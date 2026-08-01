@@ -1,8 +1,17 @@
-import { Notice, Plugin, TFile, normalizePath } from "obsidian";
+import { Notice, Plugin, TFile, TFolder, normalizePath } from "obsidian";
 import { buildManuscript, packDocument } from "./docx";
 import { parseStory } from "./markdown";
+import { NewStoryModal } from "./modals";
+import { toStoryFileName, uniquePath } from "./naming";
 import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
+
+/**
+ * The only property the scaffold writes. Title and shortTitle stay out of it
+ * deliberately — they're overrides for the uncommon case, and three fields on
+ * every new story is clutter for someone who just wants to write.
+ */
+const CONTENT_WARNINGS_KEY = "contentWarnings";
 
 export default class SmfExportPlugin extends Plugin {
   settings: SmfSettings = DEFAULT_SETTINGS;
@@ -22,8 +31,37 @@ export default class SmfExportPlugin extends Plugin {
       },
     });
 
+    this.addCommand({
+      id: "new-story",
+      name: "New story",
+      callback: () => this.promptForNewStory(this.defaultNewStoryFolder()),
+    });
+
+    this.addCommand({
+      id: "add-manuscript-properties",
+      name: "Add manuscript properties to this note",
+      checkCallback: (checking) => {
+        const file = this.app.workspace.getActiveFile();
+        if (!file || file.extension !== "md") return false;
+        if (!checking) void this.addManuscriptProperties(file);
+        return true;
+      },
+    });
+
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file) => {
+        // Right-clicking a folder is where people look for "new thing here",
+        // and it's a better first encounter than the command palette.
+        if (file instanceof TFolder) {
+          menu.addItem((item) =>
+            item
+              .setTitle("New story")
+              .setIcon("pencil")
+              .onClick(() => this.promptForNewStory(file.path))
+          );
+          return;
+        }
+
         if (!(file instanceof TFile) || file.extension !== "md") return;
         menu.addItem((item) =>
           item
@@ -31,8 +69,88 @@ export default class SmfExportPlugin extends Plugin {
             .setIcon("file-text")
             .onClick(() => void this.exportFile(file))
         );
+        menu.addItem((item) =>
+          item
+            .setTitle("Add manuscript properties")
+            .setIcon("list-plus")
+            .onClick(() => void this.addManuscriptProperties(file))
+        );
       })
     );
+  }
+
+  private defaultNewStoryFolder(): string {
+    const configured = this.settings.newStoryFolder.trim();
+    if (configured) return normalizePath(configured);
+    // Blank means "wherever I am" — the note you're in, else the vault root.
+    return this.app.workspace.getActiveFile()?.parent?.path ?? "";
+  }
+
+  private promptForNewStory(folder: string) {
+    new NewStoryModal(this.app, (title) => void this.createStory(folder, title));
+  }
+
+  async createStory(folder: string, title: string) {
+    try {
+      const { fileName, needsTitleOverride } = toStoryFileName(title);
+      const dir = folder === "/" ? "" : folder;
+
+      if (dir && !this.app.vault.getAbstractFileByPath(dir)) {
+        await this.app.vault.createFolder(dir);
+      }
+
+      const path = uniquePath(
+        dir,
+        fileName,
+        (p) => this.app.vault.getAbstractFileByPath(p) !== null
+      );
+      const file = await this.app.vault.create(path, "");
+
+      // processFrontMatter owns the YAML, so a title containing a colon or a
+      // quote is escaped correctly rather than by hand.
+      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+        frontmatter[CONTENT_WARNINGS_KEY] = [];
+        if (needsTitleOverride) frontmatter.title = title.trim();
+      });
+
+      await this.app.workspace.getLeaf(false).openFile(file);
+      if (needsTitleOverride) {
+        new Notice(
+          `Created ${path}. The filename dropped characters the title needs, so the full title is in properties.`,
+          8000
+        );
+      }
+    } catch (error) {
+      console.error("Could not create story", error);
+      new Notice(
+        `Could not create story: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  async addManuscriptProperties(file: TFile) {
+    try {
+      let added = false;
+      // Only fills in what's missing, and never prompts. Most stories have no
+      // content warnings; an empty property is the correct resting state.
+      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+        if (!(CONTENT_WARNINGS_KEY in frontmatter)) {
+          frontmatter[CONTENT_WARNINGS_KEY] = [];
+          added = true;
+        }
+      });
+
+      new Notice(
+        added
+          ? `Added manuscript properties to ${file.basename}.`
+          : `${file.basename} already has them.`
+      );
+    } catch (error) {
+      console.error("Could not add manuscript properties", error);
+      new Notice(
+        `Could not add properties: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   async exportFile(file: TFile) {

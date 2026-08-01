@@ -39,6 +39,8 @@ export interface SmfSettings {
   roundWordCount: boolean;
   endMarker: string;
   outputFolder: string;
+  /** Blank means "alongside the note I'm in" rather than a fixed location. */
+  newStoryFolder: string;
   warnUnclosedQuotes: boolean;
   /** The warnings themselves are per story; only presentation is global. */
   includeContentWarnings: boolean;
@@ -64,6 +66,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   roundWordCount: true,
   endMarker: "#",
   outputFolder: "Manuscripts",
+  newStoryFolder: "",
   warnUnclosedQuotes: true,
   includeContentWarnings: true,
   contentWarningLabel: "Content warnings",

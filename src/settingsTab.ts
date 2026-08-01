@@ -150,6 +150,12 @@ export class SmfSettingTab extends PluginSettingTab {
       "Vault folder the .docx is written to. Created if missing.",
       "outputFolder"
     );
+    this.text(
+      "New story folder",
+      "Where “New story” puts the file. Leave blank to create it alongside the note you're in.",
+      "newStoryFolder",
+      "Leave blank for the current folder"
+    );
     this.toggle(
       "Include content warnings",
       "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",

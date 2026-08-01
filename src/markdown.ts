@@ -186,7 +186,11 @@ export function parseInline(input: string): Run[] {
 }
 
 function pickShortTitle(title: string): string {
-  const words = title
+  // A subtitle is the wrong place to look for the running head's keyword —
+  // "The Salt Year: A Fragment" should head as SALT, not FRAGMENT.
+  const main = title.split(/\s*[:—–]\s*/)[0].trim() || title;
+
+  const words = main
     .replace(/[^A-Za-z0-9\s'’-]/g, " ")
     .split(/\s+/)
     .filter(Boolean);

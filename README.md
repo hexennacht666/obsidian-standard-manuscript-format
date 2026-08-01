@@ -17,9 +17,13 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 ## Use
 
-Command palette → **Export to Standard Manuscript Format**, or right-click a note in the file explorer. The `.docx` is written to the folder set in settings (`Manuscripts` by default).
+**New story** — from the command palette, or by right-clicking a folder in the file explorer. Asks for a title, creates the note with its properties ready, and opens it.
+
+**Export to Standard Manuscript Format** — from the command palette, or by right-clicking a note. The `.docx` is written to the folder set in settings (`Manuscripts` by default).
 
 Set your name in settings before the first export — the contact block needs it.
+
+Nothing else is required. A story with no properties at all exports fine: the title falls back to the first heading, then the filename, and a story with no content warnings simply doesn't print that line. An old note from years ago needs nothing done to it. If you do want the properties on an existing story, **Add manuscript properties** puts them there — on that one note, when you ask, without prompting you for values.
 
 ### Per-story frontmatter
 

@@ -194,3 +194,10 @@ test("an empty content-warnings key of either form yields none", () => {
     []
   );
 });
+
+test("the running head keyword comes from the main title, not the subtitle", () => {
+  assert.equal(parseStory("Body.\n", "The Salt Year: A Fragment").shortTitle, "SALT");
+  assert.equal(parseStory("Body.\n", "Wintering — A Ghost Story").shortTitle, "WINTERING");
+  // A title that is only a subtitle marker still yields something usable.
+  assert.equal(parseStory("Body.\n", ": Fragment").shortTitle, "FRAGMENT");
+});
