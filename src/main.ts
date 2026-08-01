@@ -6,11 +6,15 @@ import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
 /**
- * The only property the scaffold writes. Title and shortTitle stay out of it
- * deliberately — they're overrides for the uncommon case, and three fields on
- * every new story is clutter for someone who just wants to write.
+ * The only property the scaffold writes, spelled the way it should read in
+ * Obsidian's properties panel rather than the way a programmer would name a
+ * variable. The parser accepts every other spelling too.
+ *
+ * Title and shortTitle stay out of the scaffold deliberately — they're
+ * overrides for the uncommon case, and three fields on every new story is
+ * clutter for someone who just wants to write.
  */
-const CONTENT_WARNINGS_KEY = "contentWarnings";
+const CONTENT_WARNINGS_KEY = "Content warnings";
 
 /** Marks the element we add to the empty pane, so we can find and remove it. */
 const EMPTY_PANE_CLASS = "smf-empty-state-action";

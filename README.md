@@ -33,17 +33,19 @@ Facts about the story itself, all optional:
 
 ```yaml
 ---
-title: The Salt Year
-shortTitle: SALT
-contentWarnings:
+Content warnings:
   - body horror
   - animal death
 ---
 ```
 
-Content warnings print on the title page, under the byline, where a slush reader meets them before the story. A comma-separated line (`cw: violence, grief`) or an inline array works just as well as a block list, and `contentNotes` / `content_warnings` / `cw` are all accepted spellings. The label and whether they print at all are in settings; the warnings themselves belong to the story.
+You won't normally type this by hand — **New story** puts the property there, and Obsidian shows it as a list you add to with a click. Property names are matched loosely, so `Content warnings`, `contentWarnings`, `content_notes` and `cw` are all the same thing.
 
-Without `title`, the plugin uses the first heading in the note, then the filename. Without `shortTitle`, it picks the most distinctive word from the title for the running head.
+The title needs no property at all: it comes from the filename, so renaming the note renames the manuscript. Two optional overrides exist for when that isn't enough — `Title`, for when the real title can't be a filename (anything with a colon), and `Short title`, to choose the keyword in the running head yourself.
+
+Content warnings print on the title page, under the byline, where a slush reader meets them before the story. A comma-separated line or an inline array works just as well as a list. The label, and whether they print at all, are in settings; the warnings themselves belong to the story.
+
+Without a `Title` property the plugin uses the first heading in the note, then the filename. Without `Short title` it picks the most distinctive word from the title, ignoring any subtitle.
 
 ## Settings
 

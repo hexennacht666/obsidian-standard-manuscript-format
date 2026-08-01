@@ -201,3 +201,42 @@ test("the running head keyword comes from the main title, not the subtitle", () 
   // A title that is only a subtitle marker still yields something usable.
   assert.equal(parseStory("Body.\n", ": Fragment").shortTitle, "FRAGMENT");
 });
+
+test("property names with spaces and any casing are one key", () => {
+  const variants = [
+    "Content warnings: grief, body horror",
+    "content_warnings: grief, body horror",
+    "CONTENT-WARNINGS: grief, body horror",
+    "contentWarnings: grief, body horror",
+    "Content notes: grief, body horror",
+    "cw: grief, body horror",
+  ];
+  for (const line of variants) {
+    assert.deepEqual(
+      parseStory(`---\n${line}\n---\n\nBody.\n`, "fn").contentWarnings,
+      ["grief", "body horror"],
+      line
+    );
+  }
+});
+
+test("a spaced key works as a block list too", () => {
+  const s = parseStory(
+    "---\nContent warnings:\n  - grief\n  - body horror\nShort title: SALT\n---\n\nBody.\n",
+    "fn"
+  );
+  assert.deepEqual(s.contentWarnings, ["grief", "body horror"]);
+  assert.equal(s.shortTitle, "SALT");
+});
+
+test("indented text is never mistaken for a property", () => {
+  const s = parseStory(
+    "---\nContent warnings:\n  - grief\n---\n\nShe said: nothing at all.\n",
+    "fn"
+  );
+  assert.deepEqual(s.contentWarnings, ["grief"]);
+  assert.equal(
+    s.blocks[0].kind === "para" && s.blocks[0].runs.map((r) => r.text).join(""),
+    "She said: nothing at all."
+  );
+});

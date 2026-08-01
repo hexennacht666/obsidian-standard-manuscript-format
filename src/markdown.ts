@@ -42,6 +42,15 @@ const TITLE_STOPWORDS = new Set([
   "this", "these", "those", "all", "only",
 ]);
 
+/**
+ * Collapses a property name to a comparable form, so `Content warnings`,
+ * `contentWarnings`, `content_warnings` and `CONTENT-WARNINGS` are one key.
+ * Writers shouldn't have to remember which spelling they used.
+ */
+function normalizeKey(key: string): string {
+  return key.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 function splitFrontmatter(source: string): {
   frontmatter: Record<string, string>;
   body: string;
@@ -67,12 +76,16 @@ function splitFrontmatter(source: string): {
       continue;
     }
 
-    const kv = line.match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)$/);
+    // Keys may contain spaces — "Content warnings" reads far better in
+    // Obsidian's properties panel than contentWarnings, and YAML allows it.
+    // Must start at column 0 with an alphanumeric so indented content can't be
+    // mistaken for a key.
+    const kv = line.match(/^([A-Za-z0-9][A-Za-z0-9_ -]*?)\s*:\s*(.*)$/);
     if (!kv) {
       listKey = null;
       continue;
     }
-    const key = kv[1].toLowerCase();
+    const key = normalizeKey(kv[1]);
     frontmatter[key] = clean(kv[2]);
     listKey = frontmatter[key] === "" ? key : null;
   }
@@ -80,15 +93,12 @@ function splitFrontmatter(source: string): {
   return { frontmatter, body: source.slice(match[0].length) };
 }
 
-// Writers won't all reach for the same key, and none of the variants are wrong.
+// Already normalized, so every spacing and casing variant of each is covered.
 const CONTENT_WARNING_KEYS = [
   "contentwarnings",
   "contentwarning",
-  "content_warnings",
-  "content-warnings",
   "contentnotes",
-  "content_notes",
-  "content-notes",
+  "contentnote",
   "cw",
 ];
 
