@@ -123,5 +123,10 @@ export class SmfSettingTab extends PluginSettingTab {
       "Vault folder the .docx is written to. Created if missing.",
       "outputFolder"
     );
+    this.toggle(
+      "Mention unclosed quotes",
+      "After exporting, note any paragraph that opens dialogue and neither closes it nor carries it into the next paragraph. Never changes the manuscript.",
+      "warnUnclosedQuotes"
+    );
   }
 }

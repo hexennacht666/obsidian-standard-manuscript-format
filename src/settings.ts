@@ -17,6 +17,7 @@ export interface SmfSettings {
   roundWordCount: boolean;
   endMarker: string;
   outputFolder: string;
+  warnUnclosedQuotes: boolean;
 }
 
 export const DEFAULT_SETTINGS: SmfSettings = {
@@ -37,4 +38,5 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   roundWordCount: true,
   endMarker: "#",
   outputFolder: "Manuscripts",
+  warnUnclosedQuotes: true,
 };

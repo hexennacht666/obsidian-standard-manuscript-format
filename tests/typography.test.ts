@@ -30,6 +30,16 @@ test("an em dash before a quote resolves by state, not by the dash", () => {
   );
 });
 
+test("a forgotten closing quote does not invert the quotes after it", () => {
+  // The close after "Hello," is missing. The second quote is unmistakably
+  // opening, so it opens — leaving one dangling quote instead of flipping
+  // every quote in the rest of the paragraph.
+  assert.equal(
+    smartTypography(`"Hello, she said. "How are you?"`),
+    "“Hello, she said. “How are you?”"
+  );
+});
+
 test("speech running past a paragraph re-opens rather than closing", () => {
   // Each paragraph is typographed on its own, which is what makes the
   // open-with-no-close convention come out right.

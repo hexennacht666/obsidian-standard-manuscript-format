@@ -36,6 +36,8 @@ console.log(
   "scene breaks:",
   story.blocks.filter((b) => b.kind === "sceneBreak").length
 );
+console.log("unclosed:   ", story.unclosedQuotes.length);
+for (const u of story.unclosedQuotes) console.log(`  ¶${u.paragraph} ${u.excerpt}`);
 
 packDocument(buildManuscript(story, settings)).then((buf) => {
   writeFileSync(output, Buffer.from(buf));

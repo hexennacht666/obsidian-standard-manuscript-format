@@ -83,6 +83,40 @@ test("soft-wrapped lines join into one paragraph", () => {
   assert.equal(s.blocks.length, 2);
 });
 
+test("multi-paragraph speech is never reported as unclosed", () => {
+  // The convention: open every paragraph, close only the last. Reporting this
+  // would fire on correctly written dialogue constantly.
+  const s = parseStory(
+    '"It went on for years.\n\n"And it never once stopped."\n\nShe looked away.\n',
+    "fn"
+  );
+  assert.deepEqual(s.unclosedQuotes, []);
+});
+
+test("a genuinely unclosed quote is reported once, with its position", () => {
+  const s = parseStory(
+    'She spoke first.\n\n"I never meant for it to happen.\n\nHe said nothing at all.\n',
+    "fn"
+  );
+  assert.equal(s.unclosedQuotes.length, 1);
+  assert.equal(s.unclosedQuotes[0].paragraph, 2);
+  assert.match(s.unclosedQuotes[0].excerpt, /never meant/);
+});
+
+test("speech left open at the very end of the story is reported", () => {
+  const s = parseStory('He turned back.\n\n"You never listen to me.\n', "fn");
+  assert.equal(s.unclosedQuotes.length, 1);
+  assert.equal(s.unclosedQuotes[0].paragraph, 2);
+});
+
+test("clean dialogue reports nothing", () => {
+  const s = parseStory(
+    '"Morning," she said.\n\nHe grunted.\n\n"That all you have to say?"\n',
+    "fn"
+  );
+  assert.deepEqual(s.unclosedQuotes, []);
+});
+
 test("word count covers the body only", () => {
   const s = parseStory("---\ntitle: Ignore Me Entirely\n---\n\n# Also Ignored\n\none two three\n", "fn");
   assert.equal(s.wordCount, 3);

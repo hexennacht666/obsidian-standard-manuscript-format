@@ -1,4 +1,4 @@
-import { smartTypography } from "./typography";
+import { typographize } from "./typography";
 
 export interface Run {
   text: string;
@@ -10,12 +10,25 @@ export type Block =
   | { kind: "para"; runs: Run[] }
   | { kind: "sceneBreak" };
 
+export interface UnclosedQuote {
+  /** 1-based position among body paragraphs. */
+  paragraph: number;
+  excerpt: string;
+}
+
 export interface ParsedStory {
   title: string | null;
   shortTitle: string | null;
   frontmatter: Record<string, string>;
   blocks: Block[];
   wordCount: number;
+  /**
+   * Paragraphs that end mid-quote AND aren't continued by the next paragraph.
+   * Deliberately not "every paragraph with an odd number of quotes" — speech
+   * running over several paragraphs re-opens each one and closes only at the
+   * end, so that check would fire on correctly written dialogue constantly.
+   */
+  unclosedQuotes: UnclosedQuote[];
 }
 
 const SCENE_BREAK = /^(#|\*(\s*\*){2,}|-{3,}|_{3,}|<hr\s*\/?>)$/;
@@ -149,11 +162,18 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
   const blocks: Block[] = [];
   let pending: string[] = [];
 
+  const paragraphs: { text: string; endsOpen: boolean }[] = [];
+
   const flush = () => {
     if (!pending.length) return;
-    const text = smartTypography(pending.join(" ").replace(/\s+/g, " ").trim());
+    const { text, endsOpen } = typographize(
+      pending.join(" ").replace(/\s+/g, " ").trim()
+    );
     const runs = parseInline(text);
-    if (runs.length) blocks.push({ kind: "para", runs });
+    if (runs.length) {
+      blocks.push({ kind: "para", runs });
+      paragraphs.push({ text, endsOpen });
+    }
     pending = [];
   };
 
@@ -202,6 +222,18 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
     .split(/\s+/)
     .filter((w) => /[A-Za-z0-9]/.test(w)).length;
 
+  // A paragraph left mid-quote is only suspect when the next one doesn't pick
+  // the speech back up — that continuation is the convention, not an error.
+  const unclosedQuotes: UnclosedQuote[] = [];
+  paragraphs.forEach((para, i) => {
+    if (!para.endsOpen) return;
+    if (paragraphs[i + 1]?.text.trimStart().startsWith("“")) return;
+    unclosedQuotes.push({
+      paragraph: i + 1,
+      excerpt: para.text.length > 60 ? `…${para.text.slice(-60)}` : para.text,
+    });
+  });
+
   const resolvedTitle = title ?? fallbackTitle;
 
   return {
@@ -210,5 +242,6 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
     frontmatter,
     blocks,
     wordCount,
+    unclosedQuotes,
   };
 }

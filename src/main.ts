@@ -61,7 +61,26 @@ export default class SmfExportPlugin extends Plugin {
         await this.app.vault.createBinary(path, buffer);
       }
 
-      new Notice(`Exported ${story.wordCount.toLocaleString()} words to ${path}`);
+      const notice = [
+        `Exported ${story.wordCount.toLocaleString()} words to ${path}`,
+      ];
+
+      // Never blocks the export and never rewrites the prose — a missing quote
+      // is the writer's call to make, and a wrong guess in a manuscript is
+      // worse than no guess.
+      if (this.settings.warnUnclosedQuotes && story.unclosedQuotes.length) {
+        const n = story.unclosedQuotes.length;
+        notice.push(
+          `${n} paragraph${n === 1 ? "" : "s"} may be missing a closing quote:`,
+          story.unclosedQuotes
+            .slice(0, 3)
+            .map((u) => `  ¶${u.paragraph} ${u.excerpt}`)
+            .join("\n"),
+          n > 3 ? `  …and ${n - 3} more.` : ""
+        );
+      }
+
+      new Notice(notice.filter(Boolean).join("\n"), notice.length > 1 ? 12000 : 5000);
     } catch (error) {
       console.error("SMF export failed", error);
       new Notice(

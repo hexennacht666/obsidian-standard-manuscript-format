@@ -7,15 +7,25 @@
  */
 
 // Characters that mean a following double/single quote is an OPENING quote.
-// Dashes are deliberately absent: in fiction `—"` is nearly always interrupted
-// dialogue closing a quote, not the start of one.
-const OPENERS = new Set(["(", "[", "{", "‘", "“", "*", "_", "/"]);
+const OPENERS = new Set(["(", "[", "{", "‘", "“", "*", "_", "/", "—", "–"]);
 
 function isOpeningContext(prev: string | undefined): boolean {
   if (prev === undefined) return true;
   if (/\s/.test(prev)) return true;
   return OPENERS.has(prev);
 }
+
+// A quote is only *confidently* opening or closing when both the character
+// before and the character after agree. When they don't, the quote is genuinely
+// ambiguous (`—"` sits before interrupted dialogue AND before speech starting
+// mid-sentence) and running state decides instead.
+const looksOpening = (prev: string | undefined, next: string | undefined) =>
+  isOpeningContext(prev) && next !== undefined && /[A-Za-z0-9'’‘]/.test(next);
+
+const looksClosing = (prev: string | undefined, next: string | undefined) =>
+  prev !== undefined &&
+  /[A-Za-z0-9,.!?;:…’)]/.test(prev) &&
+  (next === undefined || /[\s)\]}.,;:!?—–]/.test(next));
 
 function isWordChar(c: string | undefined): boolean {
   return c !== undefined && /[A-Za-z0-9]/.test(c);
@@ -26,7 +36,22 @@ function isWordChar(c: string | undefined): boolean {
 const LEADING_ELISIONS =
   /^(?:em|tis|twas|round|cause|bout|til|till|neath|nother|way)\b/i;
 
+export interface TypographyResult {
+  text: string;
+  /**
+   * True when the paragraph ends with a double quote still open. On its own
+   * this means nothing — speech running over several paragraphs opens each one
+   * and closes only at the end. Only the caller, which can see whether the next
+   * paragraph continues the speech, can tell that apart from a missing quote.
+   */
+  endsOpen: boolean;
+}
+
 export function smartTypography(input: string): string {
+  return typographize(input).text;
+}
+
+export function typographize(input: string): TypographyResult {
   let text = input;
 
   // Normalize first, so quotes that are ALREADY curly get re-derived from
@@ -62,8 +87,24 @@ export function smartTypography(input: string): string {
     const prev = i > 0 ? text[i - 1] : undefined;
 
     if (c === '"') {
-      out.push(inDoubleQuote ? "”" : "“");
-      inDoubleQuote = !inDoubleQuote;
+      const next = i + 1 < text.length ? text[i + 1] : undefined;
+      const opening = looksOpening(prev, next);
+      const closing = looksClosing(prev, next);
+
+      if (opening && !closing) {
+        // Confidently opening. If a quote was already open, the writer forgot
+        // to close it — emit an opening quote anyway and leave that one
+        // dangling, so the mistake stays put instead of inverting every quote
+        // after it.
+        out.push("“");
+        inDoubleQuote = true;
+      } else if (closing && !opening) {
+        out.push("”");
+        inDoubleQuote = false;
+      } else {
+        out.push(inDoubleQuote ? "”" : "“");
+        inDoubleQuote = !inDoubleQuote;
+      }
     } else if (c === "'") {
       // Mid-word: an apostrophe (don't, Sam's). Otherwise an opening or
       // closing single quote depending on what precedes it — which also
@@ -77,5 +118,5 @@ export function smartTypography(input: string): string {
     }
   }
 
-  return out.join("");
+  return { text: out.join(""), endsOpen: inDoubleQuote };
 }
