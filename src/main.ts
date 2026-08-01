@@ -135,13 +135,18 @@ export default class SmfExportPlugin extends Plugin {
       .forEach((list) => {
         if (list.querySelector(`.${EMPTY_PANE_CLASS}`)) return;
 
-        const action = list.createDiv({
-          cls: `empty-state-action ${EMPTY_PANE_CLASS}`,
-          text: "Create new story",
-        });
+        const action = document.createElement("div");
+        action.className = `empty-state-action ${EMPTY_PANE_CLASS}`;
+        action.textContent = "Create new story";
         action.addEventListener("click", () =>
           this.promptForNewStory(this.defaultNewStoryFolder())
         );
+
+        // Directly under "Create new note", where it belongs — appending would
+        // put it below Close, which reads as an afterthought.
+        const first = list.querySelector(".empty-state-action");
+        if (first) first.after(action);
+        else list.prepend(action);
       });
   }
 
@@ -162,7 +167,9 @@ export default class SmfExportPlugin extends Plugin {
   }
 
   private promptForNewStory(folder: string) {
-    new NewStoryModal(this.app, (title) => void this.createStory(folder, title));
+    new NewStoryModal(this.app, (title) =>
+      void this.createStory(folder, title)
+    ).open();
   }
 
   async createStory(folder: string, title: string) {
