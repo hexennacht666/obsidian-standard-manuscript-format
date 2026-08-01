@@ -240,3 +240,37 @@ test("indented text is never mistaken for a property", () => {
     "She said: nothing at all."
   );
 });
+
+test("an empty Title property inherits the filename", () => {
+  // Exactly what New story leaves behind.
+  const s = parseStory(
+    '---\nTitle: ""\nContent warnings: []\n---\n\nBody text here.\n',
+    "Untitled story"
+  );
+  assert.equal(s.title, "Untitled story");
+});
+
+test("a filled Title property wins, punctuation and all", () => {
+  // The whole reason the field exists: a filename can't hold these.
+  for (const [value, expected] of [
+    ["Who Goes There?", "Who Goes There?"],
+    ["The Salt Year: A Fragment", "The Salt Year: A Fragment"],
+    ["What/Then", "What/Then"],
+  ] as [string, string][]) {
+    const s = parseStory(
+      `---\nTitle: "${value}"\nContent warnings: []\n---\n\nBody.\n`,
+      "Some Filename"
+    );
+    assert.equal(s.title, expected);
+  }
+});
+
+test("the running head follows the Title property, not the filename", () => {
+  // A working filename bears no relation to the title often enough to matter.
+  const s = parseStory(
+    '---\nTitle: "The Salt Year: A Fragment"\n---\n\nBody.\n',
+    "salt draft v3"
+  );
+  assert.equal(s.title, "The Salt Year: A Fragment");
+  assert.equal(s.shortTitle, "SALT");
+});

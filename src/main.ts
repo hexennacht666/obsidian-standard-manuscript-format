@@ -16,6 +16,18 @@ import { SmfSettingTab } from "./settingsTab";
  */
 const CONTENT_WARNINGS_KEY = "Content warnings";
 
+/**
+ * Written empty, and empty means "use the filename". Obsidian forbids
+ * `: / \ * " < > | ?` in filenames, so a title like "Who Goes There?" can never
+ * be one — this is where it goes.
+ *
+ * Deliberately NOT pre-filled with the current filename. A copy of the name
+ * would be correct exactly once: rename the note afterwards and the stale copy
+ * would silently override the new name, putting the wrong title on a manuscript
+ * with nothing to signal it. Empty can never go stale.
+ */
+const TITLE_KEY = "Title";
+
 /** Marks the element we add to the empty pane, so we can find and remove it. */
 const EMPTY_PANE_CLASS = "smf-empty-state-action";
 
@@ -190,8 +202,9 @@ export default class SmfExportPlugin extends Plugin {
       );
       const file = await this.app.vault.create(path, "");
 
-      // processFrontMatter owns the YAML so the property is written correctly.
+      // processFrontMatter owns the YAML so the properties are written correctly.
       await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+        frontmatter[TITLE_KEY] = "";
         frontmatter[CONTENT_WARNINGS_KEY] = [];
       });
 
@@ -219,7 +232,16 @@ export default class SmfExportPlugin extends Plugin {
       // Only fills in what's missing, and never prompts. Most stories have no
       // content warnings; an empty property is the correct resting state.
       await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-        if (!(CONTENT_WARNINGS_KEY in frontmatter)) {
+        // Compared loosely, so a note that already says `contentWarnings` or
+        // `title` in some other casing doesn't end up with a duplicate.
+        const present = new Set(
+          Object.keys(frontmatter).map((k) => k.toLowerCase().replace(/[^a-z0-9]/g, ""))
+        );
+        if (!present.has("title")) {
+          frontmatter[TITLE_KEY] = "";
+          added = true;
+        }
+        if (!present.has("contentwarnings") && !present.has("cw")) {
           frontmatter[CONTENT_WARNINGS_KEY] = [];
           added = true;
         }

@@ -33,6 +33,7 @@ Facts about the story itself, all optional:
 
 ```yaml
 ---
+Title:
 Content warnings:
   - body horror
   - animal death
@@ -41,7 +42,11 @@ Content warnings:
 
 You won't normally type this by hand — **New story** puts the property there, and Obsidian shows it as a list you add to with a click. Property names are matched loosely, so `Content warnings`, `contentWarnings`, `content_notes` and `cw` are all the same thing.
 
-The title needs no property at all: it comes from the filename, so renaming the note renames the manuscript. Two optional overrides exist for when that isn't enough — `Title`, for when the real title can't be a filename (anything with a colon), and `Short title`, to choose the keyword in the running head yourself.
+**Leave `Title` empty and the filename is the title**, so renaming the note renames the manuscript. Fill it in and it wins. It's there because Obsidian forbids `: / \\ * " < > | ?` in filenames, and plenty of titles need them — *Who Goes There?* can never be a filename, and neither can anything with a subtitle.
+
+It is deliberately not pre-filled with the current filename. A copy of the name would be right exactly once; rename the note afterwards and the stale copy would quietly override the new name, putting the wrong title on a manuscript with nothing to show for it. Empty can't go stale.
+
+`Short title` is a third, rarer override, for choosing the running head's keyword yourself instead of letting the plugin pick the most distinctive word.
 
 Content warnings print on the title page, under the byline, where a slush reader meets them before the story. A comma-separated line or an inline array works just as well as a list. The label, and whether they print at all, are in settings; the warnings themselves belong to the story.
 
