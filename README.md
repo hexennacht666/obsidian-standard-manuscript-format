@@ -19,13 +19,13 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 **New story** — from the pencil in the left ribbon, the command palette, the "Create new story" line in an empty pane, or by right-clicking a folder in the file explorer. It asks nothing: you get a note with its properties ready and the cursor in the body. Name it whenever you like, or never — a story titled `Untitled story` still exports, and if the real title won't fit in a filename, put it in the `title` property.
 
-**Add manuscript properties** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
+**Add title and content warnings** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
 
 **Export to Standard Manuscript Format** — from the command palette, or by right-clicking a note. The `.docx` is written to the folder set in settings (`Manuscripts` by default).
 
 Set your name in settings before the first export — the contact block needs it.
 
-Nothing else is required. A story with no properties at all exports fine: the title falls back to the first heading, then the filename, and a story with no content warnings simply doesn't print that line. An old note from years ago needs nothing done to it. If you do want the properties on an existing story, **Add manuscript properties** puts them there — on that one note, when you ask, without prompting you for values.
+Nothing else is required. A story with no properties at all exports fine: the title falls back to the first heading, then the filename, and a story with no content warnings simply doesn't print that line. An old note from years ago needs nothing done to it. If you do want the fields on an existing story, **Add title and content warnings** puts them there — on that one note, when you ask, without prompting you for values.
 
 ### Per-story frontmatter
 

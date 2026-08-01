@@ -6,13 +6,13 @@ import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
 /**
- * The only property the scaffold writes, spelled the way it should read in
- * Obsidian's properties panel rather than the way a programmer would name a
- * variable. The parser accepts every other spelling too.
+ * Spelled the way it should read in Obsidian's properties panel rather than the
+ * way a programmer would name a variable. The parser accepts every other
+ * spelling too.
  *
- * Title and shortTitle stay out of the scaffold deliberately — they're
- * overrides for the uncommon case, and three fields on every new story is
- * clutter for someone who just wants to write.
+ * `Short title` stays out of the scaffold deliberately — it's an override for
+ * the uncommon case, and a third field on every new story is clutter for
+ * someone who just wants to write.
  */
 const CONTENT_WARNINGS_KEY = "Content warnings";
 
@@ -56,8 +56,10 @@ export default class SmfExportPlugin extends Plugin {
     });
 
     this.addCommand({
+      // The id stays as it was so any hotkey already bound to it survives the
+      // rename; it's internal and never shown.
       id: "add-manuscript-properties",
-      name: "Add manuscript properties to this note",
+      name: "Add title and content warnings",
       checkCallback: (checking) => {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "md") return false;
@@ -78,7 +80,7 @@ export default class SmfExportPlugin extends Plugin {
         if (!file || file.extension !== "md") return;
         menu.addItem((item) =>
           item
-            .setTitle("Add manuscript properties")
+            .setTitle("Add title and content warnings")
             .setIcon("list-plus")
             .onClick(() => void this.addManuscriptProperties(file))
         );
@@ -122,7 +124,7 @@ export default class SmfExportPlugin extends Plugin {
         );
         menu.addItem((item) =>
           item
-            .setTitle("Add manuscript properties")
+            .setTitle("Add title and content warnings")
             .setIcon("list-plus")
             .onClick(() => void this.addManuscriptProperties(file))
         );
@@ -228,7 +230,7 @@ export default class SmfExportPlugin extends Plugin {
 
   async addManuscriptProperties(file: TFile) {
     try {
-      let added = false;
+      const added: string[] = [];
       // Only fills in what's missing, and never prompts. Most stories have no
       // content warnings; an empty property is the correct resting state.
       await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
@@ -239,23 +241,25 @@ export default class SmfExportPlugin extends Plugin {
         );
         if (!present.has("title")) {
           frontmatter[TITLE_KEY] = "";
-          added = true;
+          added.push("title");
         }
         if (!present.has("contentwarnings") && !present.has("cw")) {
           frontmatter[CONTENT_WARNINGS_KEY] = [];
-          added = true;
+          added.push("content warnings");
         }
       });
 
+      // Names only what actually changed — a note that already had one of them
+      // shouldn't be told both were added.
       new Notice(
-        added
-          ? `Added manuscript properties to ${file.basename}.`
-          : `${file.basename} already has them.`
+        added.length
+          ? `Added ${added.join(" and ")} to ${file.basename}.`
+          : `${file.basename} already has both.`
       );
     } catch (error) {
-      console.error("Could not add manuscript properties", error);
+      console.error("Could not add title and content warnings", error);
       new Notice(
-        `Could not add properties: ${error instanceof Error ? error.message : String(error)}`
+        `Could not add fields: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
