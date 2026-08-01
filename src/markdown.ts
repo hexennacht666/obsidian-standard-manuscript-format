@@ -204,7 +204,10 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
   const { frontmatter, body } = splitFrontmatter(source);
   const lines = stripVaultSyntax(body).split(/\r?\n/);
 
-  let title: string | null = frontmatter["title"] ?? null;
+  // Blank is absent, not an override. A scaffold leaves these keys empty for
+  // the writer to fill in later, and an empty title must fall back to the
+  // heading or filename rather than producing an untitled manuscript.
+  let title: string | null = frontmatter["title"]?.trim() || null;
   const blocks: Block[] = [];
   let pending: string[] = [];
 
@@ -284,7 +287,8 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
 
   return {
     title: resolvedTitle,
-    shortTitle: frontmatter["shorttitle"] ?? pickShortTitle(resolvedTitle),
+    shortTitle:
+      frontmatter["shorttitle"]?.trim() || pickShortTitle(resolvedTitle),
     frontmatter,
     blocks,
     wordCount,

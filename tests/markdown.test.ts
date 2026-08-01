@@ -172,3 +172,25 @@ test("a block list is followed by keys that still parse", () => {
   assert.equal(s.shortTitle, "SALT");
   assert.equal(s.title, "The Salt Year");
 });
+
+test("an empty frontmatter key means absent, not blank", () => {
+  // What a scaffold leaves behind on a story the writer hasn't filled in yet.
+  const s = parseStory(
+    "---\ntitle:\nshortTitle:\ncontentWarnings: []\n---\n\nBody text here.\n",
+    "My Story Filename"
+  );
+  assert.equal(s.title, "My Story Filename");
+  assert.equal(s.shortTitle, "FILENAME");
+  assert.deepEqual(s.contentWarnings, []);
+});
+
+test("an empty content-warnings key of either form yields none", () => {
+  assert.deepEqual(
+    parseStory("---\ncontentWarnings:\n---\n\nBody.\n", "fn").contentWarnings,
+    []
+  );
+  assert.deepEqual(
+    parseStory("---\ncontentWarnings: []\n---\n\nBody.\n", "fn").contentWarnings,
+    []
+  );
+});
