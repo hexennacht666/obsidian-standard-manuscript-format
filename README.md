@@ -41,7 +41,11 @@ Without `title`, the plugin uses the first heading in the note, then the filenam
 
 ## Settings
 
-Author identity (legal name, pen name, pronouns, address, email, phone, membership line) with per-export toggles for address, email, and phone — markets differ on what they want. Manuscript options cover font and size, underline-instead-of-italics for markets that still ask for the typewriter convention, word-count rounding, the end marker, and the output folder.
+Author identity (legal name, pen name, pronouns, address, email, phone, membership line) with per-export toggles for address, email, and phone — markets differ on what they want.
+
+Manuscript options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, the output folder, and whether unclosed quotes get mentioned.
+
+Deliberately absent: any built-in list of markets. Guidelines go stale, and a plugin that quietly formats to an out-of-date one is worse than a plugin that never claimed to know.
 
 ## Development
 
