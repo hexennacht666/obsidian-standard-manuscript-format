@@ -134,3 +134,41 @@ test("font resolution across presets and custom", () => {
   // Custom selected but left blank falls back rather than emitting an empty font.
   assert.equal(resolveFont({ ...base, fontPreset: "custom", customFont: "  " }), "Courier New");
 });
+
+test("content warnings from a YAML block list", () => {
+  const s = parseStory(
+    "---\ntitle: The Salt Year\ncontentWarnings:\n  - body horror\n  - animal death\n---\n\nBody.\n",
+    "fn"
+  );
+  assert.deepEqual(s.contentWarnings, ["body horror", "animal death"]);
+  assert.equal(s.title, "The Salt Year"); // the list didn't swallow the next key
+});
+
+test("content warnings inline, comma-separated, or as an array", () => {
+  const one = parseStory("---\ncw: violence, grief\n---\n\nBody.\n", "fn");
+  assert.deepEqual(one.contentWarnings, ["violence", "grief"]);
+
+  const two = parseStory(
+    "---\ncontent_notes: [suicide, medical detail]\n---\n\nBody.\n",
+    "fn"
+  );
+  assert.deepEqual(two.contentWarnings, ["suicide", "medical detail"]);
+});
+
+test("no content warnings is the normal case, not an empty label", () => {
+  assert.deepEqual(parseStory("Body.\n", "fn").contentWarnings, []);
+  assert.deepEqual(
+    parseStory("---\ntitle: X\ncw:\n---\n\nBody.\n", "fn").contentWarnings,
+    []
+  );
+});
+
+test("a block list is followed by keys that still parse", () => {
+  const s = parseStory(
+    "---\ncw:\n  - violence\nshortTitle: SALT\ntitle: The Salt Year\n---\n\nBody.\n",
+    "fn"
+  );
+  assert.deepEqual(s.contentWarnings, ["violence"]);
+  assert.equal(s.shortTitle, "SALT");
+  assert.equal(s.title, "The Salt Year");
+});

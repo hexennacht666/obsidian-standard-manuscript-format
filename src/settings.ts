@@ -40,6 +40,9 @@ export interface SmfSettings {
   endMarker: string;
   outputFolder: string;
   warnUnclosedQuotes: boolean;
+  /** The warnings themselves are per story; only presentation is global. */
+  includeContentWarnings: boolean;
+  contentWarningLabel: string;
 }
 
 export const DEFAULT_SETTINGS: SmfSettings = {
@@ -62,4 +65,6 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   endMarker: "#",
   outputFolder: "Manuscripts",
   warnUnclosedQuotes: true,
+  includeContentWarnings: true,
+  contentWarningLabel: "Content warnings",
 };

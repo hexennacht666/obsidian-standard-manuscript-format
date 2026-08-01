@@ -123,6 +123,18 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
       alignment: AlignmentType.CENTER,
       spacing: SINGLE,
     }),
+    // On the title page, where a slush reader meets them before the story, and
+    // off the manuscript pages themselves.
+    ...(settings.includeContentWarnings && story.contentWarnings.length
+      ? [
+          new Paragraph({ text: "", spacing: DOUBLE }),
+          new Paragraph({
+            text: `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`,
+            alignment: AlignmentType.CENTER,
+            spacing: SINGLE,
+          }),
+        ]
+      : []),
     new Paragraph({ children: [new PageBreak()] }),
   ];
 }

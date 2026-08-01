@@ -21,16 +21,21 @@ Command palette → **Export to Standard Manuscript Format**, or right-click a n
 
 Set your name in settings before the first export — the contact block needs it.
 
-### Per-story overrides
+### Per-story frontmatter
 
-Optional frontmatter, for when the defaults aren't right:
+Facts about the story itself, all optional:
 
 ```yaml
 ---
 title: The Salt Year
 shortTitle: SALT
+contentWarnings:
+  - body horror
+  - animal death
 ---
 ```
+
+Content warnings print on the title page, under the byline, where a slush reader meets them before the story. A comma-separated line (`cw: violence, grief`) or an inline array works just as well as a block list, and `contentNotes` / `content_warnings` / `cw` are all accepted spellings. The label and whether they print at all are in settings; the warnings themselves belong to the story.
 
 Without `title`, the plugin uses the first heading in the note, then the filename. Without `shortTitle`, it picks the most distinctive word from the title for the running head.
 

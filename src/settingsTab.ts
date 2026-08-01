@@ -151,6 +151,17 @@ export class SmfSettingTab extends PluginSettingTab {
       "outputFolder"
     );
     this.toggle(
+      "Include content warnings",
+      "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",
+      "includeContentWarnings"
+    );
+    this.text(
+      "Content warning label",
+      "Wording some markets are particular about — 'Content notes' is the other common one.",
+      "contentWarningLabel",
+      "Content warnings"
+    );
+    this.toggle(
       "Mention unclosed quotes",
       "After exporting, note any paragraph that opens dialogue and neither closes it nor carries it into the next paragraph. Never changes the manuscript.",
       "warnUnclosedQuotes"

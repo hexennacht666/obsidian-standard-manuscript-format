@@ -22,6 +22,8 @@ export interface ParsedStory {
   frontmatter: Record<string, string>;
   blocks: Block[];
   wordCount: number;
+  /** From the story's own frontmatter — a fact about the story, not the market. */
+  contentWarnings: string[];
   /**
    * Paragraphs that end mid-quote AND aren't continued by the next paragraph.
    * Deliberately not "every paragraph with an odd number of quotes" — speech
@@ -48,12 +50,56 @@ function splitFrontmatter(source: string): {
   const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) return { frontmatter, body: source };
 
+  const clean = (s: string) => s.trim().replace(/^["']|["']$/g, "");
+
+  // A key with nothing after the colon opens a block list; its `- item` lines
+  // are collected until the next key. Values stay strings, joined with commas,
+  // so a list and a comma-separated line are interchangeable to callers.
+  let listKey: string | null = null;
+
   for (const line of match[1].split(/\r?\n/)) {
+    const item = line.match(/^\s*-\s+(.*)$/);
+    if (item && listKey) {
+      const value = clean(item[1]);
+      frontmatter[listKey] = frontmatter[listKey]
+        ? `${frontmatter[listKey]}, ${value}`
+        : value;
+      continue;
+    }
+
     const kv = line.match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)$/);
-    if (!kv) continue;
-    frontmatter[kv[1].toLowerCase()] = kv[2].trim().replace(/^["']|["']$/g, "");
+    if (!kv) {
+      listKey = null;
+      continue;
+    }
+    const key = kv[1].toLowerCase();
+    frontmatter[key] = clean(kv[2]);
+    listKey = frontmatter[key] === "" ? key : null;
   }
+
   return { frontmatter, body: source.slice(match[0].length) };
+}
+
+// Writers won't all reach for the same key, and none of the variants are wrong.
+const CONTENT_WARNING_KEYS = [
+  "contentwarnings",
+  "contentwarning",
+  "content_warnings",
+  "content-warnings",
+  "contentnotes",
+  "content_notes",
+  "content-notes",
+  "cw",
+];
+
+function readContentWarnings(frontmatter: Record<string, string>): string[] {
+  const key = CONTENT_WARNING_KEYS.find((k) => frontmatter[k]);
+  if (!key) return [];
+  return frontmatter[key]
+    .replace(/^\[|\]$/g, "") // an inline [a, b] array
+    .split(",")
+    .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+    .filter(Boolean);
 }
 
 /** Strip the Obsidian-isms that should never reach an editor's desk. */
@@ -242,6 +288,7 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
     frontmatter,
     blocks,
     wordCount,
+    contentWarnings: readContentWarnings(frontmatter),
     unclosedQuotes,
   };
 }
