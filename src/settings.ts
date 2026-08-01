@@ -1,3 +1,23 @@
+export type FontPreset = "courier" | "times" | "custom";
+
+/**
+ * Shunn specifies a monospace face and Courier New is the default everywhere.
+ * Times is the common alternative. Anything else is a market-specific ask —
+ * Neon Hemlock, for one, states an editorial preference for Georgia — so the
+ * two usual answers are one click and everything else is still reachable.
+ */
+export const FONT_PRESETS: Record<Exclude<FontPreset, "custom">, string> = {
+  courier: "Courier New",
+  times: "Times New Roman",
+};
+
+export function resolveFont(settings: SmfSettings): string {
+  if (settings.fontPreset === "custom") {
+    return settings.customFont.trim() || FONT_PRESETS.courier;
+  }
+  return FONT_PRESETS[settings.fontPreset] ?? FONT_PRESETS.courier;
+}
+
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
@@ -11,7 +31,9 @@ export interface SmfSettings {
   includePhone: boolean;
   includeAddress: boolean;
 
-  font: string;
+  fontPreset: FontPreset;
+  /** Only consulted when fontPreset is "custom". */
+  customFont: string;
   fontSize: number;
   italicsAsUnderline: boolean;
   roundWordCount: boolean;
@@ -32,7 +54,8 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   includePhone: false,
   includeAddress: true,
 
-  font: "Courier New",
+  fontPreset: "courier",
+  customFont: "",
   fontSize: 12,
   italicsAsUnderline: false,
   roundWordCount: true,

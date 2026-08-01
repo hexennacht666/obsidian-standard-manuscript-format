@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting, TextAreaComponent } from "obsidian";
 import type SmfExportPlugin from "./main";
-import type { SmfSettings } from "./settings";
+import type { FontPreset, SmfSettings } from "./settings";
 
 export class SmfSettingTab extends PluginSettingTab {
   plugin: SmfExportPlugin;
@@ -88,7 +88,34 @@ export class SmfSettingTab extends PluginSettingTab {
 
     new Setting(containerEl).setName("Manuscript").setHeading();
 
-    this.text("Font", "Shunn's default is Courier New.", "font");
+    new Setting(containerEl)
+      .setName("Font")
+      .setDesc(
+        "Shunn specifies Courier. Times is the usual alternative — use Custom when a market asks for something specific."
+      )
+      .addDropdown((d) =>
+        d
+          .addOptions({
+            courier: "Courier New",
+            times: "Times New Roman",
+            custom: "Custom…",
+          })
+          .setValue(this.plugin.settings.fontPreset)
+          .onChange(async (value) => {
+            this.plugin.settings.fontPreset = value as FontPreset;
+            await this.plugin.saveSettings();
+            this.display(); // show or hide the custom field
+          })
+      );
+
+    if (this.plugin.settings.fontPreset === "custom") {
+      this.text(
+        "Custom font",
+        "Exact font name, e.g. Georgia. Word substitutes if the reader doesn't have it.",
+        "customFont",
+        "Georgia"
+      );
+    }
 
     new Setting(containerEl)
       .setName("Font size")
@@ -105,7 +132,7 @@ export class SmfSettingTab extends PluginSettingTab {
 
     this.toggle(
       "Underline instead of italics",
-      "A few markets still ask for the old typewriter convention.",
+      "Off means normal bold and italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
       "italicsAsUnderline"
     );
     this.toggle(

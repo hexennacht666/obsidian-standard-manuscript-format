@@ -1,7 +1,7 @@
 import { Notice, Plugin, TFile, normalizePath } from "obsidian";
 import { buildManuscript, packDocument } from "./docx";
 import { parseStory } from "./markdown";
-import { DEFAULT_SETTINGS, type SmfSettings } from "./settings";
+import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
 export default class SmfExportPlugin extends Plugin {
@@ -99,7 +99,27 @@ export default class SmfExportPlugin extends Plugin {
   }
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const data: Record<string, unknown> = (await this.loadData()) ?? {};
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+
+    // The font used to be one free-text field. Carry an existing value over to
+    // the preset it matches, or to Custom, so nobody's setting silently resets.
+    const legacy = data.font;
+    if (typeof legacy === "string" && data.fontPreset === undefined) {
+      const name = legacy.trim();
+      const preset = (
+        Object.keys(FONT_PRESETS) as (keyof typeof FONT_PRESETS)[]
+      ).find((k) => FONT_PRESETS[k].toLowerCase() === name.toLowerCase());
+
+      if (preset) {
+        this.settings.fontPreset = preset;
+      } else if (name) {
+        this.settings.fontPreset = "custom";
+        this.settings.customFont = name;
+      }
+      delete (this.settings as unknown as Record<string, unknown>).font;
+      await this.saveSettings();
+    }
   }
 
   async saveSettings() {

@@ -17,6 +17,7 @@ import {
   convertInchesToTwip,
 } from "docx";
 import type { Block, ParsedStory, Run } from "./markdown";
+import { resolveFont } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -175,7 +176,7 @@ export function buildManuscript(
     styles: {
       default: {
         document: {
-          run: { font: settings.font, size: settings.fontSize * 2 },
+          run: { font: resolveFont(settings), size: settings.fontSize * 2 },
           paragraph: { spacing: SINGLE },
         },
       },

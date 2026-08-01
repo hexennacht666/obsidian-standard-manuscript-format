@@ -1,6 +1,7 @@
 import { strict as assert } from "assert";
 import { test } from "node:test";
 import { parseInline, parseStory } from "../src/markdown";
+import { DEFAULT_SETTINGS, resolveFont } from "../src/settings";
 
 const plain = (s: string) => parseInline(s).map((r) => r.text).join("");
 
@@ -120,4 +121,16 @@ test("clean dialogue reports nothing", () => {
 test("word count covers the body only", () => {
   const s = parseStory("---\ntitle: Ignore Me Entirely\n---\n\n# Also Ignored\n\none two three\n", "fn");
   assert.equal(s.wordCount, 3);
+});
+
+test("font resolution across presets and custom", () => {
+  const base = { ...DEFAULT_SETTINGS };
+  assert.equal(resolveFont({ ...base, fontPreset: "courier" }), "Courier New");
+  assert.equal(resolveFont({ ...base, fontPreset: "times" }), "Times New Roman");
+  assert.equal(
+    resolveFont({ ...base, fontPreset: "custom", customFont: "Georgia" }),
+    "Georgia"
+  );
+  // Custom selected but left blank falls back rather than emitting an empty font.
+  assert.equal(resolveFont({ ...base, fontPreset: "custom", customFont: "  " }), "Courier New");
 });
