@@ -47,13 +47,23 @@ export function smartTypography(input: string): string {
   text = text.replace(/(\w)\s+…/g, "$1…");
 
   const out: string[] = [];
+  // Double quotes alternate open/close across the paragraph rather than being
+  // read from the preceding character alone. Context alone gets `He turned—"Don't."`
+  // wrong, because an em dash precedes both interrupted dialogue (closing) and
+  // dialogue that starts mid-sentence (opening). State resolves both.
+  //
+  // Resetting per paragraph is what makes the standard convention work, where
+  // speech running over several paragraphs re-opens each one and closes only at
+  // the end — smartTypography is called once per paragraph.
+  let inDoubleQuote = false;
+
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     const prev = i > 0 ? text[i - 1] : undefined;
-    const next = i + 1 < text.length ? text[i + 1] : undefined;
 
     if (c === '"') {
-      out.push(isOpeningContext(prev) ? "“" : "”");
+      out.push(inDoubleQuote ? "”" : "“");
+      inDoubleQuote = !inDoubleQuote;
     } else if (c === "'") {
       // Mid-word: an apostrophe (don't, Sam's). Otherwise an opening or
       // closing single quote depending on what precedes it — which also
