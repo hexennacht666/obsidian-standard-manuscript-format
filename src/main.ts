@@ -1,8 +1,7 @@
-import { Notice, Plugin, TFile, TFolder, normalizePath } from "obsidian";
+import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from "obsidian";
 import { buildManuscript, packDocument } from "./docx";
 import { parseStory } from "./markdown";
-import { NewStoryModal } from "./modals";
-import { toStoryFileName, uniquePath } from "./naming";
+import { uniquePath } from "./naming";
 import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
@@ -37,7 +36,7 @@ export default class SmfExportPlugin extends Plugin {
     this.addCommand({
       id: "new-story",
       name: "New story",
-      callback: () => this.promptForNewStory(this.defaultNewStoryFolder()),
+      callback: () => void this.createStory(this.defaultNewStoryFolder()),
     });
 
     this.addCommand({
@@ -52,7 +51,7 @@ export default class SmfExportPlugin extends Plugin {
     });
 
     this.addRibbonIcon("pencil", "New story", () =>
-      this.promptForNewStory(this.defaultNewStoryFolder())
+      void this.createStory(this.defaultNewStoryFolder())
     );
 
     // Right-clicking inside the note itself is a different event from the tab's
@@ -93,7 +92,7 @@ export default class SmfExportPlugin extends Plugin {
             item
               .setTitle("New story")
               .setIcon("pencil")
-              .onClick(() => this.promptForNewStory(file.path))
+              .onClick(() => void this.createStory(file.path))
           );
           return;
         }
@@ -139,7 +138,7 @@ export default class SmfExportPlugin extends Plugin {
         action.className = `empty-state-action ${EMPTY_PANE_CLASS}`;
         action.textContent = "Create new story";
         action.addEventListener("click", () =>
-          this.promptForNewStory(this.defaultNewStoryFolder())
+          void this.createStory(this.defaultNewStoryFolder())
         );
 
         // Directly under "Create new note", where it belongs — appending would
@@ -166,15 +165,14 @@ export default class SmfExportPlugin extends Plugin {
     return this.app.workspace.getActiveFile()?.parent?.path ?? "";
   }
 
-  private promptForNewStory(folder: string) {
-    new NewStoryModal(this.app, (title) =>
-      void this.createStory(folder, title)
-    ).open();
-  }
-
-  async createStory(folder: string, title: string) {
+  /**
+   * Deliberately asks nothing. A title is often the last thing a story gets,
+   * and Obsidian's own "New note" doesn't ask either — rename it whenever, or
+   * never, since the exporter falls back to the filename and then to a `title`
+   * property if the real title won't fit in a filename.
+   */
+  async createStory(folder: string) {
     try {
-      const { fileName, needsTitleOverride } = toStoryFileName(title);
       const dir = folder === "/" ? "" : folder;
 
       if (dir && !this.app.vault.getAbstractFileByPath(dir)) {
@@ -183,24 +181,25 @@ export default class SmfExportPlugin extends Plugin {
 
       const path = uniquePath(
         dir,
-        fileName,
+        "Untitled story",
         (p) => this.app.vault.getAbstractFileByPath(p) !== null
       );
       const file = await this.app.vault.create(path, "");
 
-      // processFrontMatter owns the YAML, so a title containing a colon or a
-      // quote is escaped correctly rather than by hand.
+      // processFrontMatter owns the YAML so the property is written correctly.
       await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
         frontmatter[CONTENT_WARNINGS_KEY] = [];
-        if (needsTitleOverride) frontmatter.title = title.trim();
       });
 
-      await this.app.workspace.getLeaf(false).openFile(file);
-      if (needsTitleOverride) {
-        new Notice(
-          `Created ${path}. The filename dropped characters the title needs, so the full title is in properties.`,
-          8000
-        );
+      const leaf = this.app.workspace.getLeaf(false);
+      await leaf.openFile(file);
+
+      // Land the cursor in the body, below the properties, ready to write.
+      const view = leaf.view;
+      if (view instanceof MarkdownView) {
+        const editor = view.editor;
+        editor.setCursor({ line: editor.lastLine(), ch: 0 });
+        editor.focus();
       }
     } catch (error) {
       console.error("Could not create story", error);

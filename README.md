@@ -17,7 +17,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 ## Use
 
-**New story** — from the pencil in the left ribbon, the command palette, the "Create new story" line in an empty pane, or by right-clicking a folder in the file explorer. Asks for a title, creates the note with its properties ready, and opens it.
+**New story** — from the pencil in the left ribbon, the command palette, the "Create new story" line in an empty pane, or by right-clicking a folder in the file explorer. It asks nothing: you get a note with its properties ready and the cursor in the body. Name it whenever you like, or never — a story titled `Untitled story` still exports, and if the real title won't fit in a filename, put it in the `title` property.
 
 **Add manuscript properties** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
 
