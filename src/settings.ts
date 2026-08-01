@@ -41,6 +41,8 @@ export interface SmfSettings {
   outputFolder: string;
   /** Blank means "alongside the note I'm in" rather than a fixed location. */
   newStoryFolder: string;
+  /** Adds a "Create new story" line to the empty-pane view. */
+  showInEmptyPane: boolean;
   warnUnclosedQuotes: boolean;
   /** The warnings themselves are per story; only presentation is global. */
   includeContentWarnings: boolean;
@@ -67,6 +69,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   endMarker: "#",
   outputFolder: "Manuscripts",
   newStoryFolder: "",
+  showInEmptyPane: true,
   warnUnclosedQuotes: true,
   includeContentWarnings: true,
   contentWarningLabel: "Content warnings",

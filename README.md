@@ -17,7 +17,9 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 ## Use
 
-**New story** — from the command palette, or by right-clicking a folder in the file explorer. Asks for a title, creates the note with its properties ready, and opens it.
+**New story** — from the pencil in the left ribbon, the command palette, the "Create new story" line in an empty pane, or by right-clicking a folder in the file explorer. Asks for a title, creates the note with its properties ready, and opens it.
+
+**Add manuscript properties** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
 
 **Export to Standard Manuscript Format** — from the command palette, or by right-clicking a note. The `.docx` is written to the folder set in settings (`Manuscripts` by default).
 

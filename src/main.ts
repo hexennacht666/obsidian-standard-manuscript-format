@@ -13,6 +13,9 @@ import { SmfSettingTab } from "./settingsTab";
  */
 const CONTENT_WARNINGS_KEY = "contentWarnings";
 
+/** Marks the element we add to the empty pane, so we can find and remove it. */
+const EMPTY_PANE_CLASS = "smf-empty-state-action";
+
 export default class SmfExportPlugin extends Plugin {
   settings: SmfSettings = DEFAULT_SETTINGS;
 
@@ -48,6 +51,39 @@ export default class SmfExportPlugin extends Plugin {
       },
     });
 
+    this.addRibbonIcon("pencil", "New story", () =>
+      this.promptForNewStory(this.defaultNewStoryFolder())
+    );
+
+    // Right-clicking inside the note itself is a different event from the tab's
+    // ⋯ menu, and plenty of people reach for it first.
+    this.registerEvent(
+      this.app.workspace.on("editor-menu", (menu, _editor, view) => {
+        const file = view?.file;
+        if (!file || file.extension !== "md") return;
+        menu.addItem((item) =>
+          item
+            .setTitle("Add manuscript properties")
+            .setIcon("list-plus")
+            .onClick(() => void this.addManuscriptProperties(file))
+        );
+        menu.addItem((item) =>
+          item
+            .setTitle("Export to Standard Manuscript Format")
+            .setIcon("file-text")
+            .onClick(() => void this.exportFile(file))
+        );
+      })
+    );
+
+    this.app.workspace.onLayoutReady(() => this.decorateEmptyPanes());
+    this.registerEvent(
+      this.app.workspace.on("layout-change", () => this.decorateEmptyPanes())
+    );
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", () => this.decorateEmptyPanes())
+    );
+
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file) => {
         // Right-clicking a folder is where people look for "new thing here",
@@ -77,6 +113,45 @@ export default class SmfExportPlugin extends Plugin {
         );
       })
     );
+  }
+
+  /**
+   * Adds a "Create new story" line to the empty-pane view, beneath Obsidian's
+   * own actions.
+   *
+   * This reaches into core UI markup, which is not a supported API — the class
+   * names could change in any release. Everything here is written to no-op when
+   * the structure isn't what we expect, so the worst outcome is the line simply
+   * not appearing. Every other entry point works regardless.
+   */
+  private decorateEmptyPanes() {
+    if (!this.settings.showInEmptyPane) {
+      this.undecorateEmptyPanes();
+      return;
+    }
+
+    document
+      .querySelectorAll<HTMLElement>(".empty-state-action-list")
+      .forEach((list) => {
+        if (list.querySelector(`.${EMPTY_PANE_CLASS}`)) return;
+
+        const action = list.createDiv({
+          cls: `empty-state-action ${EMPTY_PANE_CLASS}`,
+          text: "Create new story",
+        });
+        action.addEventListener("click", () =>
+          this.promptForNewStory(this.defaultNewStoryFolder())
+        );
+      });
+  }
+
+  private undecorateEmptyPanes() {
+    document.querySelectorAll(`.${EMPTY_PANE_CLASS}`).forEach((el) => el.remove());
+  }
+
+  onunload() {
+    // The empty-pane line is our DOM, so we take it with us.
+    this.undecorateEmptyPanes();
   }
 
   private defaultNewStoryFolder(): string {
