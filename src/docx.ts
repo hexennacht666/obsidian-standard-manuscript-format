@@ -4,7 +4,7 @@ import {
   Header,
   LineRuleType,
   PageBreak,
-  PageNumber,
+  SimpleField,
   Packer,
   Paragraph,
   TextRun,
@@ -30,14 +30,15 @@ export function formatWordCount(count: number, round: boolean): string {
 
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   const font = resolveFont(settings);
+  const size = settings.fontSize * 2;
   return runs.map(
     (r) =>
       new TextRun({
         text: r.text,
-        // Named on every run rather than left to docDefaults, which not every
-        // reader honours — a manuscript silently rendered in Calibri is worse
-        // than one that never claimed a font at all.
+        // Font AND size on every run. Left to the defaults, Pages renders the
+        // manuscript in its own Normal — wrong face, wrong size.
         font,
+        size,
         bold: r.bold,
         italics: r.italic && !settings.italicsAsUnderline,
         underline:
@@ -59,7 +60,13 @@ function line(
   } = {}
 ): Paragraph {
   return new Paragraph({
-    children: [new TextRun({ text, font: resolveFont(settings) })],
+    children: [
+      new TextRun({
+        text,
+        font: resolveFont(settings),
+        size: settings.fontSize * 2,
+      }),
+    ],
     alignment: options.alignment,
     spacing: options.spacing ?? SINGLE,
     indent: options.indent,
@@ -171,8 +178,12 @@ export function buildManuscript(
     styles: {
       default: {
         document: {
+          // Font only. Declaring paragraph spacing here made Pages prefer the
+          // default over each paragraph's own — the body came out single-spaced
+          // and unindented despite carrying line=480 and a 0.5" first line.
+          // Scrivener ships no styles.xml at all and renders correctly
+          // everywhere; every paragraph property is stated on the paragraph.
           run: { font: resolveFont(settings), size: settings.fontSize * 2 },
-          paragraph: { spacing: SINGLE },
         },
       },
       // docDefaults alone was not enough: with no Normal style present, readers
@@ -184,7 +195,6 @@ export function buildManuscript(
           name: "Normal",
           quickFormat: true,
           run: { font: resolveFont(settings), size: settings.fontSize * 2 },
-          paragraph: { spacing: SINGLE },
         },
       ],
     },
@@ -211,8 +221,18 @@ export function buildManuscript(
                 alignment: AlignmentType.RIGHT,
                 spacing: SINGLE,
                 children: [
-                  new TextRun({ text: runningHead }),
-                  new TextRun({ children: [PageNumber.CURRENT] }),
+                  // The header runs carried no properties at all, so the
+                  // running head arrived in the reader's default sans-serif
+                  // while the manuscript body was monospaced.
+                  new TextRun({
+                    text: runningHead,
+                    font: resolveFont(settings),
+                    size: settings.fontSize * 2,
+                  }),
+                  // A simple field rather than a hand-built begin/separate/end
+                  // sequence crammed into one run, which is what we emitted
+                  // before and is not how any word processor writes it.
+                  new SimpleField("PAGE"),
                 ],
               }),
             ],
