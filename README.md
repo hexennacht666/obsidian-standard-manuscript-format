@@ -17,7 +17,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 ## Use
 
-**New story** — from the pencil in the left ribbon, the command palette, the "Create new story" line in an empty pane, or by right-clicking a folder in the file explorer. It asks nothing: you get a note with its properties ready and the cursor in the body. Name it whenever you like, or never — a story titled `Untitled story` still exports, and if the real title won't fit in a filename, put it in the `title` property.
+**New story** — from the pencil in the left ribbon, the command palette or by right-clicking a folder in the file explorer. It asks nothing: you get a note with its properties ready and the cursor in the body. Name it whenever you like, or never — a story titled `Untitled story` still exports, and if the real title won't fit in a filename, put it in the `title` property.
 
 **Add title and content warnings** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
 
@@ -56,7 +56,9 @@ Without a `Title` property the plugin uses the first heading in the note, then t
 
 Author identity (legal name, pen name, pronouns, address, email, phone, membership line) with per-export toggles for address, email, and phone — markets differ on what they want.
 
-Manuscript options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, the output folder, and whether unclosed quotes get mentioned.
+Manuscript options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, the output folder, the folder new stories go in, and whether unclosed quotes get mentioned.
+
+Everything the plugin does uses Obsidian's documented API. It makes no network requests, executes no code of its own or yours, never touches the clipboard, and writes nothing outside the output folder.
 
 Deliberately absent: any built-in list of markets. Guidelines go stale, and a plugin that quietly formats to an out-of-date one is worse than a plugin that never claimed to know.
 

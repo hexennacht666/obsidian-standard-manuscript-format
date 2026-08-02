@@ -28,9 +28,6 @@ const CONTENT_WARNINGS_KEY = "Content warnings";
  */
 const TITLE_KEY = "Title";
 
-/** Marks the element we add to the empty pane, so we can find and remove it. */
-const EMPTY_PANE_CLASS = "smf-export-empty-state-action";
-
 export default class SmfExportPlugin extends Plugin {
   settings: SmfSettings = DEFAULT_SETTINGS;
 
@@ -93,14 +90,6 @@ export default class SmfExportPlugin extends Plugin {
       })
     );
 
-    this.app.workspace.onLayoutReady(() => this.decorateEmptyPanes());
-    this.registerEvent(
-      this.app.workspace.on("layout-change", () => this.decorateEmptyPanes())
-    );
-    this.registerEvent(
-      this.app.workspace.on("active-leaf-change", () => this.decorateEmptyPanes())
-    );
-
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file) => {
         // Right-clicking a folder is where people look for "new thing here",
@@ -130,50 +119,6 @@ export default class SmfExportPlugin extends Plugin {
         );
       })
     );
-  }
-
-  /**
-   * Adds a "Create new story" line to the empty-pane view, beneath Obsidian's
-   * own actions.
-   *
-   * This reaches into core UI markup, which is not a supported API — the class
-   * names could change in any release. Everything here is written to no-op when
-   * the structure isn't what we expect, so the worst outcome is the line simply
-   * not appearing. Every other entry point works regardless.
-   */
-  private decorateEmptyPanes() {
-    if (!this.settings.showInEmptyPane) {
-      this.undecorateEmptyPanes();
-      return;
-    }
-
-    document
-      .querySelectorAll<HTMLElement>(".empty-state-action-list")
-      .forEach((list) => {
-        if (list.querySelector(`.${EMPTY_PANE_CLASS}`)) return;
-
-        const action = document.createElement("div");
-        action.className = `empty-state-action ${EMPTY_PANE_CLASS}`;
-        action.textContent = "Create new story";
-        action.addEventListener("click", () =>
-          void this.createStory(this.defaultNewStoryFolder())
-        );
-
-        // Directly under "Create new note", where it belongs — appending would
-        // put it below Close, which reads as an afterthought.
-        const first = list.querySelector(".empty-state-action");
-        if (first) first.after(action);
-        else list.prepend(action);
-      });
-  }
-
-  private undecorateEmptyPanes() {
-    document.querySelectorAll(`.${EMPTY_PANE_CLASS}`).forEach((el) => el.remove());
-  }
-
-  onunload() {
-    // The empty-pane line is our DOM, so we take it with us.
-    this.undecorateEmptyPanes();
   }
 
   private defaultNewStoryFolder(): string {

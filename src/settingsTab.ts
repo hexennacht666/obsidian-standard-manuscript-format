@@ -157,11 +157,6 @@ export class SmfSettingTab extends PluginSettingTab {
       "Leave blank for the current folder"
     );
     this.toggle(
-      "Offer “New story” in the empty pane",
-      "Adds a line under Obsidian's own “Create new note”. This one touches Obsidian's own interface, so a future update could stop it working — every other way in keeps working regardless.",
-      "showInEmptyPane"
-    );
-    this.toggle(
       "Include content warnings",
       "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",
       "includeContentWarnings"
