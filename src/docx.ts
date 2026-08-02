@@ -46,9 +46,18 @@ function surnameOf(name: string): string {
   return parts.length ? parts[parts.length - 1] : "AUTHOR";
 }
 
+/**
+ * "about" appears only when the number shown isn't the true count. Printing it
+ * over an exact figure claims an approximation that isn't there, and dropping
+ * it from a rounded one claims a precision that isn't there either.
+ *
+ * That also covers rounding landing exactly on the count: 3,400 words rounds to
+ * 3,400, and there is nothing approximate about it.
+ */
 export function formatWordCount(count: number, round: boolean): string {
-  const n = round && count >= 100 ? Math.round(count / 100) * 100 : count;
-  return `about ${n.toLocaleString("en-US")} words`;
+  const shown = round && count >= 100 ? Math.round(count / 100) * 100 : count;
+  const prefix = shown === count ? "" : "about ";
+  return `${prefix}${shown.toLocaleString("en-US")} words`;
 }
 
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
