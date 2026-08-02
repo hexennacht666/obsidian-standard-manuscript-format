@@ -10,6 +10,7 @@ import {
   Paragraph,
   Table,
   TableCell,
+  TableLayoutType,
   TableRow,
   TextRun,
   UnderlineType,
@@ -43,11 +44,21 @@ export function formatWordCount(count: number, round: boolean): string {
   return `about ${n.toLocaleString("en-US")} words`;
 }
 
+// Letter, one inch each side. The table grid needs a real measurement, not a
+// percentage — Word lays out from the grid and a bad one collapses the columns.
+const CONTENT_WIDTH = convertInchesToTwip(6.5);
+const HALF_WIDTH = Math.floor(CONTENT_WIDTH / 2);
+
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
+  const font = resolveFont(settings);
   return runs.map(
     (r) =>
       new TextRun({
         text: r.text,
+        // Named on every run rather than left to docDefaults, which not every
+        // reader honours — a manuscript silently rendered in Calibri is worse
+        // than one that never claimed a font at all.
+        font,
         bold: r.bold,
         italics: r.italic && !settings.italicsAsUnderline,
         underline:
@@ -56,6 +67,24 @@ function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
             : undefined,
       })
   );
+}
+
+/** A paragraph whose font is stated outright, for the same reason. */
+function line(
+  text: string,
+  settings: SmfSettings,
+  options: {
+    alignment?: (typeof AlignmentType)[keyof typeof AlignmentType];
+    spacing?: object;
+    indent?: object;
+  } = {}
+): Paragraph {
+  return new Paragraph({
+    children: [new TextRun({ text, font: resolveFont(settings) })],
+    alignment: options.alignment,
+    spacing: options.spacing ?? SINGLE,
+    indent: options.indent,
+  });
 }
 
 function contactLines(settings: SmfSettings): string[] {
@@ -71,36 +100,40 @@ function contactLines(settings: SmfSettings): string[] {
 }
 
 function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Table)[] {
-  const contact = contactLines(settings).map(
-    (line) => new Paragraph({ text: line, spacing: SINGLE })
-  );
-  if (!contact.length) contact.push(new Paragraph({ text: "", spacing: SINGLE }));
+  const contact = contactLines(settings).map((text) => line(text, settings));
+  if (!contact.length) contact.push(line("", settings));
 
   // Shunn wants the contact block and the word count on the same visual band —
   // upper left and upper right. A borderless two-column table is the only way
   // to hold them level regardless of how many contact lines there are.
+  //
+  // Widths are absolute twips, and columnWidths sets the grid explicitly.
+  // Percentages produced a grid of 100 twips per column and collapsed the
+  // whole banner into a two-character strip.
   const banner = new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
+    columnWidths: [HALF_WIDTH, HALF_WIDTH],
+    width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+    layout: TableLayoutType.FIXED,
     borders: NO_BORDERS,
     rows: [
       new TableRow({
         children: [
           new TableCell({
-            width: { size: 50, type: WidthType.PERCENTAGE },
+            width: { size: HALF_WIDTH, type: WidthType.DXA },
             borders: NO_BORDERS,
             margins: { top: 0, bottom: 0, left: 0, right: 0 },
             children: contact,
           }),
           new TableCell({
-            width: { size: 50, type: WidthType.PERCENTAGE },
+            width: { size: HALF_WIDTH, type: WidthType.DXA },
             borders: NO_BORDERS,
             margins: { top: 0, bottom: 0, left: 0, right: 0 },
             children: [
-              new Paragraph({
-                text: formatWordCount(story.wordCount, settings.roundWordCount),
-                alignment: AlignmentType.RIGHT,
-                spacing: SINGLE,
-              }),
+              line(
+                formatWordCount(story.wordCount, settings.roundWordCount),
+                settings,
+                { alignment: AlignmentType.RIGHT }
+              ),
             ],
           }),
         ],
@@ -112,27 +145,24 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
 
   return [
     banner,
-    new Paragraph({
-      text: story.title ?? "Untitled",
+    line(story.title ?? "Untitled", settings, {
       alignment: AlignmentType.CENTER,
       spacing: { ...SINGLE, before: convertInchesToTwip(2.5) },
     }),
-    new Paragraph({ text: "", spacing: DOUBLE }),
-    new Paragraph({
-      text: byline ? `by ${byline}` : "",
+    line("", settings, { spacing: DOUBLE }),
+    line(byline ? `by ${byline}` : "", settings, {
       alignment: AlignmentType.CENTER,
-      spacing: SINGLE,
     }),
     // On the title page, where a slush reader meets them before the story, and
     // off the manuscript pages themselves.
     ...(settings.includeContentWarnings && story.contentWarnings.length
       ? [
-          new Paragraph({ text: "", spacing: DOUBLE }),
-          new Paragraph({
-            text: `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`,
-            alignment: AlignmentType.CENTER,
-            spacing: SINGLE,
-          }),
+          line("", settings, { spacing: DOUBLE }),
+          line(
+            `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`,
+            settings,
+            { alignment: AlignmentType.CENTER }
+          ),
         ]
       : []),
     new Paragraph({ children: [new PageBreak()] }),
@@ -147,11 +177,7 @@ function bodyParagraphs(
   for (const block of blocks) {
     if (block.kind === "sceneBreak") {
       out.push(
-        new Paragraph({
-          text: "#",
-          alignment: AlignmentType.CENTER,
-          spacing: DOUBLE,
-        })
+        line("#", settings, { alignment: AlignmentType.CENTER, spacing: DOUBLE })
       );
       continue;
     }
@@ -166,8 +192,7 @@ function bodyParagraphs(
 
   if (settings.endMarker.trim()) {
     out.push(
-      new Paragraph({
-        text: settings.endMarker.trim(),
+      line(settings.endMarker.trim(), settings, {
         alignment: AlignmentType.CENTER,
         spacing: DOUBLE,
       })
@@ -192,6 +217,18 @@ export function buildManuscript(
           paragraph: { spacing: SINGLE },
         },
       },
+      // docDefaults alone was not enough: with no Normal style present, readers
+      // fall back to their own built-in Normal and the manuscript arrives in
+      // Calibri. Define it explicitly as well as naming the font on every run.
+      paragraphStyles: [
+        {
+          id: "Normal",
+          name: "Normal",
+          quickFormat: true,
+          run: { font: resolveFont(settings), size: settings.fontSize * 2 },
+          paragraph: { spacing: SINGLE },
+        },
+      ],
     },
     sections: [
       {
