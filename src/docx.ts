@@ -1,5 +1,6 @@
 import {
   AlignmentType,
+  BorderStyle,
   Document,
   Header,
   LineRuleType,
@@ -7,7 +8,12 @@ import {
   PageNumber,
   Packer,
   Paragraph,
+  Table,
+  TableCell,
+  TableLayoutType,
+  TableRow,
   TextRun,
+  WidthType,
   UnderlineType,
   convertInchesToTwip,
 } from "docx";
@@ -15,6 +21,22 @@ import JSZip from "jszip";
 import type { Block, ParsedStory, Run } from "./markdown";
 import { resolveFont } from "./settings";
 import type { SmfSettings } from "./settings";
+
+const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+const NO_BORDERS = {
+  top: NO_BORDER,
+  bottom: NO_BORDER,
+  left: NO_BORDER,
+  right: NO_BORDER,
+  insideHorizontal: NO_BORDER,
+  insideVertical: NO_BORDER,
+};
+
+// Letter minus one-inch margins. The grid needs a real measurement: sizing the
+// columns as percentages made the library emit a grid of 100 twips each and
+// collapsed the banner to a two-character strip.
+const CONTENT_WIDTH = convertInchesToTwip(6.5);
+const HALF_WIDTH = Math.floor(CONTENT_WIDTH / 2);
 
 const SINGLE = { line: 240, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
 const DOUBLE = { line: 480, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
@@ -86,29 +108,50 @@ function contactLines(settings: SmfSettings): string[] {
   return lines;
 }
 
-function titlePage(story: ParsedStory, settings: SmfSettings): Paragraph[] {
+function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Table)[] {
   const contact = contactLines(settings).map((text) => line(text, settings));
   if (!contact.length) contact.push(line("", settings));
 
   const byline = settings.penName || settings.legalName;
 
-  // Stacked paragraphs, not a table.
-  //
-  // Shunn's own layout puts the contact block and word count on one visual
-  // band, and a borderless table is the only way to hold them level. But a
-  // table is the single most fragile thing in a .docx — the first attempt
-  // collapsed to a two-character column — and word processors disagree about
-  // how to render one. Scrivener, whose output these manuscripts are measured
-  // against, doesn't use a table either: contact block left, word count
-  // right-aligned below it, blank lines to push the title down. Plain
-  // paragraphs render identically everywhere, which matters more here than
-  // matching the diagram exactly.
+  // Contact block and word count share one visual band — upper left and upper
+  // right — as Shunn's layout specifies and as Scrivener's manuscripts do. A
+  // borderless single-row table is the only way to hold them level whatever the
+  // contact block's height. Stacking them instead left the word count adrift
+  // below the address.
+  const banner = new Table({
+    columnWidths: [HALF_WIDTH, HALF_WIDTH],
+    width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+    layout: TableLayoutType.FIXED,
+    borders: NO_BORDERS,
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: HALF_WIDTH, type: WidthType.DXA },
+            borders: NO_BORDERS,
+            margins: { top: 0, bottom: 0, left: 0, right: 0 },
+            children: contact,
+          }),
+          new TableCell({
+            width: { size: HALF_WIDTH, type: WidthType.DXA },
+            borders: NO_BORDERS,
+            margins: { top: 0, bottom: 0, left: 0, right: 0 },
+            children: [
+              line(
+                formatWordCount(story.wordCount, settings.roundWordCount),
+                settings,
+                { alignment: AlignmentType.RIGHT }
+              ),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+
   return [
-    ...contact,
-    line("", settings),
-    line(formatWordCount(story.wordCount, settings.roundWordCount), settings, {
-      alignment: AlignmentType.RIGHT,
-    }),
+    banner,
     // Vertical space as empty paragraphs rather than `spacing before`, which
     // readers honour inconsistently at the top of a page.
     ...Array.from({ length: 8 }, () => line("", settings)),
