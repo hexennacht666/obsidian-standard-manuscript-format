@@ -1,6 +1,5 @@
 import {
   AlignmentType,
-  BorderStyle,
   Document,
   Header,
   LineRuleType,
@@ -8,28 +7,13 @@ import {
   PageNumber,
   Packer,
   Paragraph,
-  Table,
-  TableCell,
-  TableLayoutType,
-  TableRow,
   TextRun,
   UnderlineType,
-  WidthType,
   convertInchesToTwip,
 } from "docx";
 import type { Block, ParsedStory, Run } from "./markdown";
 import { resolveFont } from "./settings";
 import type { SmfSettings } from "./settings";
-
-const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
-const NO_BORDERS = {
-  top: NO_BORDER,
-  bottom: NO_BORDER,
-  left: NO_BORDER,
-  right: NO_BORDER,
-  insideHorizontal: NO_BORDER,
-  insideVertical: NO_BORDER,
-};
 
 const SINGLE = { line: 240, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
 const DOUBLE = { line: 480, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
@@ -43,11 +27,6 @@ export function formatWordCount(count: number, round: boolean): string {
   const n = round && count >= 100 ? Math.round(count / 100) * 100 : count;
   return `about ${n.toLocaleString("en-US")} words`;
 }
-
-// Letter, one inch each side. The table grid needs a real measurement, not a
-// percentage — Word lays out from the grid and a bad one collapses the columns.
-const CONTENT_WIDTH = convertInchesToTwip(6.5);
-const HALF_WIDTH = Math.floor(CONTENT_WIDTH / 2);
 
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   const font = resolveFont(settings);
@@ -99,55 +78,34 @@ function contactLines(settings: SmfSettings): string[] {
   return lines;
 }
 
-function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Table)[] {
+function titlePage(story: ParsedStory, settings: SmfSettings): Paragraph[] {
   const contact = contactLines(settings).map((text) => line(text, settings));
   if (!contact.length) contact.push(line("", settings));
 
-  // Shunn wants the contact block and the word count on the same visual band —
-  // upper left and upper right. A borderless two-column table is the only way
-  // to hold them level regardless of how many contact lines there are.
-  //
-  // Widths are absolute twips, and columnWidths sets the grid explicitly.
-  // Percentages produced a grid of 100 twips per column and collapsed the
-  // whole banner into a two-character strip.
-  const banner = new Table({
-    columnWidths: [HALF_WIDTH, HALF_WIDTH],
-    width: { size: CONTENT_WIDTH, type: WidthType.DXA },
-    layout: TableLayoutType.FIXED,
-    borders: NO_BORDERS,
-    rows: [
-      new TableRow({
-        children: [
-          new TableCell({
-            width: { size: HALF_WIDTH, type: WidthType.DXA },
-            borders: NO_BORDERS,
-            margins: { top: 0, bottom: 0, left: 0, right: 0 },
-            children: contact,
-          }),
-          new TableCell({
-            width: { size: HALF_WIDTH, type: WidthType.DXA },
-            borders: NO_BORDERS,
-            margins: { top: 0, bottom: 0, left: 0, right: 0 },
-            children: [
-              line(
-                formatWordCount(story.wordCount, settings.roundWordCount),
-                settings,
-                { alignment: AlignmentType.RIGHT }
-              ),
-            ],
-          }),
-        ],
-      }),
-    ],
-  });
-
   const byline = settings.penName || settings.legalName;
 
+  // Stacked paragraphs, not a table.
+  //
+  // Shunn's own layout puts the contact block and word count on one visual
+  // band, and a borderless table is the only way to hold them level. But a
+  // table is the single most fragile thing in a .docx — the first attempt
+  // collapsed to a two-character column — and word processors disagree about
+  // how to render one. Scrivener, whose output these manuscripts are measured
+  // against, doesn't use a table either: contact block left, word count
+  // right-aligned below it, blank lines to push the title down. Plain
+  // paragraphs render identically everywhere, which matters more here than
+  // matching the diagram exactly.
   return [
-    banner,
+    ...contact,
+    line("", settings),
+    line(formatWordCount(story.wordCount, settings.roundWordCount), settings, {
+      alignment: AlignmentType.RIGHT,
+    }),
+    // Vertical space as empty paragraphs rather than `spacing before`, which
+    // readers honour inconsistently at the top of a page.
+    ...Array.from({ length: 8 }, () => line("", settings)),
     line(story.title ?? "Untitled", settings, {
       alignment: AlignmentType.CENTER,
-      spacing: { ...SINGLE, before: convertInchesToTwip(2.5) },
     }),
     line("", settings, { spacing: DOUBLE }),
     line(byline ? `by ${byline}` : "", settings, {
