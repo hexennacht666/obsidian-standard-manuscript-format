@@ -29,7 +29,7 @@ const CONTENT_WARNINGS_KEY = "Content warnings";
 const TITLE_KEY = "Title";
 
 /** Marks the element we add to the empty pane, so we can find and remove it. */
-const EMPTY_PANE_CLASS = "smf-empty-state-action";
+const EMPTY_PANE_CLASS = "smf-export-empty-state-action";
 
 export default class SmfExportPlugin extends Plugin {
   settings: SmfSettings = DEFAULT_SETTINGS;
