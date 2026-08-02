@@ -11,6 +11,7 @@ import {
   UnderlineType,
   convertInchesToTwip,
 } from "docx";
+import JSZip from "jszip";
 import type { Block, ParsedStory, Run } from "./markdown";
 import { resolveFont } from "./settings";
 import type { SmfSettings } from "./settings";
@@ -175,29 +176,6 @@ export function buildManuscript(
   const runningHead = `${surname} / ${story.shortTitle ?? "UNTITLED"} / `;
 
   return new Document({
-    styles: {
-      default: {
-        document: {
-          // Font only. Declaring paragraph spacing here made Pages prefer the
-          // default over each paragraph's own — the body came out single-spaced
-          // and unindented despite carrying line=480 and a 0.5" first line.
-          // Scrivener ships no styles.xml at all and renders correctly
-          // everywhere; every paragraph property is stated on the paragraph.
-          run: { font: resolveFont(settings), size: settings.fontSize * 2 },
-        },
-      },
-      // docDefaults alone was not enough: with no Normal style present, readers
-      // fall back to their own built-in Normal and the manuscript arrives in
-      // Calibri. Define it explicitly as well as naming the font on every run.
-      paragraphStyles: [
-        {
-          id: "Normal",
-          name: "Normal",
-          quickFormat: true,
-          run: { font: resolveFont(settings), size: settings.fontSize * 2 },
-        },
-      ],
-    },
     sections: [
       {
         properties: {
@@ -247,8 +225,49 @@ export function buildManuscript(
   });
 }
 
+/**
+ * Removes `word/styles.xml` from the package.
+ *
+ * Pages discards every direct paragraph property — alignment, line spacing,
+ * indents — from any document that contains a styles part. Verified by
+ * bisection: the same document renders correctly with the part removed, and
+ * incorrectly with it present, even when the part is completely EMPTY. So it
+ * isn't the content of the styles; it's the existence of the part.
+ *
+ * Scrivener's manuscripts ship no styles part either, which is why they render
+ * correctly in Pages and ours did not. Nothing is lost: every run states its
+ * own font and size, and every paragraph its own spacing, indent and alignment,
+ * so there is nothing left for a style to supply.
+ */
+async function stripStylesPart(zipped: ArrayBuffer): Promise<ArrayBuffer> {
+  const zip = await JSZip.loadAsync(zipped);
+  if (!zip.file("word/styles.xml")) return zipped;
+
+  zip.remove("word/styles.xml");
+
+  // A part that no longer exists must not be advertised, or the package is
+  // inconsistent and stricter readers than Pages will object.
+  const contentTypes = await zip.file("[Content_Types].xml")?.async("string");
+  if (contentTypes) {
+    zip.file(
+      "[Content_Types].xml",
+      contentTypes.replace(/<Override[^>]*word\/styles\.xml[^>]*\/>/g, "")
+    );
+  }
+
+  const rels = await zip.file("word/_rels/document.xml.rels")?.async("string");
+  if (rels) {
+    zip.file(
+      "word/_rels/document.xml.rels",
+      rels.replace(/<Relationship[^>]*Target="styles\.xml"[^>]*\/>/g, "")
+    );
+  }
+
+  return zip.generateAsync({ type: "arraybuffer" });
+}
+
 export async function packDocument(doc: Document): Promise<ArrayBuffer> {
   // toBlob rather than toBuffer: no Node Buffer, so this works on mobile too.
   const blob = await Packer.toBlob(doc);
-  return blob.arrayBuffer();
+  return stripStylesPart(await blob.arrayBuffer());
 }

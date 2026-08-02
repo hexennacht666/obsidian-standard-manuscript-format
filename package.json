@@ -21,6 +21,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "docx": "^9.1.1"
+    "docx": "^9.1.1",
+    "jszip": "^3.10.1"
   }
 }
