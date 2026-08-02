@@ -4,7 +4,7 @@ import {
   Header,
   LineRuleType,
   PageBreak,
-  SimpleField,
+  PageNumber,
   Packer,
   Paragraph,
   TextRun,
@@ -207,10 +207,15 @@ export function buildManuscript(
                     font: resolveFont(settings),
                     size: settings.fontSize * 2,
                   }),
-                  // A simple field rather than a hand-built begin/separate/end
-                  // sequence crammed into one run, which is what we emitted
-                  // before and is not how any word processor writes it.
-                  new SimpleField("PAGE"),
+                  // The page number has to carry the font too, or it renders
+                  // in the reader's default face — visibly heavier and wider
+                  // than the Courier beside it. SimpleField takes no run
+                  // properties, so the field goes inside a styled run instead.
+                  new TextRun({
+                    children: [PageNumber.CURRENT],
+                    font: resolveFont(settings),
+                    size: settings.fontSize * 2,
+                  }),
                 ],
               }),
             ],
