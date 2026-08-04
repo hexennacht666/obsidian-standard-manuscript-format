@@ -320,7 +320,15 @@ async function stripStylesPart(zipped: ArrayBuffer): Promise<ArrayBuffer> {
     );
   }
 
-  return zip.generateAsync({ type: "arraybuffer" });
+  // JSZip stores uncompressed unless told otherwise, and a .docx is a zip by
+  // definition — repacking without this turned every manuscript into three
+  // times the bytes it needed, which is the sort of thing that only shows up
+  // once the files are sitting in someone's synced vault.
+  return zip.generateAsync({
+    type: "arraybuffer",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
 }
 
 export async function packDocument(doc: Document): Promise<ArrayBuffer> {
