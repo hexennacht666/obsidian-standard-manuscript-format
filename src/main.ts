@@ -1,6 +1,7 @@
 import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from "obsidian";
 import { buildManuscript, packDocument } from "./docx";
 import { parseStory } from "./markdown";
+import { buildRtf } from "./rtf";
 import { uniquePath } from "./naming";
 import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
@@ -231,18 +232,19 @@ export default class SmfExportPlugin extends Plugin {
         return;
       }
 
-      const buffer = await packDocument(buildManuscript(story, this.settings));
-      const path = await this.resolveOutputPath(file.basename);
+      const written: string[] = [];
 
-      const existing = this.app.vault.getAbstractFileByPath(path);
-      if (existing instanceof TFile) {
-        await this.app.vault.modifyBinary(existing, buffer);
-      } else {
-        await this.app.vault.createBinary(path, buffer);
+      if (this.settings.exportFormat !== "rtf") {
+        const buffer = await packDocument(buildManuscript(story, this.settings));
+        written.push(await this.writeExport(file.basename, "docx", buffer));
+      }
+      if (this.settings.exportFormat !== "docx") {
+        const rtf = buildRtf(story, this.settings);
+        written.push(await this.writeExport(file.basename, "rtf", rtf));
       }
 
       const notice = [
-        `Exported ${story.wordCount.toLocaleString()} words to ${path}`,
+        `Exported ${story.wordCount.toLocaleString()} words to ${written.join(" and ")}`,
       ];
 
       // Never blocks the export and never rewrites the prose — a missing quote
@@ -270,6 +272,31 @@ export default class SmfExportPlugin extends Plugin {
   }
 
   /**
+   * Writes one rendering, replacing the previous one rather than accumulating
+   * copies — so a story that gets exported thirty times while it's being
+   * revised leaves one file behind, not thirty.
+   */
+  private async writeExport(
+    basename: string,
+    extension: "docx" | "rtf",
+    data: ArrayBuffer | string
+  ): Promise<string> {
+    const path = await this.resolveOutputPath(basename, extension);
+    const existing = this.app.vault.getAbstractFileByPath(path);
+
+    if (typeof data === "string") {
+      if (existing instanceof TFile) await this.app.vault.modify(existing, data);
+      else await this.app.vault.create(path, data);
+    } else if (existing instanceof TFile) {
+      await this.app.vault.modifyBinary(existing, data);
+    } else {
+      await this.app.vault.createBinary(path, data);
+    }
+
+    return path;
+  }
+
+  /**
    * Creates the folder if it isn't there. Tests for a *folder* rather than for
    * anything at all: a file sitting at that path would otherwise look like a
    * folder that already exists, and the write would fail somewhere less
@@ -284,11 +311,15 @@ export default class SmfExportPlugin extends Plugin {
     await this.app.vault.createFolder(path);
   }
 
-  private async resolveOutputPath(basename: string): Promise<string> {
+  private async resolveOutputPath(
+    basename: string,
+    extension: "docx" | "rtf"
+  ): Promise<string> {
     const folder = normalizePath(this.settings.outputFolder.trim() || "/");
     if (folder !== "/") await this.ensureFolder(folder);
     const safe = basename.replace(/[\\/:*?"<>|]/g, "-");
-    return folder === "/" ? `${safe}.docx` : `${folder}/${safe}.docx`;
+    const name = `${safe}.${extension}`;
+    return folder === "/" ? name : `${folder}/${name}`;
   }
 
   async loadSettings() {

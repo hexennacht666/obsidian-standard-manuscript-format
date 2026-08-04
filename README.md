@@ -1,11 +1,12 @@
 # Standard Manuscript Format Export
 
-An Obsidian plugin that exports a story to [Shunn's Standard Manuscript Format](https://www.shunn.net/format/story/) as a `.docx`, ready to submit.
+An Obsidian plugin that exports a story to [Shunn's Standard Manuscript Format](https://www.shunn.net/format/story/) as a `.docx` or `.rtf`, ready to submit.
 
 Write in markdown. Get back a manuscript that looks like every editor expects one to look.
 
 ## What it does
 
+- **Two formats, because markets disagree.** `.docx` and `.rtf`, the same manuscript either way. Clarkesworld won't take `.doc`; Beneath Ceaseless Skies won't take `.docx`; every market surveyed takes RTF, so it's the safe answer when guidelines are vague or an uploader is fussy. Export one or both.
 - **Shunn modern format.** Title page with your contact block upper-left and the word count upper-right, title and byline centred below. Story starts on page 2.
 - **Running head** on every page but the title page: `Surname / KEYWORD / page`.
 - **Manuscript layout**: 12pt Courier New, 1" margins, double-spaced, 0.5" first-line indent, centred `#` for scene breaks.
@@ -21,7 +22,9 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 **Add title and content warnings** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
 
-**Export to Standard Manuscript Format** — from the command palette, or by right-clicking a note. The `.docx` is written to the folder set in settings (`Manuscripts` by default).
+**Export to standard manuscript format** — from the command palette, or by right-clicking a note. The manuscript is written to the folder set in settings (`Manuscripts` by default), in whichever format you've chosen.
+
+Exports live in your vault, one file per story — re-exporting replaces it rather than piling up copies. A manuscript is about the size of the note it came from, so a folder of them costs roughly what your stories already cost. Drag them out if you'd rather they lived elsewhere.
 
 Set your name in settings before the first export — the contact block needs it.
 
@@ -58,7 +61,7 @@ Without a `Title` property the plugin uses the first heading in the note, then t
 
 **Manuscript** options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
 
-**Folders** — where the manuscript is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
+**Folders** — where the `.docx` is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
 
 Settings are declared rather than drawn, so every one of them is findable from Obsidian's settings search.
 
@@ -78,13 +81,17 @@ npm run build   # typecheck and production bundle
 
 Requires Obsidian 1.13 or later, which is where the declarative settings API arrives.
 
-Render a story to `.docx` without going through Obsidian:
+Render a story without going through Obsidian — the output extension picks the emitter:
 
 ```bash
 npm run sample -- path/to/story.md out.docx
 ```
 
-The core (`src/markdown.ts`, `src/typography.ts`, `src/docx.ts`) has no Obsidian imports, so it stays testable in plain Node and reusable by other tools.
+```bash
+npm run sample -- path/to/story.md out.rtf
+```
+
+The core (`src/markdown.ts`, `src/typography.ts`, `src/manuscript.ts`, `src/docx.ts`, `src/rtf.ts`) has no Obsidian imports, so it stays testable in plain Node and reusable by other tools. `manuscript.ts` holds what both emitters agree on — the contact block, the word count, the running head — so the two renderings can't drift apart.
 
 ## Licence
 

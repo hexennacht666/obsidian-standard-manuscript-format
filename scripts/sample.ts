@@ -1,18 +1,21 @@
 /**
- * Renders a markdown story to .docx outside Obsidian so the output can be
- * inspected without a manual round-trip through the app.
+ * Renders a markdown story outside Obsidian so the output can be inspected
+ * without a manual round-trip through the app. The output extension picks the
+ * emitter, which is how both renderings get compared against each other in the
+ * same readers.
  *
- *   npm run sample -- <input.md> <output.docx>
+ *   npm run sample -- <input.md> <output.docx|output.rtf>
  */
 import { readFileSync, writeFileSync } from "fs";
-import { basename } from "path";
+import { basename, extname } from "path";
 import { buildManuscript, packDocument } from "../src/docx";
 import { parseStory } from "../src/markdown";
+import { buildRtf } from "../src/rtf";
 import { DEFAULT_SETTINGS } from "../src/settings";
 
 const [input, output] = process.argv.slice(2);
 if (!input || !output) {
-  console.error("usage: npm run sample -- <input.md> <output.docx>");
+  console.error("usage: npm run sample -- <input.md> <output.docx|output.rtf>");
   process.exit(1);
 }
 
@@ -39,7 +42,12 @@ console.log(
 console.log("unclosed:   ", story.unclosedQuotes.length);
 for (const u of story.unclosedQuotes) console.log(`  ¶${u.paragraph} ${u.excerpt}`);
 
-packDocument(buildManuscript(story, settings)).then((buf) => {
-  writeFileSync(output, Buffer.from(buf));
+if (extname(output).toLowerCase() === ".rtf") {
+  writeFileSync(output, buildRtf(story, settings), "utf8");
   console.log("wrote:      ", output);
-});
+} else {
+  packDocument(buildManuscript(story, settings)).then((buf) => {
+    writeFileSync(output, Buffer.from(buf));
+    console.log("wrote:      ", output);
+  });
+}

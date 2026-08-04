@@ -19,6 +19,11 @@ import {
 } from "docx";
 import JSZip from "jszip";
 import type { Block, ParsedStory, Run } from "./markdown";
+import {
+  contactLines,
+  formatWordCount,
+  runningHeadPrefix,
+} from "./manuscript";
 import { resolveFont } from "./settings";
 import type { SmfSettings } from "./settings";
 
@@ -40,25 +45,6 @@ const HALF_WIDTH = Math.floor(CONTENT_WIDTH / 2);
 
 const SINGLE = { line: 240, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
 const DOUBLE = { line: 480, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
-
-function surnameOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : "AUTHOR";
-}
-
-/**
- * "about" appears only when the number shown isn't the true count. Printing it
- * over an exact figure claims an approximation that isn't there, and dropping
- * it from a rounded one claims a precision that isn't there either.
- *
- * That also covers rounding landing exactly on the count: 3,400 words rounds to
- * 3,400, and there is nothing approximate about it.
- */
-export function formatWordCount(count: number, round: boolean): string {
-  const shown = round && count >= 100 ? Math.round(count / 100) * 100 : count;
-  const prefix = shown === count ? "" : "about ";
-  return `${prefix}${shown.toLocaleString("en-US")} words`;
-}
 
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   const font = resolveFont(settings);
@@ -103,18 +89,6 @@ function line(
     spacing: options.spacing ?? SINGLE,
     indent: options.indent,
   });
-}
-
-function contactLines(settings: SmfSettings): string[] {
-  const lines: string[] = [];
-  if (settings.legalName) lines.push(settings.legalName);
-  if (settings.includeAddress && settings.address.trim()) {
-    lines.push(...settings.address.split(/\r?\n/).filter((l) => l.trim()));
-  }
-  if (settings.includePhone && settings.phone) lines.push(settings.phone);
-  if (settings.includeEmail && settings.email) lines.push(settings.email);
-  if (settings.membership) lines.push(settings.membership);
-  return lines;
 }
 
 function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Table)[] {
@@ -224,8 +198,7 @@ export function buildManuscript(
   story: ParsedStory,
   settings: SmfSettings
 ): Document {
-  const surname = surnameOf(settings.penName || settings.legalName || "");
-  const runningHead = `${surname} / ${story.shortTitle ?? "UNTITLED"} / `;
+  const runningHead = runningHeadPrefix(story.shortTitle, settings);
 
   return new Document({
     sections: [

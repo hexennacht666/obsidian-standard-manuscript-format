@@ -107,6 +107,19 @@ export class SmfSettingTab extends PluginSettingTab {
         heading: "Manuscript",
         items: [
           {
+            name: "Format",
+            desc: "Markets disagree: some won't take .docx, some won't take .doc. Every market surveyed accepts RTF, so it's the safe answer when guidelines are vague.",
+            control: {
+              type: "dropdown",
+              key: "exportFormat",
+              options: {
+                docx: "Word (.docx)",
+                rtf: "Rich text (.rtf)",
+                both: "Both",
+              },
+            },
+          },
+          {
             name: "Font",
             desc: "Shunn specifies Courier. Times is the usual alternative — use custom when a market asks for something specific.",
             control: {

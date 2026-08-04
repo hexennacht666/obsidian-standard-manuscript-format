@@ -18,6 +18,15 @@ export function resolveFont(settings: SmfSettings): string {
   return FONT_PRESETS[settings.fontPreset] ?? FONT_PRESETS.courier;
 }
 
+/**
+ * Both formats are honest renderings of the same manuscript. RTF exists
+ * because the markets disagree with each other, not because it's a fallback:
+ * Clarkesworld refuses .doc, Beneath Ceaseless Skies refuses .docx, and RTF is
+ * the one format the whole survey accepts. "Both" is for anyone who'd rather
+ * not check the guidelines twice.
+ */
+export type ExportFormat = "docx" | "rtf" | "both";
+
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
@@ -31,6 +40,7 @@ export interface SmfSettings {
   includePhone: boolean;
   includeAddress: boolean;
 
+  exportFormat: ExportFormat;
   fontPreset: FontPreset;
   /** Only consulted when fontPreset is "custom". */
   customFont: string;
@@ -59,6 +69,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   includePhone: false,
   includeAddress: true,
 
+  exportFormat: "docx",
   fontPreset: "courier",
   customFont: "",
   fontSize: 12,

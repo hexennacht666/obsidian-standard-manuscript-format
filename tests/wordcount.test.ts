@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { test } from "node:test";
-import { formatWordCount } from "../src/docx";
+import { formatWordCount } from "../src/manuscript";
 
 test("rounding on says about, because the number is not the count", () => {
   assert.equal(formatWordCount(3443, true), "about 3,400 words");
