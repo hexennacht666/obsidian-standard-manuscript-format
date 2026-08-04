@@ -54,9 +54,13 @@ Without a `Title` property the plugin uses the first heading in the note, then t
 
 ## Settings
 
-Author identity (legal name, pen name, pronouns, address, email, phone, membership line) with per-export toggles for address, email, and phone — markets differ on what they want.
+**Author identity** sits behind one row — legal name, pen name, pronouns, address, email, phone, membership line, with per-export toggles for address, email, and phone, since markets differ on what they want. It's set once, so it stays out of the way of the options you change per market. The row shows the name it will print, and flags itself if there isn't one yet.
 
-Manuscript options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, the output folder, the folder new stories go in, and whether unclosed quotes get mentioned.
+**Manuscript** options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
+
+**Folders** — where the manuscript is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
+
+Settings are declared rather than drawn, so every one of them is findable from Obsidian's settings search.
 
 Everything the plugin does uses Obsidian's documented API. It makes no network requests, executes no code of its own or yours, never touches the clipboard, and writes nothing outside the output folder.
 
@@ -68,8 +72,11 @@ Deliberately absent: any built-in list of markets. Guidelines go stale, and a pl
 npm install
 npm run dev     # watch build
 npm test        # markdown + typography unit tests
+npm run lint    # official Obsidian plugin guidelines
 npm run build   # typecheck and production bundle
 ```
+
+Requires Obsidian 1.13 or later, which is where the declarative settings API arrives.
 
 Render a story to `.docx` without going through Obsidian:
 

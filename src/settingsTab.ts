@@ -1,6 +1,8 @@
-import { App, PluginSettingTab, Setting, TextAreaComponent } from "obsidian";
+import { App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
 import type SmfExportPlugin from "./main";
-import type { FontPreset, SmfSettings } from "./settings";
+import type { SmfSettings } from "./settings";
+
+type Key = keyof SmfSettings;
 
 export class SmfSettingTab extends PluginSettingTab {
   plugin: SmfExportPlugin;
@@ -10,167 +12,199 @@ export class SmfSettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  private text(
-    name: string,
-    desc: string,
-    key: keyof SmfSettings,
-    placeholder = ""
-  ) {
-    new Setting(this.containerEl)
-      .setName(name)
-      .setDesc(desc)
-      .addText((t) =>
-        t
-          .setPlaceholder(placeholder)
-          .setValue(String(this.plugin.settings[key] ?? ""))
-          .onChange(async (value) => {
-            (this.plugin.settings[key] as unknown) = value;
-            await this.plugin.saveSettings();
-          })
-      );
+  /**
+   * Obsidian reads and writes every declarative control through this pair, so
+   * the definitions below carry no per-control save wiring.
+   */
+  getControlValue(key: string): unknown {
+    return this.plugin.settings[key as Key];
   }
 
-  private toggle(name: string, desc: string, key: keyof SmfSettings) {
-    new Setting(this.containerEl)
-      .setName(name)
-      .setDesc(desc)
-      .addToggle((t) =>
-        t
-          .setValue(Boolean(this.plugin.settings[key]))
-          .onChange(async (value) => {
-            (this.plugin.settings[key] as unknown) = value;
-            await this.plugin.saveSettings();
-          })
-      );
+  async setControlValue(key: string, value: unknown): Promise<void> {
+    (this.plugin.settings[key as Key] as unknown) = value;
+    await this.plugin.saveSettings();
   }
 
-  display(): void {
-    const { containerEl } = this;
-    containerEl.empty();
+  /** True once the byline has something to print. */
+  private hasName(): boolean {
+    return Boolean(
+      this.plugin.settings.legalName.trim() || this.plugin.settings.penName.trim()
+    );
+  }
 
-    new Setting(containerEl).setName("Author").setHeading();
+  getSettingDefinitions(): SettingDefinitionItem<Key>[] {
+    return [
+      {
+        type: "page",
+        name: "Author identity",
+        desc: "Your contact block and byline. Set once; every manuscript uses it.",
+        // Surfaces on the row, so the common case never needs opening.
+        displayValue: () =>
+          this.plugin.settings.penName.trim() ||
+          this.plugin.settings.legalName.trim() ||
+          "Not set",
+        // The export refuses without a name. Say so here rather than at the
+        // point of failure.
+        status: () => (this.hasName() ? null : "warning"),
+        items: [
+          {
+            name: "Legal name",
+            desc: "Goes in the contact block, as Shunn specifies.",
+            control: { type: "text", key: "legalName" },
+          },
+          {
+            name: "Pen name",
+            desc: "Used for the byline. Leave blank to use your legal name.",
+            control: { type: "text", key: "penName" },
+          },
+          {
+            name: "Pronouns",
+            desc: "Optional. Used by cover letters.",
+            control: { type: "text", key: "pronouns", placeholder: "she/her" },
+          },
+          {
+            name: "Address",
+            desc: "One line per line. Appears under your name in the contact block.",
+            control: { type: "textarea", key: "address", rows: 3 },
+          },
+          {
+            name: "Email",
+            control: { type: "text", key: "email" },
+          },
+          {
+            name: "Phone",
+            control: { type: "text", key: "phone" },
+          },
+          {
+            name: "Membership line",
+            desc: "Optional, e.g. a professional membership. Shown at the end of the contact block.",
+            control: { type: "text", key: "membership" },
+          },
+          {
+            type: "group",
+            heading: "Include per export",
+            items: [
+              {
+                name: "Include address",
+                desc: "Some markets don't want it.",
+                control: { type: "toggle", key: "includeAddress" },
+              },
+              {
+                name: "Include email",
+                control: { type: "toggle", key: "includeEmail" },
+              },
+              {
+                name: "Include phone",
+                control: { type: "toggle", key: "includePhone" },
+              },
+            ],
+          },
+        ],
+      },
 
-    this.text(
-      "Legal name",
-      "Goes in the contact block, as Shunn specifies.",
-      "legalName"
-    );
-    this.text(
-      "Pen name",
-      "Used for the byline. Leave blank to use your legal name.",
-      "penName"
-    );
-    this.text("Pronouns", "Optional. Used by cover letters.", "pronouns", "she/her");
+      {
+        type: "group",
+        heading: "Manuscript",
+        items: [
+          {
+            name: "Font",
+            desc: "Shunn specifies Courier. Times is the usual alternative — use custom when a market asks for something specific.",
+            control: {
+              type: "dropdown",
+              key: "fontPreset",
+              options: {
+                courier: "Courier New",
+                times: "Times New Roman",
+                custom: "Custom…",
+              },
+            },
+          },
+          {
+            name: "Custom font",
+            desc: "Exact font name, e.g. Georgia. Word substitutes if the reader doesn't have it.",
+            // Replaces the old rebuild-the-whole-tab call.
+            visible: () => this.plugin.settings.fontPreset === "custom",
+            control: { type: "text", key: "customFont", placeholder: "Georgia" },
+          },
+          {
+            name: "Font size",
+            desc: "Points.",
+            control: {
+              type: "number",
+              key: "fontSize",
+              min: 1,
+              // Said out loud rather than silently ignored, which is what the
+              // old text field did with anything unusable.
+              validate: (value) =>
+                Number.isFinite(value) && value > 0
+                  ? undefined
+                  : "Enter a size greater than zero.",
+            },
+          },
+          {
+            name: "Underline instead of italics",
+            desc: "Off means normal bold and italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
+            control: { type: "toggle", key: "italicsAsUnderline" },
+          },
+          {
+            name: "Round word count",
+            desc: "Round to the nearest 100, the traditional convention.",
+            control: { type: "toggle", key: "roundWordCount" },
+          },
+          {
+            name: "End marker",
+            desc: "Centred after the last line. Leave blank for none.",
+            control: { type: "text", key: "endMarker" },
+          },
+          {
+            name: "Include content warnings",
+            desc: "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",
+            control: { type: "toggle", key: "includeContentWarnings" },
+          },
+          {
+            name: "Content warning label",
+            desc: "Wording some markets are particular about — 'Content notes' is the other common one.",
+            visible: () => this.plugin.settings.includeContentWarnings,
+            control: {
+              type: "text",
+              key: "contentWarningLabel",
+              placeholder: "Content warnings",
+            },
+          },
+          {
+            name: "Mention unclosed quotes",
+            desc: "After exporting, note any paragraph that opens dialogue and neither closes it nor carries it into the next paragraph. Never changes the manuscript.",
+            control: { type: "toggle", key: "warnUnclosedQuotes" },
+          },
+        ],
+      },
 
-    new Setting(containerEl)
-      .setName("Address")
-      .setDesc("One line per line. Appears under your name in the contact block.")
-      .addTextArea((t: TextAreaComponent) => {
-        t.setValue(this.plugin.settings.address).onChange(async (value) => {
-          this.plugin.settings.address = value;
-          await this.plugin.saveSettings();
-        });
-        t.inputEl.rows = 3;
-      });
-
-    this.text("Email", "", "email");
-    this.text("Phone", "", "phone");
-    this.text(
-      "Membership line",
-      "Optional, e.g. a professional membership. Shown at the end of the contact block.",
-      "membership"
-    );
-
-    new Setting(containerEl).setName("Include per export").setHeading();
-    this.toggle("Include address", "Some markets don't want it.", "includeAddress");
-    this.toggle("Include email", "", "includeEmail");
-    this.toggle("Include phone", "", "includePhone");
-
-    new Setting(containerEl).setName("Manuscript").setHeading();
-
-    new Setting(containerEl)
-      .setName("Font")
-      .setDesc(
-        "Shunn specifies Courier. Times is the usual alternative — use Custom when a market asks for something specific."
-      )
-      .addDropdown((d) =>
-        d
-          .addOptions({
-            courier: "Courier New",
-            times: "Times New Roman",
-            custom: "Custom…",
-          })
-          .setValue(this.plugin.settings.fontPreset)
-          .onChange(async (value) => {
-            this.plugin.settings.fontPreset = value as FontPreset;
-            await this.plugin.saveSettings();
-            this.display(); // show or hide the custom field
-          })
-      );
-
-    if (this.plugin.settings.fontPreset === "custom") {
-      this.text(
-        "Custom font",
-        "Exact font name, e.g. Georgia. Word substitutes if the reader doesn't have it.",
-        "customFont",
-        "Georgia"
-      );
-    }
-
-    new Setting(containerEl)
-      .setName("Font size")
-      .setDesc("Points.")
-      .addText((t) =>
-        t.setValue(String(this.plugin.settings.fontSize)).onChange(async (v) => {
-          const n = Number(v);
-          if (Number.isFinite(n) && n > 0) {
-            this.plugin.settings.fontSize = n;
-            await this.plugin.saveSettings();
-          }
-        })
-      );
-
-    this.toggle(
-      "Underline instead of italics",
-      "Off means normal bold and italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
-      "italicsAsUnderline"
-    );
-    this.toggle(
-      "Round word count",
-      "Round to the nearest 100, the traditional convention.",
-      "roundWordCount"
-    );
-    this.text(
-      "End marker",
-      "Centred after the last line. Leave blank for none.",
-      "endMarker"
-    );
-    this.text(
-      "Output folder",
-      "Vault folder the .docx is written to. Created if missing.",
-      "outputFolder"
-    );
-    this.text(
-      "New story folder",
-      "Where “New story” puts the file. Leave blank to create it alongside the note you're in.",
-      "newStoryFolder",
-      "Leave blank for the current folder"
-    );
-    this.toggle(
-      "Include content warnings",
-      "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",
-      "includeContentWarnings"
-    );
-    this.text(
-      "Content warning label",
-      "Wording some markets are particular about — 'Content notes' is the other common one.",
-      "contentWarningLabel",
-      "Content warnings"
-    );
-    this.toggle(
-      "Mention unclosed quotes",
-      "After exporting, note any paragraph that opens dialogue and neither closes it nor carries it into the next paragraph. Never changes the manuscript.",
-      "warnUnclosedQuotes"
-    );
+      {
+        type: "group",
+        heading: "Folders",
+        items: [
+          {
+            name: "Output folder",
+            desc: "Vault folder the .docx is written to. Created if missing.",
+            control: {
+              type: "folder",
+              key: "outputFolder",
+              placeholder: "Manuscripts",
+              includeRoot: true,
+            },
+          },
+          {
+            name: "New story folder",
+            desc: "Where “New story” puts the file. Leave blank to create it alongside the note you're in.",
+            control: {
+              type: "folder",
+              key: "newStoryFolder",
+              placeholder: "Leave blank for the current folder",
+              includeRoot: true,
+            },
+          },
+        ],
+      },
+    ];
   }
 }
