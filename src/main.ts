@@ -138,9 +138,7 @@ export default class SmfExportPlugin extends Plugin {
     try {
       const dir = folder === "/" ? "" : folder;
 
-      if (dir && !this.app.vault.getAbstractFileByPath(dir)) {
-        await this.app.vault.createFolder(dir);
-      }
+      if (dir) await this.ensureFolder(dir);
 
       const path = uniquePath(
         dir,
@@ -271,11 +269,24 @@ export default class SmfExportPlugin extends Plugin {
     }
   }
 
+  /**
+   * Creates the folder if it isn't there. Tests for a *folder* rather than for
+   * anything at all: a file sitting at that path would otherwise look like a
+   * folder that already exists, and the write would fail somewhere less
+   * legible than here.
+   */
+  private async ensureFolder(path: string): Promise<void> {
+    const existing = this.app.vault.getAbstractFileByPath(path);
+    if (existing instanceof TFolder) return;
+    if (existing) {
+      throw new Error(`${path} is a file, not a folder.`);
+    }
+    await this.app.vault.createFolder(path);
+  }
+
   private async resolveOutputPath(basename: string): Promise<string> {
     const folder = normalizePath(this.settings.outputFolder.trim() || "/");
-    if (folder !== "/" && !this.app.vault.getAbstractFileByPath(folder)) {
-      await this.app.vault.createFolder(folder);
-    }
+    if (folder !== "/") await this.ensureFolder(folder);
     const safe = basename.replace(/[\\/:*?"<>|]/g, "-");
     return folder === "/" ? `${safe}.docx` : `${folder}/${safe}.docx`;
   }
