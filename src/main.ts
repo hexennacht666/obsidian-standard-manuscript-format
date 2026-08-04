@@ -36,8 +36,8 @@ export default class SmfExportPlugin extends Plugin {
     this.addSettingTab(new SmfSettingTab(this.app, this));
 
     this.addCommand({
-      id: "export-standard-manuscript-format",
-      name: "Export to Standard Manuscript Format",
+      id: "export",
+      name: "Export to standard manuscript format",
       checkCallback: (checking) => {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "md") return false;
@@ -83,7 +83,7 @@ export default class SmfExportPlugin extends Plugin {
         );
         menu.addItem((item) =>
           item
-            .setTitle("Export to Standard Manuscript Format")
+            .setTitle("Export to standard manuscript format")
             .setIcon("file-text")
             .onClick(() => void this.exportFile(file))
         );
@@ -107,7 +107,7 @@ export default class SmfExportPlugin extends Plugin {
         if (!(file instanceof TFile) || file.extension !== "md") return;
         menu.addItem((item) =>
           item
-            .setTitle("Export to Standard Manuscript Format")
+            .setTitle("Export to standard manuscript format")
             .setIcon("file-text")
             .onClick(() => void this.exportFile(file))
         );
@@ -150,10 +150,13 @@ export default class SmfExportPlugin extends Plugin {
       const file = await this.app.vault.create(path, "");
 
       // processFrontMatter owns the YAML so the properties are written correctly.
-      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-        frontmatter[TITLE_KEY] = "";
-        frontmatter[CONTENT_WARNINGS_KEY] = [];
-      });
+      await this.app.fileManager.processFrontMatter(
+        file,
+        (frontmatter: Record<string, unknown>) => {
+          frontmatter[TITLE_KEY] = "";
+          frontmatter[CONTENT_WARNINGS_KEY] = [];
+        }
+      );
 
       const leaf = this.app.workspace.getLeaf(false);
       await leaf.openFile(file);
@@ -178,21 +181,26 @@ export default class SmfExportPlugin extends Plugin {
       const added: string[] = [];
       // Only fills in what's missing, and never prompts. Most stories have no
       // content warnings; an empty property is the correct resting state.
-      await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
-        // Compared loosely, so a note that already says `contentWarnings` or
-        // `title` in some other casing doesn't end up with a duplicate.
-        const present = new Set(
-          Object.keys(frontmatter).map((k) => k.toLowerCase().replace(/[^a-z0-9]/g, ""))
-        );
-        if (!present.has("title")) {
-          frontmatter[TITLE_KEY] = "";
-          added.push("title");
+      await this.app.fileManager.processFrontMatter(
+        file,
+        (frontmatter: Record<string, unknown>) => {
+          // Compared loosely, so a note that already says `contentWarnings` or
+          // `title` in some other casing doesn't end up with a duplicate.
+          const present = new Set(
+            Object.keys(frontmatter).map((k) =>
+              k.toLowerCase().replace(/[^a-z0-9]/g, "")
+            )
+          );
+          if (!present.has("title")) {
+            frontmatter[TITLE_KEY] = "";
+            added.push("title");
+          }
+          if (!present.has("contentwarnings") && !present.has("cw")) {
+            frontmatter[CONTENT_WARNINGS_KEY] = [];
+            added.push("content warnings");
+          }
         }
-        if (!present.has("contentwarnings") && !present.has("cw")) {
-          frontmatter[CONTENT_WARNINGS_KEY] = [];
-          added.push("content warnings");
-        }
-      });
+      );
 
       // Names only what actually changed — a note that already had one of them
       // shouldn't be told both were added.
@@ -220,7 +228,7 @@ export default class SmfExportPlugin extends Plugin {
       }
       if (!this.settings.legalName && !this.settings.penName) {
         new Notice(
-          "Set your name in Standard Manuscript Format Export settings first."
+          "Set your name in this plugin's settings first."
         );
         return;
       }
@@ -273,7 +281,13 @@ export default class SmfExportPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const data: Record<string, unknown> = (await this.loadData()) ?? {};
+    // Typed as unknown on the way in — loadData returns whatever is on disk,
+    // which is not necessarily an object at all.
+    const loaded: unknown = await this.loadData();
+    const data: Record<string, unknown> =
+      typeof loaded === "object" && loaded !== null
+        ? (loaded as Record<string, unknown>)
+        : {};
     this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
 
     // The font used to be one free-text field. Carry an existing value over to

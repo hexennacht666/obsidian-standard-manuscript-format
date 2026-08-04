@@ -61,7 +61,7 @@ export function typographize(input: string): TypographyResult {
   text = text
     .replace(/[“”„‟]/g, '"')
     .replace(/[‘’‚‛]/g, "'")
-    .replace(/ /g, " ");
+    .replace(/\u00a0/g, " ");
 
   // Dashes and ellipses next — they change the characters the quote pass sees.
   text = text.replace(/---/g, "—");
