@@ -1,9 +1,14 @@
 import { typographize } from "./typography";
 
+/**
+ * There is no bold. Shunn's format has no place for it — emphasis is italic, or
+ * underline for the markets still on the typewriter convention — so `**` is
+ * consumed and discarded rather than carried to an emitter that would have to
+ * decide what to do with something the page can't hold.
+ */
 export interface Run {
   text: string;
   italic?: boolean;
-  bold?: boolean;
 }
 
 export type Block =
@@ -124,14 +129,14 @@ function stripVaultSyntax(text: string): string {
     .replace(/~~([^~]+)~~/g, "$1");
 }
 
-function pushRun(runs: Run[], text: string, italic: boolean, bold: boolean) {
+function pushRun(runs: Run[], text: string, italic: boolean) {
   if (!text) return;
   const last = runs[runs.length - 1];
-  if (last && !!last.italic === italic && !!last.bold === bold) {
+  if (last && !!last.italic === italic) {
     last.text += text;
     return;
   }
-  runs.push({ text, italic: italic || undefined, bold: bold || undefined });
+  runs.push({ text, italic: italic || undefined });
 }
 
 /**
@@ -150,7 +155,6 @@ export function parseInline(input: string): Run[] {
   const runs: Run[] = [];
   let buf = "";
   let italic = false;
-  let bold = false;
 
   for (let i = 0; i < input.length; ) {
     const c = input[i];
@@ -178,20 +182,15 @@ export function parseInline(input: string): Run[] {
       continue;
     }
 
-    pushRun(runs, buf, italic, bold);
+    pushRun(runs, buf, italic);
     buf = "";
-    if (len >= 3) {
-      italic = !italic;
-      bold = !bold;
-    } else if (len === 2) {
-      bold = !bold;
-    } else {
-      italic = !italic;
-    }
+    // `**` is swallowed whole and changes nothing. `***` is bold *and* italic,
+    // and what survives of it is the italic.
+    if (len !== 2) italic = !italic;
     i += len;
   }
 
-  pushRun(runs, buf, italic, bold);
+  pushRun(runs, buf, italic);
   return runs;
 }
 

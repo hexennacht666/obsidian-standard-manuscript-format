@@ -103,13 +103,11 @@ function runsToRtf(runs: Run[], settings: SmfSettings): string {
       const underline = run.italic && settings.italicsAsUnderline;
       const italic = run.italic && !settings.italicsAsUnderline;
       let out = "";
-      if (run.bold) out += "\\b ";
       if (italic) out += "\\i ";
       if (underline) out += "\\ul ";
       out += escapeRtf(run.text);
       if (underline) out += "\\ulnone ";
       if (italic) out += "\\i0 ";
-      if (run.bold) out += "\\b0 ";
       return out;
     })
     .join("");

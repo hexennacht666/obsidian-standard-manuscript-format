@@ -57,7 +57,6 @@ function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
         // manuscript in its own Normal — wrong face, wrong size.
         font,
         size,
-        bold: r.bold,
         italics: r.italic && !settings.italicsAsUnderline,
         underline:
           r.italic && settings.italicsAsUnderline

@@ -7,20 +7,26 @@ const plain = (s: string) => parseInline(s).map((r) => r.text).join("");
 
 test("emphasis becomes runs", () => {
   assert.deepEqual(parseInline("a *b* c"), [
-    { text: "a ", italic: undefined, bold: undefined },
-    { text: "b", italic: true, bold: undefined },
-    { text: " c", italic: undefined, bold: undefined },
+    { text: "a ", italic: undefined },
+    { text: "b", italic: true },
+    { text: " c", italic: undefined },
   ]);
-  assert.deepEqual(parseInline("**b**")[0], {
-    text: "b",
-    italic: undefined,
-    bold: true,
-  });
-  assert.deepEqual(parseInline("***b***")[0], {
-    text: "b",
-    italic: true,
-    bold: true,
-  });
+});
+
+test("bold is stripped, because the format has no bold", () => {
+  // The words survive; only the emphasis is dropped, and the run either side
+  // of it merges back into one rather than fragmenting the paragraph.
+  assert.deepEqual(parseInline("a **b** c"), [{ text: "a b c", italic: undefined }]);
+  assert.deepEqual(parseInline("**b**"), [{ text: "b", italic: undefined }]);
+  // Bold-and-italic keeps the half the page can hold.
+  assert.deepEqual(parseInline("***b***"), [{ text: "b", italic: true }]);
+  assert.deepEqual(parseInline("__b__"), [{ text: "b", italic: undefined }]);
+  // Italic nested inside bold still comes through.
+  assert.deepEqual(parseInline("**a *b* c**"), [
+    { text: "a ", italic: undefined },
+    { text: "b", italic: true },
+    { text: " c", italic: undefined },
+  ]);
 });
 
 test("underscores inside words are left alone", () => {
@@ -28,7 +34,6 @@ test("underscores inside words are left alone", () => {
   assert.deepEqual(parseInline("_word_")[0], {
     text: "word",
     italic: true,
-    bold: undefined,
   });
 });
 

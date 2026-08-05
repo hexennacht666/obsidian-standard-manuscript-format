@@ -14,6 +14,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 - **Forgiving about unclosed quotes.** Forget a closing quote and the quotes after it don't invert; the mistake stays where you made it. The export still succeeds, and afterwards it mentions any paragraph that opened dialogue and neither closed it nor carried it into the next paragraph. Multi-paragraph speech, which opens every paragraph and closes only the last, is never reported. Nothing is ever silently rewritten, and the whole check can be switched off.
 - **Word count** of the body only — front matter never inflates it — with the traditional round-to-nearest-100 on by default.
 - **Vault syntax never reaches the page.** Wikilinks, markdown links, `%%comments%%`, and highlights are stripped or unwrapped.
+- **No bold**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here.
 - Pure JavaScript throughout, so it runs on Obsidian mobile as well as desktop.
 
 ## Use
