@@ -156,8 +156,13 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "Underline instead of italics",
-            desc: "Off means normal bold and italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
+            desc: "Off means normal italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
             control: { type: "toggle", key: "italicsAsUnderline" },
+          },
+          {
+            name: "Strip bold",
+            desc: "Shunn's format has no bold, so on means the words survive and the emphasis doesn't. Turn off for a market whose editor asks for bold kept.",
+            control: { type: "toggle", key: "stripBold" },
           },
           {
             name: "Round word count",

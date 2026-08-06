@@ -12,8 +12,13 @@ const settings: SmfSettings = {
 };
 
 function render(markdown: string, overrides: Partial<SmfSettings> = {}): string {
-  const story = parseStory(markdown, "Untitled story");
-  return buildRtf(story, { ...settings, ...overrides });
+  const merged = { ...settings, ...overrides };
+  // Parsed the way the export command parses it, so the bold setting reaches
+  // the parser here too rather than only the emitter.
+  const story = parseStory(markdown, "Untitled story", {
+    stripBold: merged.stripBold,
+  });
+  return buildRtf(story, merged);
 }
 
 test("the three RTF metacharacters are escaped", () => {
@@ -140,6 +145,15 @@ test("italics become underline when the setting asks for it", () => {
   const underlined = render(emphasised, { italicsAsUnderline: true });
   assert.ok(underlined.includes("\\ul "));
   assert.ok(!underlined.includes("\\i "));
+});
+
+test("bold reaches the file only when the setting allows it", () => {
+  const emphasised = "**shouted**";
+  assert.ok(!render(emphasised).includes("\\b "));
+
+  const kept = render(emphasised, { stripBold: false });
+  assert.ok(kept.includes("\\b "));
+  assert.ok(kept.includes("\\b0 "));
 });
 
 test("a scene break prints centred", () => {

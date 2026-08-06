@@ -219,7 +219,9 @@ export default class SmfExportPlugin extends Plugin {
   async exportFile(file: TFile) {
     try {
       const source = await this.app.vault.read(file);
-      const story = parseStory(source, file.basename);
+      const story = parseStory(source, file.basename, {
+        stripBold: this.settings.stripBold,
+      });
 
       if (!story.blocks.length) {
         new Notice("Nothing to export — that note has no body text.");

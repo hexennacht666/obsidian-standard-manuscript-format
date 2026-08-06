@@ -46,6 +46,11 @@ export interface SmfSettings {
   customFont: string;
   fontSize: number;
   italicsAsUnderline: boolean;
+  /**
+   * On, because Shunn's format has no bold. Off for the market that asks for
+   * it kept — Neon Hemlock, the same one with the Georgia preference above.
+   */
+  stripBold: boolean;
   roundWordCount: boolean;
   endMarker: string;
   outputFolder: string;
@@ -74,6 +79,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   customFont: "",
   fontSize: 12,
   italicsAsUnderline: false,
+  stripBold: true,
   roundWordCount: true,
   endMarker: "#",
   outputFolder: "Manuscripts",

@@ -29,6 +29,29 @@ test("bold is stripped, because the format has no bold", () => {
   ]);
 });
 
+test("bold survives when the market asks for it kept", () => {
+  const keep = { stripBold: false };
+  assert.deepEqual(parseInline("a **b** c", keep), [
+    { text: "a ", italic: undefined },
+    { text: "b", italic: undefined, bold: true },
+    { text: " c", italic: undefined },
+  ]);
+  assert.deepEqual(parseInline("__b__", keep), [
+    { text: "b", italic: undefined, bold: true },
+  ]);
+  // `***` is both, and with bold kept both come through.
+  assert.deepEqual(parseInline("***b***", keep), [
+    { text: "b", italic: true, bold: true },
+  ]);
+  // Italic nested inside bold is two attributes on one stretch of text, so the
+  // middle run carries both rather than dropping the bold around it.
+  assert.deepEqual(parseInline("**a *b* c**", keep), [
+    { text: "a ", italic: undefined, bold: true },
+    { text: "b", italic: true, bold: true },
+    { text: " c", italic: undefined, bold: true },
+  ]);
+});
+
 test("underscores inside words are left alone", () => {
   assert.equal(plain("the orichalcum_clad beetle"), "the orichalcum_clad beetle");
   assert.deepEqual(parseInline("_word_")[0], {

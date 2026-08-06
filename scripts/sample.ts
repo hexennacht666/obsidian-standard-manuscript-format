@@ -4,7 +4,7 @@
  * emitter, which is how both renderings get compared against each other in the
  * same readers.
  *
- *   npm run sample -- <input.md> <output.docx|output.rtf>
+ *   npm run sample -- <input.md> <output.docx|output.rtf> [--keep-bold]
  */
 import { readFileSync, writeFileSync } from "fs";
 import { basename, extname } from "path";
@@ -13,14 +13,19 @@ import { parseStory } from "../src/markdown";
 import { buildRtf } from "../src/rtf";
 import { DEFAULT_SETTINGS } from "../src/settings";
 
-const [input, output] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const keepBold = args.includes("--keep-bold");
+const [input, output] = args.filter((a) => !a.startsWith("--"));
 if (!input || !output) {
-  console.error("usage: npm run sample -- <input.md> <output.docx|output.rtf>");
+  console.error(
+    "usage: npm run sample -- <input.md> <output.docx|output.rtf> [--keep-bold]"
+  );
   process.exit(1);
 }
 
 const settings = {
   ...DEFAULT_SETTINGS,
+  stripBold: !keepBold,
   legalName: "Beth Dean",
   penName: "Beth Dean",
   address: "123 Example Street\nPortland, OR 97201",
@@ -29,7 +34,9 @@ const settings = {
 };
 
 const source = readFileSync(input, "utf8");
-const story = parseStory(source, basename(input, ".md"));
+const story = parseStory(source, basename(input, ".md"), {
+  stripBold: settings.stripBold,
+});
 
 console.log("title:      ", story.title);
 console.log("short title:", story.shortTitle);

@@ -58,6 +58,9 @@ function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
         font,
         size,
         italics: r.italic && !settings.italicsAsUnderline,
+        // Only ever set when the parser was told to keep bold; underline stands
+        // in for italics, not for this, so the two are independent.
+        bold: r.bold,
         underline:
           r.italic && settings.italicsAsUnderline
             ? { type: UnderlineType.SINGLE }

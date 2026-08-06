@@ -14,7 +14,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 - **Forgiving about unclosed quotes.** Forget a closing quote and the quotes after it don't invert; the mistake stays where you made it. The export still succeeds, and afterwards it mentions any paragraph that opened dialogue and neither closed it nor carried it into the next paragraph. Multi-paragraph speech, which opens every paragraph and closes only the last, is never reported. Nothing is ever silently rewritten, and the whole check can be switched off.
 - **Word count** of the body only — front matter never inflates it — with the traditional round-to-nearest-100 on by default.
 - **Vault syntax never reaches the page.** Wikilinks, markdown links, `%%comments%%`, and highlights are stripped or unwrapped.
-- **No bold**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here.
+- **No bold by default**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here. Editors do occasionally ask for bold kept, so it's a setting rather than a rule.
 - Pure JavaScript throughout, so it runs on Obsidian mobile as well as desktop.
 
 ## Use
@@ -60,7 +60,7 @@ Without a `Title` property the plugin uses the first heading in the note, then t
 
 **Author identity** sits behind one row — legal name, pen name, pronouns, address, email, phone, membership line, with per-export toggles for address, email, and phone, since markets differ on what they want. It's set once, so it stays out of the way of the options you change per market. The row shows the name it will print, and flags itself if there isn't one yet.
 
-**Manuscript** options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
+**Manuscript** options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, strip-bold (on, and turned off for the market whose editor wants it kept), word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
 
 **Folders** — where the `.docx` is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
 

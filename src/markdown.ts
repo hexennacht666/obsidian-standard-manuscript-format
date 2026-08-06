@@ -1,14 +1,20 @@
 import { typographize } from "./typography";
 
 /**
- * There is no bold. Shunn's format has no place for it — emphasis is italic, or
- * underline for the markets still on the typewriter convention — so `**` is
- * consumed and discarded rather than carried to an emitter that would have to
- * decide what to do with something the page can't hold.
+ * Shunn's format has no place for bold — emphasis is italic, or underline for
+ * the markets still on the typewriter convention — so by default `**` is
+ * consumed and discarded rather than carried to an emitter. A market that asks
+ * for bold kept is the exception, and then it rides through as its own run.
  */
 export interface Run {
   text: string;
   italic?: boolean;
+  bold?: boolean;
+}
+
+export interface ParseOptions {
+  /** Defaults to true, which is the format as Shunn wrote it. */
+  stripBold?: boolean;
 }
 
 export type Block =
@@ -129,14 +135,18 @@ function stripVaultSyntax(text: string): string {
     .replace(/~~([^~]+)~~/g, "$1");
 }
 
-function pushRun(runs: Run[], text: string, italic: boolean) {
+function pushRun(runs: Run[], text: string, italic: boolean, bold: boolean) {
   if (!text) return;
   const last = runs[runs.length - 1];
-  if (last && !!last.italic === italic) {
+  if (last && !!last.italic === italic && !!last.bold === bold) {
     last.text += text;
     return;
   }
-  runs.push({ text, italic: italic || undefined });
+  const run: Run = { text, italic: italic || undefined };
+  // Set only when there's bold to carry, so a run parsed with bold stripped is
+  // exactly the run this produced before the setting existed.
+  if (bold) run.bold = true;
+  runs.push(run);
 }
 
 /**
@@ -151,10 +161,12 @@ function underscoreDelimits(text: string, i: number, len: number): boolean {
   return opensHere || closesHere;
 }
 
-export function parseInline(input: string): Run[] {
+export function parseInline(input: string, options: ParseOptions = {}): Run[] {
+  const stripBold = options.stripBold ?? true;
   const runs: Run[] = [];
   let buf = "";
   let italic = false;
+  let bold = false;
 
   for (let i = 0; i < input.length; ) {
     const c = input[i];
@@ -182,15 +194,16 @@ export function parseInline(input: string): Run[] {
       continue;
     }
 
-    pushRun(runs, buf, italic);
+    pushRun(runs, buf, italic, bold);
     buf = "";
-    // `**` is swallowed whole and changes nothing. `***` is bold *and* italic,
-    // and what survives of it is the italic.
+    // `*` is italic, `**` bold, `***` both. With bold stripped, `**` is
+    // swallowed whole and changes nothing, and what survives `***` is italic.
     if (len !== 2) italic = !italic;
+    if (len !== 1 && !stripBold) bold = !bold;
     i += len;
   }
 
-  pushRun(runs, buf, italic);
+  pushRun(runs, buf, italic, bold);
   return runs;
 }
 
@@ -213,7 +226,11 @@ function pickShortTitle(title: string): string {
     .toUpperCase();
 }
 
-export function parseStory(source: string, fallbackTitle: string): ParsedStory {
+export function parseStory(
+  source: string,
+  fallbackTitle: string,
+  options: ParseOptions = {}
+): ParsedStory {
   const { frontmatter, body } = splitFrontmatter(source);
   const lines = stripVaultSyntax(body).split(/\r?\n/);
 
@@ -231,7 +248,7 @@ export function parseStory(source: string, fallbackTitle: string): ParsedStory {
     const { text, endsOpen } = typographize(
       pending.join(" ").replace(/\s+/g, " ").trim()
     );
-    const runs = parseInline(text);
+    const runs = parseInline(text, options);
     if (runs.length) {
       blocks.push({ kind: "para", runs });
       paragraphs.push({ text, endsOpen });
