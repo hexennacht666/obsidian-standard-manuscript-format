@@ -1,5 +1,6 @@
 import { App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
 import type SmfExportPlugin from "./main";
+import { runningHeadName, surnameOf } from "./manuscript";
 import type { SmfSettings } from "./settings";
 
 type Key = keyof SmfSettings;
@@ -73,6 +74,30 @@ export class SmfSettingTab extends PluginSettingTab {
             name: "Pen name",
             desc: "Used for the byline. Leave blank to use your legal name.",
             control: { type: "text", key: "penName" },
+          },
+          {
+            name: "Surname",
+            // The derived value goes in the placeholder and the resulting head
+            // in the description, so a wrong guess is visible here — the one
+            // page every user has to visit, since export refuses without a name.
+            desc: createFragment((f) => {
+              f.appendText(
+                "Printed with the title and page number on every page after the first. Leave blank to use the last word of your name, which is wrong for a surname of more than one word."
+              );
+              f.createEl("br");
+              f.appendText("Every page after the first will read ");
+              f.createEl("code", {
+                text: `${runningHeadName(this.plugin.settings)} / TITLE / 2`,
+              });
+            }),
+            visible: () => this.plugin.settings.blindSubmission === "off",
+            control: {
+              type: "text",
+              key: "surname",
+              placeholder: surnameOf(
+                this.plugin.settings.penName || this.plugin.settings.legalName || ""
+              ),
+            },
           },
           {
             name: "Pronouns",

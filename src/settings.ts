@@ -43,6 +43,12 @@ export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
   penName: string;
+  /**
+   * What goes in the running head. Blank derives it from the name in use, which
+   * is right for "Alex Chen" and wrong for every surname with a particle or a
+   * second word — so it's asked rather than only inferred.
+   */
+  surname: string;
   pronouns: string;
   address: string;
   email: string;
@@ -78,6 +84,7 @@ export interface SmfSettings {
 export const DEFAULT_SETTINGS: SmfSettings = {
   legalName: "",
   penName: "",
+  surname: "",
   pronouns: "",
   address: "",
   email: "",

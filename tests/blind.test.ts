@@ -36,9 +36,8 @@ test("an identified cover page keeps the block and loses the running head name",
 });
 
 test("off is unchanged — surname in the head, name on the page", () => {
-  // "Guin", not "Le Guin": surnameOf takes the last whitespace-separated word,
-  // so particles are dropped. Pre-existing and out of scope here, but this is
-  // the assertion that would notice if it ever changed.
+  // Still the derived value while `surname` is blank. Stating it is what fixes
+  // "Le Guin" — see the running-head tests.
   assert.equal(runningHeadPrefix("SALT", identified), "Guin / SALT / ");
   assert.equal(bylineOf(identified), "Ursula Le Guin");
   assert.ok(contactLines(identified).includes("Ursula Le Guin"));

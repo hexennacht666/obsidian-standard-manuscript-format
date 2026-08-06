@@ -13,6 +13,23 @@ export function surnameOf(name: string): string {
 }
 
 /**
+ * The running head's name: what the writer stated, or the last word of the name
+ * they're submitting under.
+ *
+ * Deriving is a guess, and it is wrong for particles ("Le Guin" heads as
+ * "Guin"), for double surnames, and for suffixes. It stays as the default
+ * because it's right for most names and costs nothing when it is — but the
+ * stated value always wins, and the settings page shows the derived one so a
+ * bad guess is visible while the writer is right there.
+ */
+export function runningHeadName(settings: SmfSettings): string {
+  return (
+    settings.surname.trim() ||
+    surnameOf(settings.penName || settings.legalName || "")
+  );
+}
+
+/**
  * "about" appears only when the number shown isn't the true count. Printing it
  * over an exact figure claims an approximation that isn't there, and dropping
  * it from a rounded one claims a precision that isn't there either.
@@ -64,6 +81,5 @@ export function runningHeadPrefix(
   // easiest place to leave a name by accident, being set once and never read.
   if (settings.blindSubmission !== "off") return `${title} / `;
 
-  const surname = surnameOf(settings.penName || settings.legalName || "");
-  return `${surname} / ${title} / `;
+  return `${runningHeadName(settings)} / ${title} / `;
 }
