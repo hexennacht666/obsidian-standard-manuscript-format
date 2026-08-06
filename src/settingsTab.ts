@@ -38,14 +38,31 @@ export class SmfSettingTab extends PluginSettingTab {
         type: "page",
         name: "Author identity",
         desc: "Your contact block and byline. Set once; every manuscript uses it.",
-        // Surfaces on the row, so the common case never needs opening.
-        displayValue: () =>
-          this.plugin.settings.penName.trim() ||
-          this.plugin.settings.legalName.trim() ||
-          "Not set",
+        // Surfaces on the row, so the common case never needs opening. Blind is
+        // named here too: a manuscript that silently carries your name and one
+        // that silently doesn't are both bad, and neither is visible from the
+        // top level otherwise.
+        displayValue: () => {
+          const name =
+            this.plugin.settings.penName.trim() ||
+            this.plugin.settings.legalName.trim() ||
+            "Not set";
+          switch (this.plugin.settings.blindSubmission) {
+            case "anonymous":
+              return "Blind — no name on the manuscript";
+            case "coverPage":
+              return `${name} — cover page only`;
+            default:
+              return name;
+          }
+        },
         // The export refuses without a name. Say so here rather than at the
-        // point of failure.
-        status: () => (this.hasName() ? null : "warning"),
+        // point of failure — but an anonymous manuscript never prints one, so
+        // there is nothing missing to warn about.
+        status: () =>
+          this.hasName() || this.plugin.settings.blindSubmission === "anonymous"
+            ? null
+            : "warning",
         items: [
           {
             name: "Legal name",
@@ -81,8 +98,24 @@ export class SmfSettingTab extends PluginSettingTab {
             control: { type: "text", key: "membership" },
           },
           {
+            name: "Blind submission",
+            desc: "Markets that read anonymously differ on what that means, so this isn't a switch. 'Anonymous throughout' removes the contact block, the byline and your name from the running head. 'Identified cover page' keeps the title page as it is and takes your name off every page after it — what contests like Writers of the Future require, and disqualify you for missing. Neither can rename the file, so avoid putting your name in the note's title.",
+            control: {
+              type: "dropdown",
+              key: "blindSubmission",
+              options: {
+                off: "Off — name on the manuscript",
+                anonymous: "Anonymous throughout",
+                coverPage: "Identified cover page only",
+              },
+            },
+          },
+          {
             type: "group",
             heading: "Include per export",
+            // Nothing from this block is printed on an anonymous manuscript, so
+            // it would be three controls sitting there doing nothing.
+            visible: () => this.plugin.settings.blindSubmission !== "anonymous",
             items: [
               {
                 name: "Include address",

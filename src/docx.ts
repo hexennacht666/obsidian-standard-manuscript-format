@@ -20,6 +20,7 @@ import {
 import JSZip from "jszip";
 import type { Block, ParsedStory, Run } from "./markdown";
 import {
+  bylineOf,
   contactLines,
   formatWordCount,
   runningHeadPrefix,
@@ -97,7 +98,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
   const contact = contactLines(settings).map((text) => line(text, settings));
   if (!contact.length) contact.push(line("", settings));
 
-  const byline = settings.penName || settings.legalName;
+  const byline = bylineOf(settings);
 
   // Contact block and word count share one visual band — upper left and upper
   // right — as Shunn's layout specifies and as Scrivener's manuscripts do. A
@@ -203,6 +204,18 @@ export function buildManuscript(
   const runningHead = runningHeadPrefix(story.shortTitle, settings);
 
   return new Document({
+    // Word shows these under File > Properties, where a name survives every
+    // precaution taken on the visible page. Left unset the library writes
+    // "Un-named", which is harmless but reaches an editor looking careless.
+    creator:
+      settings.blindSubmission === "off"
+        ? settings.penName || settings.legalName || "Un-named"
+        : "Anonymous",
+    lastModifiedBy:
+      settings.blindSubmission === "off"
+        ? settings.penName || settings.legalName || "Un-named"
+        : "Anonymous",
+    title: story.title ?? "Untitled",
     sections: [
       {
         properties: {

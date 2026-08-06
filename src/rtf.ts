@@ -15,6 +15,7 @@
  */
 import type { Block, ParsedStory, Run } from "./markdown";
 import {
+  bylineOf,
   contactLines,
   formatWordCount,
   runningHeadPrefix,
@@ -142,7 +143,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   });
   out += paragraph("", settings, { spacing: DOUBLE });
 
-  const byline = settings.penName || settings.legalName;
+  const byline = bylineOf(settings);
   out += paragraph(byline ? `by ${escapeRtf(byline)}` : "", settings, {
     align: "center",
   });

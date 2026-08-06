@@ -15,6 +15,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 - **Word count** of the body only — front matter never inflates it — with the traditional round-to-nearest-100 on by default.
 - **Vault syntax never reaches the page.** Wikilinks, markdown links, `%%comments%%`, and highlights are stripped or unwrapped.
 - **No bold by default**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here. Editors do occasionally ask for bold kept, so it's a setting rather than a rule.
+- **Blind submission**, in the two arrangements markets actually ask for. *Anonymous throughout* removes the contact block, the byline and your name from the running head — what Escape Pod and Clarion West want. *Identified cover page* keeps the title page intact and takes your name off every page after it, which is what contests like Writers of the Future require and disqualify entries for missing. Both also neutralise the author name embedded in the `.docx` properties, which survives every precaution taken on the visible page.
 - Pure JavaScript throughout, so it runs on Obsidian mobile as well as desktop.
 
 ## Use
@@ -58,7 +59,7 @@ Without a `Title` property the plugin uses the first heading in the note, then t
 
 ## Settings
 
-**Author identity** sits behind one row — legal name, pen name, pronouns, address, email, phone, membership line, with per-export toggles for address, email, and phone, since markets differ on what they want. It's set once, so it stays out of the way of the options you change per market. The row shows the name it will print, and flags itself if there isn't one yet.
+**Author identity** sits behind one row — legal name, pen name, pronouns, address, email, phone, membership line, with per-export toggles for address, email, and phone, since markets differ on what they want. Blind submission lives here too, next to the settings it overrides; when it's set to anonymous, the include-toggles hide, because nothing they control is printed. It's set once, so it stays out of the way of the options you change per market. The row shows the name it will print — or says the manuscript carries no name — and flags itself if there isn't one yet.
 
 **Manuscript** options cover font (Courier, Times, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, strip-bold (on, and turned off for the market whose editor wants it kept), word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
 

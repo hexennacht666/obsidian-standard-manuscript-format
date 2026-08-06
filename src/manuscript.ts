@@ -28,6 +28,11 @@ export function formatWordCount(count: number, round: boolean): string {
 
 /** The contact block, upper left on the title page, in Shunn's order. */
 export function contactLines(settings: SmfSettings): string[] {
+  // "Anonymous" means nothing identifying anywhere, and this block is nothing
+  // but identifying. "Identified cover page" deliberately keeps it: that
+  // arrangement wants the name here and on no page after it.
+  if (settings.blindSubmission === "anonymous") return [];
+
   const lines: string[] = [];
   if (settings.legalName) lines.push(settings.legalName);
   if (settings.includeAddress && settings.address.trim()) {
@@ -39,11 +44,26 @@ export function contactLines(settings: SmfSettings): string[] {
   return lines;
 }
 
+/**
+ * The byline, or nothing when the manuscript must not carry a name. Shared so
+ * the two emitters can't answer the question differently.
+ */
+export function bylineOf(settings: SmfSettings): string {
+  if (settings.blindSubmission === "anonymous") return "";
+  return settings.penName || settings.legalName;
+}
+
 /** `Surname / KEYWORD / ` — the page number is appended by each emitter. */
 export function runningHeadPrefix(
   shortTitle: string | null,
   settings: SmfSettings
 ): string {
+  const title = shortTitle ?? "UNTITLED";
+  // The one place both blind arrangements agree: every page after the first
+  // carries the title and a page number and no name at all. It's also the
+  // easiest place to leave a name by accident, being set once and never read.
+  if (settings.blindSubmission !== "off") return `${title} / `;
+
   const surname = surnameOf(settings.penName || settings.legalName || "");
-  return `${surname} / ${shortTitle ?? "UNTITLED"} / `;
+  return `${surname} / ${title} / `;
 }

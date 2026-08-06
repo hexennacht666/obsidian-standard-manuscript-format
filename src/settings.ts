@@ -27,6 +27,18 @@ export function resolveFont(settings: SmfSettings): string {
  */
 export type ExportFormat = "docx" | "rtf" | "both";
 
+/**
+ * Blind reading is not one arrangement, so this can't be a checkbox.
+ *
+ * Escape Pod and Clarion West want nothing identifying anywhere on the
+ * manuscript. Writers of the Future wants the opposite pairing — a cover page
+ * carrying legal name, pen name, address, phone and word count, then no name on
+ * any page after it — and disqualifies entries that leave a name in the body.
+ * A boolean set for one of those produces a disqualifying manuscript for the
+ * other. See docs/market-guidelines.md.
+ */
+export type BlindMode = "off" | "anonymous" | "coverPage";
+
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
@@ -39,6 +51,7 @@ export interface SmfSettings {
   includeEmail: boolean;
   includePhone: boolean;
   includeAddress: boolean;
+  blindSubmission: BlindMode;
 
   exportFormat: ExportFormat;
   fontPreset: FontPreset;
@@ -73,6 +86,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   includeEmail: true,
   includePhone: false,
   includeAddress: true,
+  blindSubmission: "off",
 
   exportFormat: "docx",
   fontPreset: "courier",

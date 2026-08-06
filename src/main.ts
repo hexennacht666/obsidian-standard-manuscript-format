@@ -227,7 +227,14 @@ export default class SmfExportPlugin extends Plugin {
         new Notice("Nothing to export — that note has no body text.");
         return;
       }
-      if (!this.settings.legalName && !this.settings.penName) {
+      // An anonymous manuscript prints no name anywhere, so demanding one first
+      // would block the writer who only ever submits blind. Every other
+      // arrangement puts the name on the page and still needs it.
+      if (
+        this.settings.blindSubmission !== "anonymous" &&
+        !this.settings.legalName &&
+        !this.settings.penName
+      ) {
         new Notice(
           "Set your name in this plugin's settings first."
         );
