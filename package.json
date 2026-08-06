@@ -8,7 +8,8 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "sample": "esbuild scripts/sample.ts --bundle --platform=node --format=cjs --outfile=.sample.cjs --log-level=warning && node .sample.cjs",
     "test": "esbuild tests/*.test.ts --bundle --platform=node --format=cjs --outdir=.tests --log-level=warning && node --test .tests/*.test.js",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "install:vault": "npm run build && cp main.js \"${SMF_VAULT:-$HOME/Documents/Sync Vault}/.obsidian/plugins/standard-manuscript-format/main.js\" && echo '\\nCopied to the vault. Reload Obsidian to load it (the test vault is symlinked and needs no copy).'"
   },
   "keywords": [],
   "author": "Beth Dean",
