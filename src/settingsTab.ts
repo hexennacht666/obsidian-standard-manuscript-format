@@ -99,7 +99,22 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "Blind submission",
-            desc: "Markets that read anonymously differ on what that means, so this isn't a switch. 'Anonymous throughout' removes the contact block, the byline and your name from the running head. 'Identified cover page' keeps the title page as it is and takes your name off every page after it — what contests like Writers of the Future require, and disqualify you for missing. Neither can rename the file, so avoid putting your name in the note's title.",
+            // A list rather than a sentence: three modes a reader has to choose
+            // between, and the dropdown's own labels are too short to carry the
+            // distinction. Fragments are still indexed by settings search.
+            desc: createFragment((f) => {
+              f.appendText("Markets that read anonymously disagree about what to remove.");
+              const modes = f.createEl("ul");
+              modes.createEl("li", {
+                text: "Anonymous throughout — no contact block, no byline, and no name in the running head.",
+              });
+              modes.createEl("li", {
+                text: "Identified cover page — title page as usual, then no name on any page after it. Some contests disqualify entries that get this wrong.",
+              });
+              f.appendText(
+                "Neither can rename the file, so keep your name out of the note's title."
+              );
+            }),
             control: {
               type: "dropdown",
               key: "blindSubmission",
