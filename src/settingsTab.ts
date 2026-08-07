@@ -10,6 +10,7 @@ import { ProfileNameModal } from "./profileNameModal";
 import {
   describeOverrides,
   isGlobal,
+  NO_CHANGES,
   profileFromSettings,
   type OverridableKey,
   type SmfProfile,
@@ -109,7 +110,7 @@ export class SmfSettingTab extends PluginSettingTab {
       name: profile.name.trim() || "Untitled profile",
       displayValue: () => {
         const changes = describeOverrides(this.plugin.settings, profile);
-        return changes.length ? changes.join(", ") : "Changes nothing yet";
+        return changes.length ? changes.join(", ") : NO_CHANGES;
       },
       items: [
         {

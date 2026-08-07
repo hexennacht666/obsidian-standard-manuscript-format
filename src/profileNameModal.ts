@@ -6,7 +6,7 @@ import { App, Modal, Setting } from "obsidian";
  * Obsidian's declarative settings can't navigate to a sub-page from code — the
  * add affordance hands you its own button element and nothing else, and there
  * is no documented way to open a page — so adding a profile would otherwise
- * leave a row reading "New profile / changes nothing yet" and no indication
+ * leave a row reading "New profile" with nothing to act on, and no indication
  * that anything is meant to happen next. Asking for the one field a profile
  * cannot do without makes the click a decision instead, and the row that
  * appears is already the writer's own.

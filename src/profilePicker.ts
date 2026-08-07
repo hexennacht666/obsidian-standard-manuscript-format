@@ -1,5 +1,5 @@
 import { App, SuggestModal } from "obsidian";
-import { describeOverrides, type SmfProfile } from "./profiles";
+import { describeOverrides, NO_CHANGES, type SmfProfile } from "./profiles";
 import type { SmfSettings } from "./settings";
 
 interface Choice {
@@ -41,7 +41,7 @@ export class ProfilePicker extends SuggestModal<Choice> {
         return {
           profile,
           label: profile.name,
-          detail: changes.length ? changes.join(", ") : "Changes nothing yet",
+          detail: changes.length ? changes.join(", ") : NO_CHANGES,
         };
       }),
     ];

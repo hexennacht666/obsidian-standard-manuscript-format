@@ -77,6 +77,14 @@ export function isGlobal(key: OverridableKey): boolean {
   return placementOf(key) === "global";
 }
 
+/**
+ * Shown wherever a profile's summary would otherwise be empty — which is every
+ * freshly saved profile, since one starts as a copy of the settings. Says the
+ * state rather than the absence: "changes nothing" read like the profile was
+ * broken rather than untouched.
+ */
+export const NO_CHANGES = "Same as your current settings";
+
 export type ProfileOverrides = Partial<Pick<SmfSettings, OverridableKey>>;
 
 export interface SmfProfile {

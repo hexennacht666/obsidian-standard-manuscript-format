@@ -323,7 +323,7 @@ export default class SmfExportPlugin extends Plugin {
         notice.push(
           changes.length
             ? `Exported with ${profile.name} — ${changes.join(", ")}`
-            : `Exported with ${profile.name}, which changes nothing`
+            : `Exported with ${profile.name} — same as your current settings`
         );
       }
 
