@@ -6,6 +6,7 @@ import {
 } from "obsidian";
 import type SmfExportPlugin from "./main";
 import { runningHeadName, surnameOf } from "./manuscript";
+import { ProfileNameModal } from "./profileNameModal";
 import {
   describeOverrides,
   isGlobal,
@@ -81,10 +82,12 @@ export class SmfSettingTab extends PluginSettingTab {
   }
 
   private addProfile(): void {
-    const profiles = this.plugin.settings.profiles;
-    profiles.push(profileFromSettings(this.plugin.settings, "New profile", profiles));
-    void this.plugin.saveSettings();
-    this.update();
+    new ProfileNameModal(this.app, (name) => {
+      const profiles = this.plugin.settings.profiles;
+      profiles.push(profileFromSettings(this.plugin.settings, name, profiles));
+      void this.plugin.saveSettings();
+      this.update();
+    }).open();
   }
 
   private deleteProfile(index: number): void {
@@ -112,7 +115,7 @@ export class SmfSettingTab extends PluginSettingTab {
         {
           name: "Name",
           desc: "Yours to choose. Most people name a profile after the market it's for.",
-          control: { type: "text", key: k("name"), placeholder: "Neon Hemlock" },
+          control: { type: "text", key: k("name"), placeholder: "Market or editor" },
         },
         {
           name: "Format",
