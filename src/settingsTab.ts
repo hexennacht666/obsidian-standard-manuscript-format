@@ -70,7 +70,13 @@ export class SmfSettingTab extends PluginSettingTab {
         return changes.length ? changes.join(", ") : NO_CHANGES;
       },
       page: () =>
-        new ProfilePage(this.plugin, profile, () => this.update()),
+        new ProfilePage(
+          this.app,
+          this.plugin,
+          profile,
+          () => this.update(),
+          () => this.deleteProfile(this.plugin.settings.profiles.indexOf(profile))
+        ),
     };
   }
 
@@ -361,6 +367,10 @@ export class SmfSettingTab extends PluginSettingTab {
           name: "Save current settings as a profile",
           action: () => this.addProfile(),
         },
+        // Kept for the Delete/Backspace shortcut it registers, but it is not
+        // the affordance anyone will find: on 1.13.4 a row that opens a page
+        // renders no delete button, on hover or otherwise (Beth, 2026-08-07).
+        // The one that works is inside the profile's own page.
         onDelete: (index) => this.deleteProfile(index),
         items: this.plugin.settings.profiles.map((profile) =>
           this.profileRow(profile)

@@ -1,4 +1,5 @@
-import { Setting, SettingPage } from "obsidian";
+import { App, Setting, SettingPage } from "obsidian";
+import { ConfirmModal } from "./confirmModal";
 import type SmfExportPlugin from "./main";
 import type { OverridableKey, SmfProfile } from "./profiles";
 import type {
@@ -28,10 +29,15 @@ import type {
  * one.
  */
 export class ProfilePage extends SettingPage {
+  /** Set once the profile is gone, since the page outlives it. */
+  private deleted = false;
+
   constructor(
+    private readonly app: App,
     private readonly plugin: SmfExportPlugin,
     private readonly profile: SmfProfile,
-    private readonly onLeave: () => void
+    private readonly onLeave: () => void,
+    private readonly onDelete: () => void
   ) {
     super();
     this.title = titleOf(profile);
@@ -50,6 +56,19 @@ export class ProfilePage extends SettingPage {
   display() {
     const { containerEl } = this;
     containerEl.empty();
+
+    // Deleting from in here leaves the writer standing on the page of a
+    // profile that no longer exists, because the settings API has no way to
+    // navigate back from code. Saying so plainly beats a page of controls
+    // that now edit nothing.
+    if (this.deleted) {
+      new Setting(containerEl)
+        .setName("Deleted")
+        .setDesc(
+          `${this.title} is gone. Use the back arrow to return to your profiles.`
+        );
+      return;
+    }
 
     new Setting(containerEl)
       .setName("Name")
@@ -196,10 +215,33 @@ export class ProfilePage extends SettingPage {
         .setValue(this.valueOf("includePhone"))
         .onChange((value) => this.save("includePhone", value))
     );
+
+    new Setting(containerEl)
+      .setName("Delete this profile")
+      .setDesc("Your settings and any other profiles are untouched.")
+      .addButton((button) =>
+        button
+          .setButtonText("Delete profile")
+          .setDestructive()
+          .onClick(() => {
+            new ConfirmModal(this.app, {
+              title: `Delete ${titleOf(this.profile)}?`,
+              message:
+                "The profile and everything it changes will be removed. Your settings and any other profiles stay as they are.",
+              confirmText: "Delete profile",
+              onConfirm: () => {
+                this.deleted = true;
+                this.onDelete();
+                this.display();
+              },
+            }).open();
+          })
+      );
   }
 
   hide() {
     super.hide();
+    if (this.deleted) return;
     // Leaving is the moment the list can safely be rebuilt: the name and the
     // summary on the row are both stale by now, and no page is open to lose.
     this.onLeave();
