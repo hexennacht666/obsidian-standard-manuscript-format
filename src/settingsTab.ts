@@ -77,9 +77,14 @@ export class SmfSettingTab extends PluginSettingTab {
     }
 
     await this.plugin.saveSettings();
-    // The row above this page shows the profile's name and what it changes,
-    // and both just moved.
-    this.update();
+
+    // NOT update(). This runs on every keystroke in the name field, and
+    // update() rebuilds the definitions the open page was made from — the page
+    // then stands there as an empty shell titled with whatever has been typed
+    // so far. refreshDomState only re-evaluates the visible predicates, which
+    // is all an edit inside a page can change. The list row behind it re-reads
+    // its name and summary when the tab renders again.
+    this.refreshDomState();
   }
 
   private addProfile(): void {
