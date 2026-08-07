@@ -20,7 +20,7 @@ import {
   formatWordCount,
   runningHeadPrefix,
 } from "./manuscript";
-import { resolveFont } from "./settings";
+import { resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const TWIPS_PER_INCH = 1440;
@@ -31,9 +31,12 @@ const PAGE_WIDTH = Math.round(8.5 * TWIPS_PER_INCH);
 const PAGE_HEIGHT = 11 * TWIPS_PER_INCH;
 const MARGIN = INCH;
 
-/** Single and double, in twips, as `\sl` expects them. */
+/**
+ * Single, in twips, as `\sl` expects it. The contact block and the running head
+ * are always single; the manuscript itself takes the writer's chosen spacing,
+ * which `resolveLineSpacing` returns in the same unit.
+ */
 const SINGLE = 240;
-const DOUBLE = 480;
 
 const FIRST_LINE_INDENT = Math.round(0.5 * TWIPS_PER_INCH);
 
@@ -141,7 +144,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   out += paragraph(escapeRtf(story.title ?? "Untitled"), settings, {
     align: "center",
   });
-  out += paragraph("", settings, { spacing: DOUBLE });
+  out += paragraph("", settings, { spacing: resolveLineSpacing(settings) });
 
   const byline = bylineOf(settings);
   out += paragraph(byline ? `by ${escapeRtf(byline)}` : "", settings, {
@@ -149,7 +152,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   });
 
   if (settings.includeContentWarnings && story.contentWarnings.length) {
-    out += paragraph("", settings, { spacing: DOUBLE });
+    out += paragraph("", settings, { spacing: resolveLineSpacing(settings) });
     out += paragraph(
       escapeRtf(
         `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`
@@ -164,13 +167,14 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
 
 function body(blocks: Block[], settings: SmfSettings): string {
   let out = "";
+  const spacing = resolveLineSpacing(settings);
   for (const block of blocks) {
     if (block.kind === "sceneBreak") {
-      out += paragraph("#", settings, { align: "center", spacing: DOUBLE });
+      out += paragraph("#", settings, { align: "center", spacing });
       continue;
     }
     out += paragraph(runsToRtf(block.runs, settings), settings, {
-      spacing: DOUBLE,
+      spacing,
       firstLineIndent: FIRST_LINE_INDENT,
     });
   }
@@ -178,7 +182,7 @@ function body(blocks: Block[], settings: SmfSettings): string {
   if (settings.endMarker.trim()) {
     out += paragraph(escapeRtf(settings.endMarker.trim()), settings, {
       align: "center",
-      spacing: DOUBLE,
+      spacing,
     });
   }
 

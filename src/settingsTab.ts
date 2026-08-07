@@ -228,6 +228,18 @@ export class SmfSettingTab extends PluginSettingTab {
             },
           },
           {
+            name: "Line spacing",
+            desc: "Double is standard format and the safe answer. Single is for a market that asks for it outright — Lightspeed does, in preference to Shunn.",
+            control: {
+              type: "dropdown",
+              key: "lineSpacing",
+              options: {
+                double: "Double",
+                single: "Single",
+              },
+            },
+          },
+          {
             name: "Underline instead of italics",
             desc: "Off means normal italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
             control: { type: "toggle", key: "italicsAsUnderline" },

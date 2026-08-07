@@ -25,7 +25,7 @@ import {
   formatWordCount,
   runningHeadPrefix,
 } from "./manuscript";
-import { resolveFont } from "./settings";
+import { resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -44,8 +44,24 @@ const NO_BORDERS = {
 const CONTENT_WIDTH = convertInchesToTwip(6.5);
 const HALF_WIDTH = Math.floor(CONTENT_WIDTH / 2);
 
+// The contact block and the running head are always single — they're address
+// lines, not prose. Everything the reader reads as the manuscript takes the
+// spacing the writer chose.
 const SINGLE = { line: 240, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
-const DOUBLE = { line: 480, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
+
+function bodySpacing(settings: SmfSettings): {
+  line: number;
+  lineRule: (typeof LineRuleType)[keyof typeof LineRuleType];
+  before: number;
+  after: number;
+} {
+  return {
+    line: resolveLineSpacing(settings),
+    lineRule: LineRuleType.AUTO,
+    before: 0,
+    after: 0,
+  };
+}
 
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   const font = resolveFont(settings);
@@ -144,7 +160,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
     line(story.title ?? "Untitled", settings, {
       alignment: AlignmentType.CENTER,
     }),
-    line("", settings, { spacing: DOUBLE }),
+    line("", settings, { spacing: bodySpacing(settings) }),
     line(byline ? `by ${byline}` : "", settings, {
       alignment: AlignmentType.CENTER,
     }),
@@ -152,7 +168,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
     // off the manuscript pages themselves.
     ...(settings.includeContentWarnings && story.contentWarnings.length
       ? [
-          line("", settings, { spacing: DOUBLE }),
+          line("", settings, { spacing: bodySpacing(settings) }),
           line(
             `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`,
             settings,
@@ -169,17 +185,18 @@ function bodyParagraphs(
   settings: SmfSettings
 ): Paragraph[] {
   const out: Paragraph[] = [];
+  const spacing = bodySpacing(settings);
   for (const block of blocks) {
     if (block.kind === "sceneBreak") {
       out.push(
-        line("#", settings, { alignment: AlignmentType.CENTER, spacing: DOUBLE })
+        line("#", settings, { alignment: AlignmentType.CENTER, spacing })
       );
       continue;
     }
     out.push(
       new Paragraph({
         children: toTextRuns(block.runs, settings),
-        spacing: DOUBLE,
+        spacing,
         indent: { firstLine: convertInchesToTwip(0.5) },
       })
     );
@@ -189,7 +206,7 @@ function bodyParagraphs(
     out.push(
       line(settings.endMarker.trim(), settings, {
         alignment: AlignmentType.CENTER,
-        spacing: DOUBLE,
+        spacing,
       })
     );
   }

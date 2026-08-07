@@ -39,6 +39,28 @@ export type ExportFormat = "docx" | "rtf" | "both";
  */
 export type BlindMode = "off" | "anonymous" | "coverPage";
 
+/**
+ * Double is Shunn's, and what every market surveyed either states or assumes.
+ * Single exists because Lightspeed prefers it *over* Shunn — Arial 14pt,
+ * single-spaced — so a plugin that can only double-space cannot produce a
+ * manuscript for a market that publishes its preference outright. See
+ * docs/market-guidelines.md.
+ *
+ * Two values, not a free number: no surveyed market asks for anything between
+ * them. One-and-a-half is a line in this table away if one turns up.
+ */
+export type LineSpacing = "double" | "single";
+
+/** In twips, which is what both emitters' spacing controls take. */
+export const LINE_SPACING_TWIPS: Record<LineSpacing, number> = {
+  double: 480,
+  single: 240,
+};
+
+export function resolveLineSpacing(settings: SmfSettings): number {
+  return LINE_SPACING_TWIPS[settings.lineSpacing] ?? LINE_SPACING_TWIPS.double;
+}
+
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
@@ -64,6 +86,12 @@ export interface SmfSettings {
   /** Only consulted when fontPreset is "custom". */
   customFont: string;
   fontSize: number;
+  /**
+   * Applies to the story and the gaps on the title page. The contact block and
+   * the running head stay single whatever this says — they are blocks of
+   * address lines, not prose, and no market has ever wanted them opened out.
+   */
+  lineSpacing: LineSpacing;
   italicsAsUnderline: boolean;
   /**
    * On, because Shunn's format has no bold. Off for the market that asks for
@@ -99,6 +127,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   fontPreset: "courier",
   customFont: "",
   fontSize: 12,
+  lineSpacing: "double",
   italicsAsUnderline: false,
   stripBold: true,
   roundWordCount: true,
