@@ -7,28 +7,17 @@ import {
 import type SmfExportPlugin from "./main";
 import { runningHeadName, surnameOf } from "./manuscript";
 import { ProfileNameModal } from "./profileNameModal";
+import { ProfilePage } from "./profilePage";
 import {
   describeOverrides,
   isGlobal,
   NO_CHANGES,
   profileFromSettings,
-  type OverridableKey,
   type SmfProfile,
 } from "./profiles";
 import type { SmfSettings } from "./settings";
 
 type Key = keyof SmfSettings;
-
-/**
- * Controls inside a profile address a field of one profile rather than a
- * setting, so they carry a composite key. `getControlValue` and
- * `setControlValue` are the only two places that have to know.
- */
-const PROFILE_KEY = /^profile:([^:]+):(.+)$/;
-
-function profileKey(profile: SmfProfile, field: string): string {
-  return `profile:${profile.id}:${field}`;
-}
 
 export class SmfSettingTab extends PluginSettingTab {
   plugin: SmfExportPlugin;
@@ -40,51 +29,17 @@ export class SmfSettingTab extends PluginSettingTab {
 
   /**
    * Obsidian reads and writes every declarative control through this pair, so
-   * the definitions below carry no per-control save wiring.
+   * the definitions below carry no per-control save wiring. A profile's own
+   * fields don't come through here — its page renders itself, for the reason
+   * in src/profilePage.ts.
    */
   getControlValue(key: string): unknown {
-    const match = PROFILE_KEY.exec(key);
-    if (!match) return this.plugin.settings[key as Key];
-
-    const [, id, field] = match;
-    const profile = this.plugin.settings.profiles.find((p) => p.id === id);
-    if (!profile) return undefined;
-    if (field === "name") return profile.name;
-
-    // A field the profile doesn't override shows the setting it would fall
-    // through to, so the page reads as the manuscript it would produce rather
-    // than as a form full of blanks.
-    const override = profile.overrides[field as OverridableKey];
-    return override ?? this.plugin.settings[field as Key];
+    return this.plugin.settings[key as Key];
   }
 
   async setControlValue(key: string, value: unknown): Promise<void> {
-    const match = PROFILE_KEY.exec(key);
-    if (!match) {
-      (this.plugin.settings[key as Key] as unknown) = value;
-      await this.plugin.saveSettings();
-      return;
-    }
-
-    const [, id, field] = match;
-    const profile = this.plugin.settings.profiles.find((p) => p.id === id);
-    if (!profile) return;
-
-    if (field === "name") {
-      profile.name = String(value);
-    } else {
-      (profile.overrides as Record<string, unknown>)[field] = value;
-    }
-
+    (this.plugin.settings[key as Key] as unknown) = value;
     await this.plugin.saveSettings();
-
-    // NOT update(). This runs on every keystroke in the name field, and
-    // update() rebuilds the definitions the open page was made from — the page
-    // then stands there as an empty shell titled with whatever has been typed
-    // so far. refreshDomState only re-evaluates the visible predicates, which
-    // is all an edit inside a page can change. The list row behind it re-reads
-    // its name and summary when the tab renders again.
-    this.refreshDomState();
   }
 
   private addProfile(): void {
@@ -103,13 +58,10 @@ export class SmfSettingTab extends PluginSettingTab {
   }
 
   /**
-   * One page per profile, showing every field a profile may override. Fields
-   * are prefilled from the settings they'd fall through to, so a new profile
-   * starts where the writer already is and only the differences need touching.
+   * The row in the list, and a factory for the page behind it. The page is
+   * imperative so that leaving it can refresh this row — see src/profilePage.ts.
    */
-  private profilePage(profile: SmfProfile): SettingDefinitionPage<Key> {
-    const k = (field: string) => profileKey(profile, field) as Key;
-
+  private profileRow(profile: SmfProfile): SettingDefinitionPage<Key> {
     return {
       type: "page",
       name: profile.name.trim() || "Untitled profile",
@@ -117,118 +69,8 @@ export class SmfSettingTab extends PluginSettingTab {
         const changes = describeOverrides(this.plugin.settings, profile);
         return changes.length ? changes.join(", ") : NO_CHANGES;
       },
-      items: [
-        {
-          name: "Name",
-          desc: "Yours to choose. Most people name a profile after the market it's for.",
-          control: { type: "text", key: k("name"), placeholder: "Market or editor" },
-        },
-        {
-          name: "Format",
-          control: {
-            type: "dropdown",
-            key: k("exportFormat"),
-            options: {
-              docx: "Word (.docx)",
-              rtf: "Rich text (.rtf)",
-              both: "Both",
-            },
-          },
-        },
-        {
-          name: "Font",
-          control: {
-            type: "dropdown",
-            key: k("fontPreset"),
-            options: {
-              courier: "Courier New",
-              times: "Times New Roman",
-              custom: "Custom…",
-            },
-          },
-        },
-        {
-          name: "Custom font",
-          visible: () =>
-            this.getControlValue(profileKey(profile, "fontPreset")) === "custom",
-          control: { type: "text", key: k("customFont"), placeholder: "Georgia" },
-        },
-        {
-          name: "Font size",
-          desc: "Points.",
-          control: {
-            type: "number",
-            key: k("fontSize"),
-            min: 1,
-            validate: (value) =>
-              Number.isFinite(value) && value > 0
-                ? undefined
-                : "Enter a size greater than zero.",
-          },
-        },
-        {
-          name: "Line spacing",
-          control: {
-            type: "dropdown",
-            key: k("lineSpacing"),
-            options: { double: "Double", single: "Single" },
-          },
-        },
-        {
-          name: "Underline instead of italics",
-          control: { type: "toggle", key: k("italicsAsUnderline") },
-        },
-        {
-          name: "Strip bold",
-          control: { type: "toggle", key: k("stripBold") },
-        },
-        {
-          name: "Blind submission",
-          desc: "Set by the market, and sometimes by a single call from one — which is what a profile is for.",
-          control: {
-            type: "dropdown",
-            key: k("blindSubmission"),
-            options: {
-              off: "Off — name on the manuscript",
-              anonymous: "Anonymous throughout",
-              coverPage: "Named cover page, anonymous body",
-            },
-          },
-        },
-        {
-          name: "Include content warnings",
-          control: { type: "toggle", key: k("includeContentWarnings") },
-        },
-        {
-          name: "Content warning label",
-          visible: () =>
-            this.getControlValue(profileKey(profile, "includeContentWarnings")) ===
-            true,
-          control: {
-            type: "text",
-            key: k("contentWarningLabel"),
-            placeholder: "Content warnings",
-          },
-        },
-        {
-          type: "group",
-          heading: "Contact block",
-          items: [
-            {
-              name: "Include address",
-              control: { type: "toggle", key: k("includeAddress") },
-            },
-            {
-              name: "Include email",
-              control: { type: "toggle", key: k("includeEmail") },
-            },
-            {
-              name: "Include phone",
-              control: { type: "toggle", key: k("includePhone") },
-            },
-          ],
-        },
-      ],
+      page: () =>
+        new ProfilePage(this.plugin, profile, () => this.update()),
     };
   }
 
@@ -521,7 +363,7 @@ export class SmfSettingTab extends PluginSettingTab {
         },
         onDelete: (index) => this.deleteProfile(index),
         items: this.plugin.settings.profiles.map((profile) =>
-          this.profilePage(profile)
+          this.profileRow(profile)
         ),
       },
 
