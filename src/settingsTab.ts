@@ -503,9 +503,9 @@ export class SmfSettingTab extends PluginSettingTab {
       {
         type: "list",
         heading: "Export profiles",
-        desc: "Named sets of changes, chosen at the moment of export and never left switched on. Adding one puts “Export with…” in the menu; with none, nothing changes.",
+        desc: "Save an editor's or market's preferences as a profile, instead of changing your settings before a submission and remembering to change them back after. Use “Export with…” to apply a profile to a single export.",
         emptyState:
-          "No profiles. Add one to save the settings above under a name — for a market that wants something different.",
+          "You haven't saved a profile yet. Save your current settings as one, then change just the parts a particular editor or market wants.",
         addItem: {
           name: "Save current settings as a profile",
           action: () => this.addProfile(),
