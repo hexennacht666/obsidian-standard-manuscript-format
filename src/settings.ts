@@ -1,3 +1,5 @@
+import type { SmfProfile } from "./profiles";
+
 export type FontPreset = "courier" | "times" | "custom";
 
 /**
@@ -107,6 +109,12 @@ export interface SmfSettings {
   /** The warnings themselves are per story; only presentation is global. */
   includeContentWarnings: boolean;
   contentWarningLabel: string;
+  /**
+   * Named override sets, applied at the moment of export and never afterwards.
+   * Type-only import so settings stays free of a runtime cycle. See
+   * src/profiles.ts.
+   */
+  profiles: SmfProfile[];
 }
 
 export const DEFAULT_SETTINGS: SmfSettings = {
@@ -137,4 +145,5 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   warnUnclosedQuotes: true,
   includeContentWarnings: true,
   contentWarningLabel: "Content warnings",
+  profiles: [],
 };

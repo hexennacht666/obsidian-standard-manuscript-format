@@ -3,6 +3,13 @@ import { buildManuscript, packDocument } from "./docx";
 import { parseStory } from "./markdown";
 import { buildRtf } from "./rtf";
 import { uniquePath } from "./naming";
+import { ProfilePicker } from "./profilePicker";
+import {
+  describeOverrides,
+  resolveProfile,
+  sanitizeProfiles,
+  type SmfProfile,
+} from "./profiles";
 import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
@@ -43,6 +50,20 @@ export default class SmfExportPlugin extends Plugin {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "md") return false;
         if (!checking) void this.exportFile(file);
+        return true;
+      },
+    });
+
+    // Appears only once a profile exists, so the command palette looks exactly
+    // as it always did for anyone who never makes one.
+    this.addCommand({
+      id: "export-with-profile",
+      name: "Export with…",
+      checkCallback: (checking) => {
+        const file = this.app.workspace.getActiveFile();
+        if (!file || file.extension !== "md") return false;
+        if (!this.settings.profiles.length) return false;
+        if (!checking) this.pickProfileThenExport(file);
         return true;
       },
     });
@@ -88,6 +109,14 @@ export default class SmfExportPlugin extends Plugin {
             .setIcon("file-text")
             .onClick(() => void this.exportFile(file))
         );
+        if (this.settings.profiles.length) {
+          menu.addItem((item) =>
+            item
+              .setTitle("Export with…")
+              .setIcon("file-cog")
+              .onClick(() => this.pickProfileThenExport(file))
+          );
+        }
       })
     );
 
@@ -112,6 +141,14 @@ export default class SmfExportPlugin extends Plugin {
             .setIcon("file-text")
             .onClick(() => void this.exportFile(file))
         );
+        if (this.settings.profiles.length) {
+          menu.addItem((item) =>
+            item
+              .setTitle("Export with…")
+              .setIcon("file-cog")
+              .onClick(() => this.pickProfileThenExport(file))
+          );
+        }
         menu.addItem((item) =>
           item
             .setTitle("Add title and content warnings")
@@ -120,6 +157,15 @@ export default class SmfExportPlugin extends Plugin {
         );
       })
     );
+  }
+
+  private pickProfileThenExport(file: TFile) {
+    new ProfilePicker(
+      this.app,
+      this.settings,
+      this.settings.profiles,
+      (profile) => void this.exportFile(file, profile)
+    ).open();
   }
 
   private defaultNewStoryFolder(): string {
@@ -216,11 +262,16 @@ export default class SmfExportPlugin extends Plugin {
     }
   }
 
-  async exportFile(file: TFile) {
+  async exportFile(file: TFile, profile?: SmfProfile) {
     try {
+      // Everything past this line reads the resolved settings, never
+      // `this.settings` — a path that missed the profile would produce a
+      // manuscript that disagrees with the notice describing it.
+      const settings = resolveProfile(this.settings, profile);
+
       const source = await this.app.vault.read(file);
       const story = parseStory(source, file.basename, {
-        stripBold: this.settings.stripBold,
+        stripBold: settings.stripBold,
       });
 
       if (!story.blocks.length) {
@@ -231,9 +282,9 @@ export default class SmfExportPlugin extends Plugin {
       // would block the writer who only ever submits blind. Every other
       // arrangement puts the name on the page and still needs it.
       if (
-        this.settings.blindSubmission !== "anonymous" &&
-        !this.settings.legalName &&
-        !this.settings.penName
+        settings.blindSubmission !== "anonymous" &&
+        !settings.legalName &&
+        !settings.penName
       ) {
         new Notice(
           "Set your name in this plugin's settings first."
@@ -241,25 +292,45 @@ export default class SmfExportPlugin extends Plugin {
         return;
       }
 
-      const written: string[] = [];
+      const written: { path: string; replaced: boolean }[] = [];
 
-      if (this.settings.exportFormat !== "rtf") {
-        const buffer = await packDocument(buildManuscript(story, this.settings));
+      if (settings.exportFormat !== "rtf") {
+        const buffer = await packDocument(buildManuscript(story, settings));
         written.push(await this.writeExport(file.basename, "docx", buffer));
       }
-      if (this.settings.exportFormat !== "docx") {
-        const rtf = buildRtf(story, this.settings);
+      if (settings.exportFormat !== "docx") {
+        const rtf = buildRtf(story, settings);
         written.push(await this.writeExport(file.basename, "rtf", rtf));
       }
 
+      // Re-exporting overwrites, deliberately — that's why a story revised
+      // thirty times leaves one manuscript behind rather than thirty. The word
+      // says which happened, so nothing is lost silently and nothing has to be
+      // confirmed on the common case.
+      const verb = written.every((w) => w.replaced) ? "Replaced" : "Wrote";
+      const paths = written.map((w) => w.path).join(" and ");
+
       const notice = [
-        `Exported ${story.wordCount.toLocaleString()} words to ${written.join(" and ")}`,
+        `${verb} ${paths} — ${story.wordCount.toLocaleString()} words`,
       ];
+
+      // Every export says what it applied. The risk in an override isn't the
+      // override; it's silent divergence between what the settings screen shows
+      // and what the file contains, and saying it out loud at the moment of
+      // export leaves no state to be surprised by later.
+      if (profile) {
+        const changes = describeOverrides(this.settings, profile);
+        notice.push(
+          changes.length
+            ? `Exported with ${profile.name} — ${changes.join(", ")}`
+            : `Exported with ${profile.name}, which changes nothing`
+        );
+      }
 
       // Never blocks the export and never rewrites the prose — a missing quote
       // is the writer's call to make, and a wrong guess in a manuscript is
       // worse than no guess.
-      if (this.settings.warnUnclosedQuotes && story.unclosedQuotes.length) {
+      if (settings.warnUnclosedQuotes && story.unclosedQuotes.length) {
         const n = story.unclosedQuotes.length;
         notice.push(
           `${n} paragraph${n === 1 ? "" : "s"} may be missing a closing quote:`,
@@ -289,9 +360,10 @@ export default class SmfExportPlugin extends Plugin {
     basename: string,
     extension: "docx" | "rtf",
     data: ArrayBuffer | string
-  ): Promise<string> {
+  ): Promise<{ path: string; replaced: boolean }> {
     const path = await this.resolveOutputPath(basename, extension);
     const existing = this.app.vault.getAbstractFileByPath(path);
+    const replaced = existing instanceof TFile;
 
     if (typeof data === "string") {
       if (existing instanceof TFile) await this.app.vault.modify(existing, data);
@@ -302,7 +374,7 @@ export default class SmfExportPlugin extends Plugin {
       await this.app.vault.createBinary(path, data);
     }
 
-    return path;
+    return { path, replaced };
   }
 
   /**
@@ -340,6 +412,11 @@ export default class SmfExportPlugin extends Plugin {
         ? (loaded as Record<string, unknown>)
         : {};
     this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+
+    // Every menu and command asks whether any profile exists, so a data.json
+    // that says something other than a list here would break the plugin at
+    // load rather than at export.
+    this.settings.profiles = sanitizeProfiles(data.profiles);
 
     // The font used to be one free-text field. Carry an existing value over to
     // the preset it matches, or to Custom, so nobody's setting silently resets.

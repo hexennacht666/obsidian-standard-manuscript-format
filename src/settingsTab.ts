@@ -1,9 +1,32 @@
-import { App, PluginSettingTab, type SettingDefinitionItem } from "obsidian";
+import {
+  App,
+  PluginSettingTab,
+  type SettingDefinitionItem,
+  type SettingDefinitionPage,
+} from "obsidian";
 import type SmfExportPlugin from "./main";
 import { runningHeadName, surnameOf } from "./manuscript";
+import {
+  describeOverrides,
+  isGlobal,
+  profileFromSettings,
+  type OverridableKey,
+  type SmfProfile,
+} from "./profiles";
 import type { SmfSettings } from "./settings";
 
 type Key = keyof SmfSettings;
+
+/**
+ * Controls inside a profile address a field of one profile rather than a
+ * setting, so they carry a composite key. `getControlValue` and
+ * `setControlValue` are the only two places that have to know.
+ */
+const PROFILE_KEY = /^profile:([^:]+):(.+)$/;
+
+function profileKey(profile: SmfProfile, field: string): string {
+  return `profile:${profile.id}:${field}`;
+}
 
 export class SmfSettingTab extends PluginSettingTab {
   plugin: SmfExportPlugin;
@@ -18,12 +41,186 @@ export class SmfSettingTab extends PluginSettingTab {
    * the definitions below carry no per-control save wiring.
    */
   getControlValue(key: string): unknown {
-    return this.plugin.settings[key as Key];
+    const match = PROFILE_KEY.exec(key);
+    if (!match) return this.plugin.settings[key as Key];
+
+    const [, id, field] = match;
+    const profile = this.plugin.settings.profiles.find((p) => p.id === id);
+    if (!profile) return undefined;
+    if (field === "name") return profile.name;
+
+    // A field the profile doesn't override shows the setting it would fall
+    // through to, so the page reads as the manuscript it would produce rather
+    // than as a form full of blanks.
+    const override = profile.overrides[field as OverridableKey];
+    return override ?? this.plugin.settings[field as Key];
   }
 
   async setControlValue(key: string, value: unknown): Promise<void> {
-    (this.plugin.settings[key as Key] as unknown) = value;
+    const match = PROFILE_KEY.exec(key);
+    if (!match) {
+      (this.plugin.settings[key as Key] as unknown) = value;
+      await this.plugin.saveSettings();
+      return;
+    }
+
+    const [, id, field] = match;
+    const profile = this.plugin.settings.profiles.find((p) => p.id === id);
+    if (!profile) return;
+
+    if (field === "name") {
+      profile.name = String(value);
+    } else {
+      (profile.overrides as Record<string, unknown>)[field] = value;
+    }
+
     await this.plugin.saveSettings();
+    // The row above this page shows the profile's name and what it changes,
+    // and both just moved.
+    this.update();
+  }
+
+  private addProfile(): void {
+    const profiles = this.plugin.settings.profiles;
+    profiles.push(profileFromSettings(this.plugin.settings, "New profile", profiles));
+    void this.plugin.saveSettings();
+    this.update();
+  }
+
+  private deleteProfile(index: number): void {
+    this.plugin.settings.profiles.splice(index, 1);
+    void this.plugin.saveSettings();
+    this.update();
+  }
+
+  /**
+   * One page per profile, showing every field a profile may override. Fields
+   * are prefilled from the settings they'd fall through to, so a new profile
+   * starts where the writer already is and only the differences need touching.
+   */
+  private profilePage(profile: SmfProfile): SettingDefinitionPage<Key> {
+    const k = (field: string) => profileKey(profile, field) as Key;
+
+    return {
+      type: "page",
+      name: profile.name.trim() || "Untitled profile",
+      displayValue: () => {
+        const changes = describeOverrides(this.plugin.settings, profile);
+        return changes.length ? changes.join(", ") : "Changes nothing yet";
+      },
+      items: [
+        {
+          name: "Name",
+          desc: "Yours to choose. Most people name a profile after the market it's for.",
+          control: { type: "text", key: k("name"), placeholder: "Neon Hemlock" },
+        },
+        {
+          name: "Format",
+          control: {
+            type: "dropdown",
+            key: k("exportFormat"),
+            options: {
+              docx: "Word (.docx)",
+              rtf: "Rich text (.rtf)",
+              both: "Both",
+            },
+          },
+        },
+        {
+          name: "Font",
+          control: {
+            type: "dropdown",
+            key: k("fontPreset"),
+            options: {
+              courier: "Courier New",
+              times: "Times New Roman",
+              custom: "Custom…",
+            },
+          },
+        },
+        {
+          name: "Custom font",
+          visible: () =>
+            this.getControlValue(profileKey(profile, "fontPreset")) === "custom",
+          control: { type: "text", key: k("customFont"), placeholder: "Georgia" },
+        },
+        {
+          name: "Font size",
+          desc: "Points.",
+          control: {
+            type: "number",
+            key: k("fontSize"),
+            min: 1,
+            validate: (value) =>
+              Number.isFinite(value) && value > 0
+                ? undefined
+                : "Enter a size greater than zero.",
+          },
+        },
+        {
+          name: "Line spacing",
+          control: {
+            type: "dropdown",
+            key: k("lineSpacing"),
+            options: { double: "Double", single: "Single" },
+          },
+        },
+        {
+          name: "Underline instead of italics",
+          control: { type: "toggle", key: k("italicsAsUnderline") },
+        },
+        {
+          name: "Strip bold",
+          control: { type: "toggle", key: k("stripBold") },
+        },
+        {
+          name: "Blind submission",
+          desc: "Set by the market, and sometimes by a single call from one — which is what a profile is for.",
+          control: {
+            type: "dropdown",
+            key: k("blindSubmission"),
+            options: {
+              off: "Off — name on the manuscript",
+              anonymous: "Anonymous throughout",
+              coverPage: "Named cover page, anonymous body",
+            },
+          },
+        },
+        {
+          name: "Include content warnings",
+          control: { type: "toggle", key: k("includeContentWarnings") },
+        },
+        {
+          name: "Content warning label",
+          visible: () =>
+            this.getControlValue(profileKey(profile, "includeContentWarnings")) ===
+            true,
+          control: {
+            type: "text",
+            key: k("contentWarningLabel"),
+            placeholder: "Content warnings",
+          },
+        },
+        {
+          type: "group",
+          heading: "Contact block",
+          items: [
+            {
+              name: "Include address",
+              control: { type: "toggle", key: k("includeAddress") },
+            },
+            {
+              name: "Include email",
+              control: { type: "toggle", key: k("includeEmail") },
+            },
+            {
+              name: "Include phone",
+              control: { type: "toggle", key: k("includePhone") },
+            },
+          ],
+        },
+      ],
+    };
   }
 
   /** True once the byline has something to print. */
@@ -140,6 +337,10 @@ export class SmfSettingTab extends PluginSettingTab {
                 "Neither can rename the file, so keep your name out of the note's title."
               );
             }),
+            // Deliberately not gated on isGlobal: a profile may override this,
+            // but it can never be the only place to reach it. Most writers keep
+            // no profiles, and blind submission has to work without setting one
+            // up first.
             control: {
               type: "dropdown",
               key: "blindSubmission",
@@ -155,19 +356,26 @@ export class SmfSettingTab extends PluginSettingTab {
             heading: "Include per export",
             // Nothing from this block is printed on an anonymous manuscript, so
             // it would be three controls sitting there doing nothing.
-            visible: () => this.plugin.settings.blindSubmission !== "anonymous",
+            visible: () =>
+              this.plugin.settings.blindSubmission !== "anonymous" &&
+              (isGlobal("includeAddress") ||
+                isGlobal("includeEmail") ||
+                isGlobal("includePhone")),
             items: [
               {
                 name: "Include address",
                 desc: "Some markets don't want it.",
+                visible: () => isGlobal("includeAddress"),
                 control: { type: "toggle", key: "includeAddress" },
               },
               {
                 name: "Include email",
+                visible: () => isGlobal("includeEmail"),
                 control: { type: "toggle", key: "includeEmail" },
               },
               {
                 name: "Include phone",
+                visible: () => isGlobal("includePhone"),
                 control: { type: "toggle", key: "includePhone" },
               },
             ],
@@ -182,6 +390,7 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Format",
             desc: "Markets disagree: some won't take .docx, some won't take .doc. Every market surveyed accepts RTF, so it's the safe answer when guidelines are vague.",
+            visible: () => isGlobal("exportFormat"),
             control: {
               type: "dropdown",
               key: "exportFormat",
@@ -195,6 +404,7 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Font",
             desc: "Shunn specifies Courier. Times is the usual alternative — use custom when a market asks for something specific.",
+            visible: () => isGlobal("fontPreset"),
             control: {
               type: "dropdown",
               key: "fontPreset",
@@ -209,12 +419,14 @@ export class SmfSettingTab extends PluginSettingTab {
             name: "Custom font",
             desc: "Exact font name, e.g. Georgia. Word substitutes if the reader doesn't have it.",
             // Replaces the old rebuild-the-whole-tab call.
-            visible: () => this.plugin.settings.fontPreset === "custom",
+            visible: () =>
+              isGlobal("customFont") && this.plugin.settings.fontPreset === "custom",
             control: { type: "text", key: "customFont", placeholder: "Georgia" },
           },
           {
             name: "Font size",
             desc: "Points.",
+            visible: () => isGlobal("fontSize"),
             control: {
               type: "number",
               key: "fontSize",
@@ -230,6 +442,7 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Line spacing",
             desc: "Double is standard format and the safe answer. Single is for a market that asks for it outright — Lightspeed does, in preference to Shunn.",
+            visible: () => isGlobal("lineSpacing"),
             control: {
               type: "dropdown",
               key: "lineSpacing",
@@ -242,11 +455,13 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Underline instead of italics",
             desc: "Off means normal italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
+            visible: () => isGlobal("italicsAsUnderline"),
             control: { type: "toggle", key: "italicsAsUnderline" },
           },
           {
             name: "Strip bold",
             desc: "Shunn's format has no bold, so on means the words survive and the emphasis doesn't. Turn off for a market whose editor asks for bold kept.",
+            visible: () => isGlobal("stripBold"),
             control: { type: "toggle", key: "stripBold" },
           },
           {
@@ -262,12 +477,15 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Include content warnings",
             desc: "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",
+            visible: () => isGlobal("includeContentWarnings"),
             control: { type: "toggle", key: "includeContentWarnings" },
           },
           {
             name: "Content warning label",
             desc: "Wording some markets are particular about — 'Content notes' is the other common one.",
-            visible: () => this.plugin.settings.includeContentWarnings,
+            visible: () =>
+              isGlobal("contentWarningLabel") &&
+              this.plugin.settings.includeContentWarnings,
             control: {
               type: "text",
               key: "contentWarningLabel",
@@ -280,6 +498,22 @@ export class SmfSettingTab extends PluginSettingTab {
             control: { type: "toggle", key: "warnUnclosedQuotes" },
           },
         ],
+      },
+
+      {
+        type: "list",
+        heading: "Export profiles",
+        desc: "Named sets of changes, chosen at the moment of export and never left switched on. Adding one puts “Export with…” in the menu; with none, nothing changes.",
+        emptyState:
+          "No profiles. Add one to save the settings above under a name — for a market that wants something different.",
+        addItem: {
+          name: "Save current settings as a profile",
+          action: () => this.addProfile(),
+        },
+        onDelete: (index) => this.deleteProfile(index),
+        items: this.plugin.settings.profiles.map((profile) =>
+          this.profilePage(profile)
+        ),
       },
 
       {
