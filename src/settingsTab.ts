@@ -389,7 +389,7 @@ export class SmfSettingTab extends PluginSettingTab {
         items: [
           {
             name: "Format",
-            desc: "Markets disagree: some won't take .docx, some won't take .doc. Every market surveyed accepts RTF, so it's the safe answer when guidelines are vague.",
+            desc: "Most markets accept either .docx or .rtf. Check the guidelines if they ask for one.",
             visible: () => isGlobal("exportFormat"),
             control: {
               type: "dropdown",
