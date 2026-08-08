@@ -335,7 +335,7 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "End marker",
-            desc: "Centred after the last line. Leave blank for none.",
+            desc: "Centred after the last line, so an ending near the foot of a page can't be mistaken for a scene break. Leave blank for none.",
             control: { type: "text", key: "endMarker" },
           },
         ],

@@ -151,6 +151,14 @@ export interface SmfSettings {
    */
   stripBold: boolean;
   roundWordCount: boolean;
+  /**
+   * Shunn suggests centring the word END after the last line, because it
+   * "can prevent ambiguity when your closing words fall near the bottom of the
+   * page". The default was `#` — the very symbol a scene break prints — so the
+   * last mark in a story was indistinguishable from the mark that means keep
+   * reading. Corrected 2026-08-07. Blank prints nothing, which is also a
+   * perfectly ordinary manuscript.
+   */
   endMarker: string;
   outputFolder: string;
   /** Blank means "alongside the note I'm in" rather than a fixed location. */
@@ -190,7 +198,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   emphasis: "italic",
   stripBold: true,
   roundWordCount: true,
-  endMarker: "#",
+  endMarker: "END",
   outputFolder: "Manuscripts",
   newStoryFolder: "",
   warnUnclosedQuotes: true,

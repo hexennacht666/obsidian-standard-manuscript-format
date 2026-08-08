@@ -182,3 +182,23 @@ test("a curly quote in the title survives into the document", () => {
   const out = render("---\nTitle: Don’t Look\n---\n\nA paragraph.");
   assert.ok(out.includes("Don\\u8217?t Look"));
 });
+
+// Shunn marks a scene break with a centred "#" and suggests centring END after
+// the last line, because it "can prevent ambiguity when your closing words fall
+// near the bottom of the page". Defaulting the end marker to "#" recreated the
+// exact ambiguity it exists to remove.
+test("the end of a story doesn't look like a scene break", () => {
+  assert.equal(DEFAULT_SETTINGS.endMarker, "END");
+
+  const out = render("First scene.\n\n#\n\nSecond scene.\n");
+  assert.match(out, /\\qc\\fi0\\sl480\\slmult1\\f0\\fs24 #\\par/);
+  assert.match(out, /\\qc\\fi0\\sl480\\slmult1\\f0\\fs24 END\\par/);
+
+  // And the last mark on the page is the end, not the break.
+  assert.ok(out.lastIndexOf("END") > out.lastIndexOf(" #"));
+});
+
+test("a blank end marker prints nothing at all", () => {
+  const out = render("Just the one scene.\n", { endMarker: "" });
+  assert.doesNotMatch(out, /END/);
+});
