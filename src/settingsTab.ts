@@ -329,26 +329,6 @@ export class SmfSettingTab extends PluginSettingTab {
             },
           },
           {
-            name: "Emphasis",
-            desc: "Italics are what almost every market now wants. Underline is the typewriter convention a few still ask for. Underscores put the marks in the text itself, for a market that asks to see them.",
-            visible: () => isGlobal("emphasis"),
-            control: {
-              type: "dropdown",
-              key: "emphasis",
-              options: {
-                italic: "Italics",
-                underline: "Underline",
-                underscore: "Underscores, _like this_",
-              },
-            },
-          },
-          {
-            name: "Strip bold",
-            desc: "Shunn's format has no bold, so on means the words survive and the emphasis doesn't. Turn off for a market whose editor asks for bold kept.",
-            visible: () => isGlobal("stripBold"),
-            control: { type: "toggle", key: "stripBold" },
-          },
-          {
             name: "Round word count",
             desc: "Round to the nearest 100, the traditional convention.",
             control: { type: "toggle", key: "roundWordCount" },
@@ -358,9 +338,19 @@ export class SmfSettingTab extends PluginSettingTab {
             desc: "Centred after the last line. Leave blank for none.",
             control: { type: "text", key: "endMarker" },
           },
+        ],
+      },
+
+      // Their own group rather than three rows inside Manuscript: whether,
+      // where and what they're called read as one decision, and since they can
+      // print with the story they aren't title-page furniture either.
+      {
+        type: "group",
+        heading: "Content warnings",
+        items: [
           {
             name: "Include content warnings",
-            desc: "Print them on the title page when the story's frontmatter has them. The warnings themselves are set per story, not here.",
+            desc: "Print them when the story's frontmatter has them. The warnings themselves are set per story, not here.",
             visible: () => isGlobal("includeContentWarnings"),
             control: { type: "toggle", key: "includeContentWarnings" },
           },
@@ -391,6 +381,35 @@ export class SmfSettingTab extends PluginSettingTab {
               key: "contentWarningLabel",
               placeholder: "Content warnings",
             },
+          },
+        ],
+      },
+
+      // What the exporter does to what you actually wrote — including the
+      // unclosed-quote check, which is not a property of the manuscript at all.
+      {
+        type: "group",
+        heading: "Your prose",
+        items: [
+          {
+            name: "Emphasis",
+            desc: "Italics are what almost every market now wants. Underline is the typewriter convention a few still ask for. Underscores put the marks in the text itself, for a market that asks to see them.",
+            visible: () => isGlobal("emphasis"),
+            control: {
+              type: "dropdown",
+              key: "emphasis",
+              options: {
+                italic: "Italics",
+                underline: "Underline",
+                underscore: "Underscores, _like this_",
+              },
+            },
+          },
+          {
+            name: "Strip bold",
+            desc: "Shunn's format has no bold, so on means the words survive and the emphasis doesn't. Turn off for a market whose editor asks for bold kept.",
+            visible: () => isGlobal("stripBold"),
+            control: { type: "toggle", key: "stripBold" },
           },
           {
             name: "Mention unclosed quotes",

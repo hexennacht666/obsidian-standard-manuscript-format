@@ -94,6 +94,8 @@ export class ProfilePage extends SettingPage {
           })
       );
 
+    new Setting(containerEl).setName("Manuscript").setHeading();
+
     new Setting(containerEl)
       .setName("Format")
       .setDesc("Most markets accept either .docx or .rtf.")
@@ -161,44 +163,7 @@ export class ProfilePage extends SettingPage {
         .onChange((value) => this.save("lineSpacing", value as LineSpacing))
     );
 
-    new Setting(containerEl)
-      .setName("Emphasis")
-      .setDesc("Underline is the typewriter convention. Underscores put the marks in the text itself.")
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions({
-            italic: "Italics",
-            underline: "Underline",
-            underscore: "Underscores, _like this_",
-          })
-          .setValue(this.valueOf("emphasis"))
-          .onChange((value) => this.save("emphasis", value as Emphasis))
-      );
-
-    new Setting(containerEl)
-      .setName("Strip bold")
-      .setDesc("Standard format has no bold. Off keeps it, for an editor who asks.")
-      .addToggle((toggle) =>
-      toggle
-        .setValue(this.valueOf("stripBold"))
-        .onChange((value) => this.save("stripBold", value))
-    );
-
-    new Setting(containerEl)
-      .setName("Blind submission")
-      .setDesc(
-        "Set by the market, and sometimes by a single call from one — which is what a profile is for."
-      )
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions({
-            off: "Off — name on the manuscript",
-            anonymous: "Anonymous throughout",
-            coverPage: "Identified cover page only",
-          })
-          .setValue(this.valueOf("blindSubmission"))
-          .onChange((value) => this.save("blindSubmission", value as BlindMode))
-      );
+    new Setting(containerEl).setName("Content warnings").setHeading();
 
     new Setting(containerEl)
       .setName("Include content warnings")
@@ -240,7 +205,50 @@ export class ProfilePage extends SettingPage {
         );
     }
 
-    new Setting(containerEl).setName("Contact block").setHeading();
+    new Setting(containerEl).setName("Your prose").setHeading();
+
+    new Setting(containerEl)
+      .setName("Emphasis")
+      .setDesc("Underline is the typewriter convention. Underscores put the marks in the text itself.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            italic: "Italics",
+            underline: "Underline",
+            underscore: "Underscores, _like this_",
+          })
+          .setValue(this.valueOf("emphasis"))
+          .onChange((value) => this.save("emphasis", value as Emphasis))
+      );
+
+    new Setting(containerEl)
+      .setName("Strip bold")
+      .setDesc("Standard format has no bold. Off keeps it, for an editor who asks.")
+      .addToggle((toggle) =>
+      toggle
+        .setValue(this.valueOf("stripBold"))
+        .onChange((value) => this.save("stripBold", value))
+    );
+
+    new Setting(containerEl).setName("Author identity").setHeading();
+
+    new Setting(containerEl)
+      .setName("Blind submission")
+      .setDesc(
+        "Set by the market, and sometimes by a single call from one — which is what a profile is for."
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            off: "Off — name on the manuscript",
+            anonymous: "Anonymous throughout",
+            coverPage: "Identified cover page only",
+          })
+          .setValue(this.valueOf("blindSubmission"))
+          .onChange((value) => this.save("blindSubmission", value as BlindMode))
+      );
+
+
 
     new Setting(containerEl)
       .setName("Include address")
