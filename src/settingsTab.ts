@@ -160,7 +160,7 @@ export class SmfSettingTab extends PluginSettingTab {
               f.createEl("br");
               f.appendText("Every page after the first will read ");
               f.createEl("code", {
-                text: `${runningHeadName(this.plugin.settings)} / TITLE / 2`,
+                text: `${runningHeadName(this.plugin.settings)} / Short title / 2`,
               });
             }),
             visible: () => this.plugin.settings.blindSubmission === "off",

@@ -79,8 +79,11 @@ test("falls back to an H1, then the filename", () => {
 });
 
 test("short title skips stopwords and picks the distinctive word", () => {
-  assert.equal(parseStory("Body.\n", "Only Perfumed Gloves Would Do").shortTitle, "PERFUMED");
-  assert.equal(parseStory("Body.\n", "The Salt Year").shortTitle, "SALT");
+  assert.equal(
+    parseStory("Body.\n", "Only Perfumed Gloves Would Do").shortTitle,
+    "Perfumed Gloves"
+  );
+  assert.equal(parseStory("Body.\n", "The Salt Year").shortTitle, "Salt Year");
 });
 
 test("scene break markers, but not headings", () => {
@@ -208,7 +211,7 @@ test("an empty frontmatter key means absent, not blank", () => {
     "My Story Filename"
   );
   assert.equal(s.title, "My Story Filename");
-  assert.equal(s.shortTitle, "FILENAME");
+  assert.equal(s.shortTitle, "Story Filename");
   assert.deepEqual(s.contentWarnings, []);
 });
 
@@ -224,10 +227,13 @@ test("an empty content-warnings key of either form yields none", () => {
 });
 
 test("the running head keyword comes from the main title, not the subtitle", () => {
-  assert.equal(parseStory("Body.\n", "The Salt Year: A Fragment").shortTitle, "SALT");
-  assert.equal(parseStory("Body.\n", "Wintering — A Ghost Story").shortTitle, "WINTERING");
+  assert.equal(
+    parseStory("Body.\n", "The Salt Year: A Fragment").shortTitle,
+    "Salt Year"
+  );
+  assert.equal(parseStory("Body.\n", "Wintering — A Ghost Story").shortTitle, "Wintering");
   // A title that is only a subtitle marker still yields something usable.
-  assert.equal(parseStory("Body.\n", ": Fragment").shortTitle, "FRAGMENT");
+  assert.equal(parseStory("Body.\n", ": Fragment").shortTitle, "Fragment");
 });
 
 test("property names with spaces and any casing are one key", () => {
@@ -300,5 +306,5 @@ test("the running head follows the Title property, not the filename", () => {
     "salt draft v3"
   );
   assert.equal(s.title, "The Salt Year: A Fragment");
-  assert.equal(s.shortTitle, "SALT");
+  assert.equal(s.shortTitle, "Salt Year");
 });

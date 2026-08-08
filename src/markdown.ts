@@ -207,9 +207,27 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
   return runs;
 }
 
+/**
+ * Two keywords, in the order and the case the title uses.
+ *
+ * Shunn asks for "one or two keywords from the title of your story" and gives
+ * no rule about capitals, so both halves of the old behaviour — one word, upper
+ * case — were ours rather than the format's. A manuscript is passed between
+ * readers who have to refer to it out loud, and "Perfumed Gloves" is a story
+ * where "PERFUMED" is a word.
+ *
+ * Picked in title order rather than by length: the old rule chose the longest
+ * word, which is why "Only Perfumed Gloves Would Do" headed as PERFUMED, and
+ * length is not what makes a keyword recognisable.
+ *
+ * A story whose derived head is still wrong sets `Short title` in its own
+ * frontmatter, as it always could.
+ */
+const MAX_KEYWORD_LENGTH = 24;
+
 function pickShortTitle(title: string): string {
   // A subtitle is the wrong place to look for the running head's keyword —
-  // "The Salt Year: A Fragment" should head as SALT, not FRAGMENT.
+  // "The Salt Year: A Fragment" should head as Salt Year, not Fragment.
   const main = title.split(/\s*[:—–]\s*/)[0].trim() || title;
 
   const words = main
@@ -220,10 +238,14 @@ function pickShortTitle(title: string): string {
     (w) => !TITLE_STOPWORDS.has(w.toLowerCase()) && w.length > 2
   );
   const pool = candidates.length ? candidates : words;
-  if (!pool.length) return "UNTITLED";
-  return pool
-    .reduce((longest, w) => (w.length > longest.length ? w : longest), pool[0])
-    .toUpperCase();
+  if (!pool.length) return "Untitled";
+
+  const [first, second] = pool;
+  // One keyword when two would run long. Even the longest surname plus 24
+  // characters plus a page number is half the width of a 6.5" line, so this is
+  // about a head that reads quickly, not one that fits.
+  const pair = second ? `${first} ${second}` : first;
+  return pair.length <= MAX_KEYWORD_LENGTH ? pair : first;
 }
 
 export function parseStory(
