@@ -12,7 +12,8 @@ import {
   describeOverrides,
   isGlobal,
   NO_CHANGES,
-  profileFromSettings,
+  hasDuplicateName,
+  newProfile,
   type SmfProfile,
 } from "./profiles";
 import type { SmfSettings } from "./settings";
@@ -45,10 +46,20 @@ export class SmfSettingTab extends PluginSettingTab {
   private addProfile(): void {
     new ProfileNameModal(this.app, (name) => {
       const profiles = this.plugin.settings.profiles;
-      profiles.push(profileFromSettings(this.plugin.settings, name, profiles));
+      profiles.push(newProfile(name, profiles));
       void this.plugin.saveSettings();
       this.update();
     }).open();
+  }
+
+  /** Only affects the order they're listed and offered in — nothing else reads it. */
+  private moveProfile(from: number, to: number): void {
+    const profiles = this.plugin.settings.profiles;
+    const [moved] = profiles.splice(from, 1);
+    if (!moved) return;
+    profiles.splice(to, 0, moved);
+    void this.plugin.saveSettings();
+    this.update();
   }
 
   private deleteProfile(index: number): void {
@@ -62,9 +73,17 @@ export class SmfSettingTab extends PluginSettingTab {
    * imperative so that leaving it can refresh this row — see src/profilePage.ts.
    */
   private profileRow(profile: SmfProfile): SettingDefinitionPage<Key> {
+    // Renaming happens on the page, where refusing a name mid-word would be
+    // worse than allowing it — so a collision is reported here instead.
+    const duplicate = hasDuplicateName(profile, this.plugin.settings.profiles);
+
     return {
       type: "page",
       name: profile.name.trim() || "Untitled profile",
+      desc: duplicate
+        ? "Another profile has this name. Both will look the same at export time."
+        : undefined,
+      status: () => (duplicate ? "warning" : null),
       displayValue: () => {
         const changes = describeOverrides(this.plugin.settings, profile);
         return changes.length ? changes.join(", ") : NO_CHANGES;
@@ -362,11 +381,12 @@ export class SmfSettingTab extends PluginSettingTab {
         heading: "Export profiles",
         desc: "Save an editor's or market's preferences as a profile, instead of changing your settings before a submission and remembering to change them back after. Use “Export with…” to apply a profile to a single export.",
         emptyState:
-          "You haven't saved a profile yet. Save your current settings as one, then change just the parts a particular editor or market wants.",
+          "You haven't saved a profile yet. Add one and change only what a particular editor or market asks for — everything else follows your settings.",
         addItem: {
-          name: "Save current settings as a profile",
+          name: "Add a profile",
           action: () => this.addProfile(),
         },
+        onReorder: (from, to) => this.moveProfile(from, to),
         // Kept for the Delete/Backspace shortcut it registers, but it is not
         // the affordance anyone will find: on 1.13.4 a row that opens a page
         // renders no delete button, on hover or otherwise (Beth, 2026-08-07).

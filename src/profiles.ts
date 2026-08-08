@@ -79,9 +79,9 @@ export function isGlobal(key: OverridableKey): boolean {
 
 /**
  * Shown wherever a profile's summary would otherwise be empty — which is every
- * freshly saved profile, since one starts as a copy of the settings. Says the
- * state rather than the absence: "changes nothing" read like the profile was
- * broken rather than untouched.
+ * new profile, since one starts overriding nothing at all. Says the state
+ * rather than the absence: "changes nothing" read like the profile was broken
+ * rather than untouched.
  */
 export const NO_CHANGES = "Same as your current settings";
 
@@ -238,19 +238,68 @@ export function describeOverrides(
 }
 
 /**
- * A profile made from the settings as they stand, carrying every overridable
- * field. Starting from ~90% correct is what keeps setup cost near zero — the
- * defaults are already standard format, so a new profile is usually one edit
- * away from right.
+ * A new profile overrides nothing at all.
+ *
+ * It reads as "your current settings" because that is exactly what it is: every
+ * field falls through until the writer changes one. Copying the settings in
+ * would look identical on the day and diverge silently afterwards — change your
+ * default font next month and every profile made before it would quietly keep
+ * exporting the old one, while still claiming to match your settings.
  */
-export function profileFromSettings(
+export function newProfile(name: string, existing: SmfProfile[]): SmfProfile {
+  return {
+    id: newProfileId(existing),
+    name: uniqueName(name.trim() || "Untitled profile", existing),
+    overrides: {},
+  };
+}
+
+/**
+ * "Neon Hemlock" a second time becomes "Neon Hemlock 2", the way Obsidian names
+ * a duplicate file. Renaming quietly is a small rudeness; two identical rows in
+ * the export picker, distinguishable only by their summaries, is a larger one.
+ *
+ * It can't cover renaming — that happens on the profile's own page, where
+ * refusing a name mid-word would be worse than allowing it. A row whose name
+ * collides carries a warning instead; see `hasDuplicateName`.
+ */
+export function uniqueName(name: string, existing: SmfProfile[]): string {
+  const taken = new Set(existing.map((p) => p.name.trim().toLowerCase()));
+  if (!taken.has(name.toLowerCase())) return name;
+
+  let n = 2;
+  while (taken.has(`${name} ${n}`.toLowerCase())) n++;
+  return `${name} ${n}`;
+}
+
+/** Whether another profile answers to the same name. Blank names never collide. */
+export function hasDuplicateName(
+  profile: SmfProfile,
+  profiles: SmfProfile[]
+): boolean {
+  const name = profile.name.trim().toLowerCase();
+  if (!name) return false;
+  return profiles.some(
+    (other) => other.id !== profile.id && other.name.trim().toLowerCase() === name
+  );
+}
+
+/**
+ * Setting a profile's field back to what the settings say removes the override
+ * rather than storing an equal copy, so the field resumes following the
+ * settings. The two are indistinguishable today — `describeOverrides` already
+ * treats an equal override as no difference — and they stop being
+ * indistinguishable the moment the setting changes.
+ */
+export function setOverride<K extends OverridableKey>(
+  profile: SmfProfile,
   settings: SmfSettings,
-  name: string,
-  existing: SmfProfile[]
-): SmfProfile {
-  const overrides: ProfileOverrides = {};
-  for (const key of OVERRIDABLE_KEYS) {
-    (overrides as Record<string, unknown>)[key] = settings[key];
+  key: K,
+  value: SmfSettings[K]
+): void {
+  if (value === settings[key]) {
+    delete profile.overrides[key];
+  } else {
+    (profile.overrides as Record<string, unknown>)[key] = value;
   }
-  return { id: newProfileId(existing), name: name.trim() || "Untitled profile", overrides };
 }

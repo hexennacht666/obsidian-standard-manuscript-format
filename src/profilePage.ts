@@ -1,7 +1,7 @@
 import { App, Setting, SettingPage } from "obsidian";
 import { ConfirmModal } from "./confirmModal";
 import type SmfExportPlugin from "./main";
-import type { OverridableKey, SmfProfile } from "./profiles";
+import { setOverride, type OverridableKey, type SmfProfile } from "./profiles";
 import type {
   BlindMode,
   ExportFormat,
@@ -49,7 +49,7 @@ export class ProfilePage extends SettingPage {
   }
 
   private save<K extends OverridableKey>(key: K, value: SmfSettings[K]): void {
-    (this.profile.overrides as Record<string, unknown>)[key] = value;
+    setOverride(this.profile, this.plugin.settings, key, value);
     void this.plugin.saveSettings();
   }
 
@@ -70,6 +70,12 @@ export class ProfilePage extends SettingPage {
       return;
     }
 
+    // Without this the page reads as thirteen values the profile owns, when
+    // in fact it owns only what gets changed here.
+    new Setting(containerEl).setDesc(
+      "Anything you don't change here follows your settings."
+    );
+
     new Setting(containerEl)
       .setName("Name")
       .setDesc("Yours to choose. Most people name a profile after the market it's for.")
@@ -86,7 +92,10 @@ export class ProfilePage extends SettingPage {
           })
       );
 
-    new Setting(containerEl).setName("Format").addDropdown((dropdown) =>
+    new Setting(containerEl)
+      .setName("Format")
+      .setDesc("Most markets accept either .docx or .rtf.")
+      .addDropdown((dropdown) =>
       dropdown
         .addOptions({
           docx: "Word (.docx)",
@@ -97,7 +106,10 @@ export class ProfilePage extends SettingPage {
         .onChange((value) => this.save("exportFormat", value as ExportFormat))
     );
 
-    new Setting(containerEl).setName("Font").addDropdown((dropdown) =>
+    new Setting(containerEl)
+      .setName("Font")
+      .setDesc("Courier is what standard format specifies. Times is the usual alternative.")
+      .addDropdown((dropdown) =>
       dropdown
         .addOptions({
           courier: "Courier New",
@@ -137,7 +149,10 @@ export class ProfilePage extends SettingPage {
         })
       );
 
-    new Setting(containerEl).setName("Line spacing").addDropdown((dropdown) =>
+    new Setting(containerEl)
+      .setName("Line spacing")
+      .setDesc("Double is standard format. Single is for a market that asks for it outright.")
+      .addDropdown((dropdown) =>
       dropdown
         .addOptions({ double: "Double", single: "Single" })
         .setValue(this.valueOf("lineSpacing"))
@@ -146,13 +161,17 @@ export class ProfilePage extends SettingPage {
 
     new Setting(containerEl)
       .setName("Underline instead of italics")
+      .setDesc("On only for a market that still asks for the typewriter convention.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.valueOf("italicsAsUnderline"))
           .onChange((value) => this.save("italicsAsUnderline", value))
       );
 
-    new Setting(containerEl).setName("Strip bold").addToggle((toggle) =>
+    new Setting(containerEl)
+      .setName("Strip bold")
+      .setDesc("Standard format has no bold. Off keeps it, for an editor who asks.")
+      .addToggle((toggle) =>
       toggle
         .setValue(this.valueOf("stripBold"))
         .onChange((value) => this.save("stripBold", value))
@@ -176,6 +195,7 @@ export class ProfilePage extends SettingPage {
 
     new Setting(containerEl)
       .setName("Include content warnings")
+      .setDesc("Printed on the title page when the story's frontmatter has them.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.valueOf("includeContentWarnings"))
@@ -188,6 +208,7 @@ export class ProfilePage extends SettingPage {
     if (this.valueOf("includeContentWarnings")) {
       new Setting(containerEl)
         .setName("Content warning label")
+        .setDesc("Wording some markets are particular about.")
         .addText((text) =>
           text
             .setPlaceholder("Content warnings")
@@ -198,7 +219,10 @@ export class ProfilePage extends SettingPage {
 
     new Setting(containerEl).setName("Contact block").setHeading();
 
-    new Setting(containerEl).setName("Include address").addToggle((toggle) =>
+    new Setting(containerEl)
+      .setName("Include address")
+      .setDesc("Some markets don't want it.")
+      .addToggle((toggle) =>
       toggle
         .setValue(this.valueOf("includeAddress"))
         .onChange((value) => this.save("includeAddress", value))

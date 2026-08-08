@@ -304,15 +304,18 @@ export default class SmfExportPlugin extends Plugin {
       }
 
       // Re-exporting overwrites, deliberately — that's why a story revised
-      // thirty times leaves one manuscript behind rather than thirty. The word
-      // says which happened, so nothing is lost silently and nothing has to be
-      // confirmed on the common case.
-      const verb = written.every((w) => w.replaced) ? "Replaced" : "Wrote";
-      const paths = written.map((w) => w.path).join(" and ");
+      // thirty times leaves one manuscript behind rather than thirty. Each file
+      // says which happened to it: exporting both formats can replace one and
+      // create the other, and a single verb for the pair would be wrong about
+      // one of them.
+      const wrote = written
+        .map((w, i) => {
+          const verb = w.replaced ? "Replaced" : "Wrote";
+          return `${i === 0 ? verb : verb.toLowerCase()} ${w.path}`;
+        })
+        .join(", ");
 
-      const notice = [
-        `${verb} ${paths} — ${story.wordCount.toLocaleString()} words`,
-      ];
+      const notice = [`${wrote} — ${story.wordCount.toLocaleString()} words`];
 
       // Every export says what it applied. The risk in an override isn't the
       // override; it's silent divergence between what the settings screen shows
