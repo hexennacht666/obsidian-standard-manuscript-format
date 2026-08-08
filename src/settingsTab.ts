@@ -317,7 +317,7 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "Line spacing",
-            desc: "Double is standard format and the safe answer. Single is for a market that asks for it outright — Lightspeed does, in preference to Shunn.",
+            desc: "Double is standard format and the safe answer. Single is for the occasional market that asks for it outright, in preference to the standard.",
             visible: () => isGlobal("lineSpacing"),
             control: {
               type: "dropdown",
