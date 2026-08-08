@@ -41,7 +41,7 @@ export type OverridableKey =
   | "customFont"
   | "fontSize"
   | "lineSpacing"
-  | "italicsAsUnderline"
+  | "emphasis"
   | "stripBold"
   | "blindSubmission"
   | "includeContentWarnings"
@@ -57,7 +57,7 @@ export const PROFILE_FIELDS: ProfileField[] = [
   { key: "customFont", placement: "global" },
   { key: "fontSize", placement: "global" },
   { key: "lineSpacing", placement: "global" },
-  { key: "italicsAsUnderline", placement: "global" },
+  { key: "emphasis", placement: "global" },
   { key: "stripBold", placement: "global" },
   { key: "blindSubmission", placement: "global" },
   { key: "includeContentWarnings", placement: "global" },
@@ -183,8 +183,12 @@ function describe(key: OverridableKey, settings: SmfSettings): string {
       return `${settings.fontSize}pt`;
     case "lineSpacing":
       return settings.lineSpacing === "single" ? "single-spaced" : "double-spaced";
-    case "italicsAsUnderline":
-      return settings.italicsAsUnderline ? "italics underlined" : "italics kept";
+    case "emphasis":
+      return settings.emphasis === "underline"
+        ? "emphasis underlined"
+        : settings.emphasis === "underscore"
+          ? "emphasis in underscores"
+          : "emphasis in italics";
     case "stripBold":
       return settings.stripBold ? "bold stripped" : "bold kept";
     case "blindSubmission":

@@ -439,6 +439,16 @@ export default class SmfExportPlugin extends Plugin {
       delete (this.settings as unknown as Record<string, unknown>).font;
       await this.saveSettings();
     }
+
+    // Emphasis used to be a boolean — underline instead of italics — until a
+    // market asked for literal underscores and a third mode couldn't be a
+    // toggle. Carry the old answer over so nobody's setting silently resets.
+    const legacyUnderline = data.italicsAsUnderline;
+    if (typeof legacyUnderline === "boolean" && data.emphasis === undefined) {
+      this.settings.emphasis = legacyUnderline ? "underline" : "italic";
+      delete (this.settings as unknown as Record<string, unknown>).italicsAsUnderline;
+      await this.saveSettings();
+    }
   }
 
   async saveSettings() {

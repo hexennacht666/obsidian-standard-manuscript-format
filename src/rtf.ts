@@ -22,7 +22,7 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { resolveFont, resolveLineSpacing } from "./settings";
+import { emphasisedText, resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const TWIPS_PER_INCH = 1440;
@@ -106,13 +106,15 @@ function paragraph(
 function runsToRtf(runs: Run[], settings: SmfSettings): string {
   return runs
     .map((run) => {
-      const underline = run.italic && settings.italicsAsUnderline;
-      const italic = run.italic && !settings.italicsAsUnderline;
+      const underline = run.italic && settings.emphasis === "underline";
+      const italic = run.italic && settings.emphasis === "italic";
       let out = "";
       if (run.bold) out += "\\b ";
       if (italic) out += "\\i ";
       if (underline) out += "\\ul ";
-      out += escapeRtf(run.text);
+      out += escapeRtf(
+        run.italic ? emphasisedText(run.text, settings) : run.text
+      );
       if (underline) out += "\\ulnone ";
       if (italic) out += "\\i0 ";
       if (run.bold) out += "\\b0 ";

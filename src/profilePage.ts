@@ -5,6 +5,7 @@ import { setOverride, type OverridableKey, type SmfProfile } from "./profiles";
 import type {
   BlindMode,
   ContentWarningPlacement,
+  Emphasis,
   ExportFormat,
   FontPreset,
   LineSpacing,
@@ -161,12 +162,17 @@ export class ProfilePage extends SettingPage {
     );
 
     new Setting(containerEl)
-      .setName("Underline instead of italics")
-      .setDesc("On only for a market that still asks for the typewriter convention.")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.valueOf("italicsAsUnderline"))
-          .onChange((value) => this.save("italicsAsUnderline", value))
+      .setName("Emphasis")
+      .setDesc("Underline is the typewriter convention. Underscores put the marks in the text itself.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            italic: "Italics",
+            underline: "Underline",
+            underscore: "Underscores, _like this_",
+          })
+          .setValue(this.valueOf("emphasis"))
+          .onChange((value) => this.save("emphasis", value as Emphasis))
       );
 
     new Setting(containerEl)

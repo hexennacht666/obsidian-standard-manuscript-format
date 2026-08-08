@@ -142,7 +142,7 @@ test("italics become underline when the setting asks for it", () => {
   assert.ok(render(emphasised).includes("\\i "));
   assert.ok(!render(emphasised).includes("\\ul "));
 
-  const underlined = render(emphasised, { italicsAsUnderline: true });
+  const underlined = render(emphasised, { emphasis: "underline" });
   assert.ok(underlined.includes("\\ul "));
   assert.ok(!underlined.includes("\\i "));
 });

@@ -27,7 +27,7 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { resolveFont, resolveLineSpacing } from "./settings";
+import { emphasisedText, resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -71,17 +71,17 @@ function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   return runs.map(
     (r) =>
       new TextRun({
-        text: r.text,
+        text: r.italic ? emphasisedText(r.text, settings) : r.text,
         // Font AND size on every run. Left to the defaults, Pages renders the
         // manuscript in its own Normal — wrong face, wrong size.
         font,
         size,
-        italics: r.italic && !settings.italicsAsUnderline,
-        // Only ever set when the parser was told to keep bold; underline stands
-        // in for italics, not for this, so the two are independent.
+        italics: r.italic && settings.emphasis === "italic",
+        // Only ever set when the parser was told to keep bold; the emphasis
+        // mode stands in for italics, not for this, so the two are independent.
         bold: r.bold,
         underline:
-          r.italic && settings.italicsAsUnderline
+          r.italic && settings.emphasis === "underline"
             ? { type: UnderlineType.SINGLE }
             : undefined,
       })

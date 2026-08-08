@@ -329,10 +329,18 @@ export class SmfSettingTab extends PluginSettingTab {
             },
           },
           {
-            name: "Underline instead of italics",
-            desc: "Off means normal italics, which is what almost every market now wants. Turn on only for one that still asks for the old typewriter convention.",
-            visible: () => isGlobal("italicsAsUnderline"),
-            control: { type: "toggle", key: "italicsAsUnderline" },
+            name: "Emphasis",
+            desc: "Italics are what almost every market now wants. Underline is the typewriter convention a few still ask for. Underscores put the marks in the text itself, for a market that asks to see them.",
+            visible: () => isGlobal("emphasis"),
+            control: {
+              type: "dropdown",
+              key: "emphasis",
+              options: {
+                italic: "Italics",
+                underline: "Underline",
+                underscore: "Underscores, _like this_",
+              },
+            },
           },
           {
             name: "Strip bold",

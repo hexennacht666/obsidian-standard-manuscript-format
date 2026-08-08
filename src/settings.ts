@@ -69,6 +69,23 @@ export const LINE_SPACING_TWIPS: Record<LineSpacing, number> = {
   single: 240,
 };
 
+/**
+ * An emphasised run as it should read on the page.
+ *
+ * Only the underscore mode changes the text itself. Surrounding whitespace stays
+ * outside the marks — `_ word _` is not what anyone means by emphasis, and a
+ * run's edges routinely carry the space between it and the next word.
+ */
+export function emphasisedText(text: string, settings: SmfSettings): string {
+  if (settings.emphasis !== "underscore") return text;
+
+  const match = /^(\s*)([\s\S]*?)(\s*)$/.exec(text);
+  if (!match) return text;
+
+  const [, before, core, after] = match;
+  return core ? `${before}_${core}_${after}` : text;
+}
+
 export function resolveLineSpacing(settings: SmfSettings): number {
   return LINE_SPACING_TWIPS[settings.lineSpacing] ?? LINE_SPACING_TWIPS.double;
 }
@@ -83,6 +100,18 @@ export function resolveLineSpacing(settings: SmfSettings): number {
  * the other. See docs/market-guidelines.md.
  */
 export type ContentWarningPlacement = "titlePage" | "story" | "both";
+
+/**
+ * How emphasis reaches the page.
+ *
+ * `italic` is what almost every market now wants. `underline` is the typewriter
+ * convention a few still ask for — it stood alone as a boolean until Escape Pod
+ * turned up wanting the third: emphasis written as literal underscores,
+ * `_like this_`, in plain type. That one is the only mode that puts characters
+ * into the prose rather than formatting on it, which is why it can't be faked
+ * with a style. See docs/market-guidelines.md.
+ */
+export type Emphasis = "italic" | "underline" | "underscore";
 
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
@@ -115,7 +144,7 @@ export interface SmfSettings {
    * address lines, not prose, and no market has ever wanted them opened out.
    */
   lineSpacing: LineSpacing;
-  italicsAsUnderline: boolean;
+  emphasis: Emphasis;
   /**
    * On, because Shunn's format has no bold. Off for the market that asks for
    * it kept — Neon Hemlock, the same one with the Georgia preference above.
@@ -158,7 +187,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   customFont: "",
   fontSize: 12,
   lineSpacing: "double",
-  italicsAsUnderline: false,
+  emphasis: "italic",
   stripBold: true,
   roundWordCount: true,
   endMarker: "#",

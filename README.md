@@ -61,7 +61,7 @@ Without a `Title` property the plugin uses the first heading in the note, then t
 
 **Author identity** sits behind one row — legal name, pen name, pronouns, address, email, phone, membership line, with per-export toggles for address, email, and phone, since markets differ on what they want. Blind submission lives here too, next to the settings it overrides; when it's set to anonymous, the include-toggles hide, because nothing they control is printed. It's set once, so it stays out of the way of the options you change per market. The row shows the name it will print — or says the manuscript carries no name — and flags itself if there isn't one yet.
 
-**Manuscript** options cover font (Times, Courier, or a custom face for a market that asks for one), size, underline-instead-of-italics for markets still on the typewriter convention, strip-bold (on, and turned off for the market whose editor wants it kept), word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
+**Manuscript** options cover font (Times, Courier, or a custom face for a market that asks for one), size, emphasis (italics, underline for markets still on the typewriter convention, or literal underscores for one that asks to see them), strip-bold (on, and turned off for the market whose editor wants it kept), word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
 
 **Folders** — where the `.docx` is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
 
