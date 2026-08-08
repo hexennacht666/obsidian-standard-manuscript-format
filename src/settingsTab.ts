@@ -279,7 +279,7 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "Font",
-            desc: "Shunn specifies Courier. Times is the usual alternative — use custom when a market asks for something specific.",
+            desc: "Times is what the modern standard recommends. Courier is the classic look, still preferred by some editors. Use custom when a market asks for something else.",
             visible: () => isGlobal("fontPreset"),
             control: {
               type: "dropdown",

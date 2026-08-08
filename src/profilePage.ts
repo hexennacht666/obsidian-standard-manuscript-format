@@ -109,7 +109,7 @@ export class ProfilePage extends SettingPage {
 
     new Setting(containerEl)
       .setName("Font")
-      .setDesc("Courier is what standard format specifies. Times is the usual alternative.")
+      .setDesc("Times is what the modern standard recommends. Courier is the classic look.")
       .addDropdown((dropdown) =>
       dropdown
         .addOptions({

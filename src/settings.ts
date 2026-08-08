@@ -3,10 +3,20 @@ import type { SmfProfile } from "./profiles";
 export type FontPreset = "courier" | "times" | "custom";
 
 /**
- * Shunn specifies a monospace face and Courier New is the default everywhere.
- * Times is the common alternative. Anything else is a market-specific ask —
- * Neon Hemlock, for one, states an editorial preference for Georgia — so the
- * two usual answers are one click and everything else is still reachable.
+ * Times is the default because the standard this plugin implements says so.
+ * Shunn's *modern* format — the one Clarkesworld, Uncanny and khōréō point at —
+ * reads "choose something standard and easily readable, like Times New Roman";
+ * Courier belongs to his *classic* version and is noted there as his own
+ * preference. Corrected 2026-08-07, having defaulted to Courier on the strength
+ * of the opposite claim.
+ *
+ * No market surveyed requires Courier, and two are actively easier in Times:
+ * PseudoPod refuses Courier outright, and Beneath Ceaseless Skies asks for a
+ * 12pt serif. Courier stays one click away for the classic look.
+ *
+ * Anything else is a market-specific ask — Neon Hemlock states an editorial
+ * preference for Georgia, Lightspeed asks for Arial — so the two usual answers
+ * are one click and everything else is still reachable.
  */
 export const FONT_PRESETS: Record<Exclude<FontPreset, "custom">, string> = {
   courier: "Courier New",
@@ -15,9 +25,9 @@ export const FONT_PRESETS: Record<Exclude<FontPreset, "custom">, string> = {
 
 export function resolveFont(settings: SmfSettings): string {
   if (settings.fontPreset === "custom") {
-    return settings.customFont.trim() || FONT_PRESETS.courier;
+    return settings.customFont.trim() || FONT_PRESETS.times;
   }
-  return FONT_PRESETS[settings.fontPreset] ?? FONT_PRESETS.courier;
+  return FONT_PRESETS[settings.fontPreset] ?? FONT_PRESETS.times;
 }
 
 /**
@@ -144,7 +154,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   blindSubmission: "off",
 
   exportFormat: "docx",
-  fontPreset: "courier",
+  fontPreset: "times",
   customFont: "",
   fontSize: 12,
   lineSpacing: "double",

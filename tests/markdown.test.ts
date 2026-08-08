@@ -160,7 +160,7 @@ test("font resolution across presets and custom", () => {
     "Georgia"
   );
   // Custom selected but left blank falls back rather than emitting an empty font.
-  assert.equal(resolveFont({ ...base, fontPreset: "custom", customFont: "  " }), "Courier New");
+  assert.equal(resolveFont({ ...base, fontPreset: "custom", customFont: "  " }), "Times New Roman");
 });
 
 test("content warnings from a YAML block list", () => {
