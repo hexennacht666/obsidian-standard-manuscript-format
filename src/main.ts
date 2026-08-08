@@ -87,10 +87,13 @@ export default class SmfExportPlugin extends Plugin {
     });
 
     this.addCommand({
-      // The id stays as it was so any hotkey already bound to it survives the
-      // rename; it's internal and never shown.
+      // The id stays as it was so any hotkey already bound to it survives a
+      // rename; it's internal and never shown. The visible name lists the
+      // fields outright: "manuscript properties" is Obsidian's word for the
+      // mechanism and tells a writer nothing about what they'd get. Long, but
+      // every word in it is one someone would search for.
       id: "add-manuscript-properties",
-      name: "Add manuscript properties",
+      name: "Add title, short title and content warnings",
       checkCallback: (checking) => {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "md") return false;
@@ -111,7 +114,7 @@ export default class SmfExportPlugin extends Plugin {
         if (!file || file.extension !== "md") return;
         menu.addItem((item) =>
           item
-            .setTitle("Add manuscript properties")
+            .setTitle("Add title, short title and content warnings")
             .setIcon("list-plus")
             .onClick(() => void this.addManuscriptProperties(file))
         );
@@ -163,7 +166,7 @@ export default class SmfExportPlugin extends Plugin {
         }
         menu.addItem((item) =>
           item
-            .setTitle("Add manuscript properties")
+            .setTitle("Add title, short title and content warnings")
             .setIcon("list-plus")
             .onClick(() => void this.addManuscriptProperties(file))
         );
