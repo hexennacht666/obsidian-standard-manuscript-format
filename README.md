@@ -51,11 +51,17 @@ You won't normally type this by hand — **New story** puts the property there, 
 
 It is deliberately not pre-filled with the current filename. A copy of the name would be right exactly once; rename the note afterwards and the stale copy would quietly override the new name, putting the wrong title on a manuscript with nothing to show for it. Empty can't go stale.
 
-`Short title` is a third, rarer override, for choosing the running head's keyword yourself instead of letting the plugin pick the most distinctive word.
+`Short title` is a third, rarer override. The running head takes two keywords from the title, which is right nearly always — set this when it isn't. Nothing puts the property there for you: type it into the note's properties on the rare story that needs it.
 
-Content warnings print on the title page, under the byline, where a slush reader meets them before the story. A comma-separated line or an inline array works just as well as a list. The label, and whether they print at all, are in settings; the warnings themselves belong to the story.
+Content warnings print on the title page by default, under the byline, where a slush reader meets them before the story — or with the story, set apart before the first line, for the markets that ask for that instead. A comma-separated line or an inline array works just as well as a list. The label, and whether they print at all, are in settings; the warnings themselves belong to the story.
 
-Without a `Title` property the plugin uses the first heading in the note, then the filename. Without `Short title` it picks the most distinctive word from the title, ignoring any subtitle.
+Without a `Title` property the plugin uses the first heading in the note, then the filename. Without `Short title` it takes two keywords from the title in the title's own case, ignoring any subtitle and any leading *the*, *a* or *of*.
+
+### Scene breaks
+
+Type `***` on a line of its own. It exports as the centred `#` that a manuscript wants.
+
+A bare `#` works too, and is what most writers reach for — but Obsidian reads it as an empty heading, so it renders as a blank H1 and turns up in the Outline pane and in `[[note#` autocomplete. `---` and `___` work as well, though `---` sitting directly under a paragraph turns that paragraph into a heading. `***` is the one with no side effects.
 
 ## Settings
 
