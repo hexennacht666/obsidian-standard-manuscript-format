@@ -45,6 +45,7 @@ export type OverridableKey =
   | "stripBold"
   | "blindSubmission"
   | "includeContentWarnings"
+  | "contentWarningPlacement"
   | "contentWarningLabel"
   | "includeAddress"
   | "includeEmail"
@@ -60,6 +61,7 @@ export const PROFILE_FIELDS: ProfileField[] = [
   { key: "stripBold", placement: "global" },
   { key: "blindSubmission", placement: "global" },
   { key: "includeContentWarnings", placement: "global" },
+  { key: "contentWarningPlacement", placement: "global" },
   { key: "contentWarningLabel", placement: "global" },
   { key: "includeAddress", placement: "global" },
   { key: "includeEmail", placement: "global" },
@@ -195,6 +197,12 @@ function describe(key: OverridableKey, settings: SmfSettings): string {
       return settings.includeContentWarnings
         ? "content warnings printed"
         : "no content warnings";
+    case "contentWarningPlacement":
+      return settings.contentWarningPlacement === "story"
+        ? "warnings with the story"
+        : settings.contentWarningPlacement === "both"
+          ? "warnings on both pages"
+          : "warnings on the title page";
     case "contentWarningLabel":
       return `labelled “${settings.contentWarningLabel.trim()}”`;
     case "includeAddress":

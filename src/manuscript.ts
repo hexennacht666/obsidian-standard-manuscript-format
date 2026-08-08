@@ -83,3 +83,27 @@ export function runningHeadPrefix(
 
   return `${runningHeadName(settings)} / ${title} / `;
 }
+
+/**
+ * The one line both emitters print, wherever it's printed. Shared so the title
+ * page and the manuscript can't word it differently.
+ */
+export function contentWarningLine(
+  warnings: string[],
+  settings: SmfSettings
+): string {
+  return `${settings.contentWarningLabel.trim()}: ${warnings.join(", ")}`;
+}
+
+/** Whether warnings are printed in a given place, given the story has any. */
+export function showsContentWarnings(
+  where: "titlePage" | "story",
+  warnings: string[],
+  settings: SmfSettings
+): boolean {
+  if (!settings.includeContentWarnings || !warnings.length) return false;
+  return (
+    settings.contentWarningPlacement === "both" ||
+    settings.contentWarningPlacement === where
+  );
+}

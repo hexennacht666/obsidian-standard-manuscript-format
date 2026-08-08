@@ -63,6 +63,17 @@ export function resolveLineSpacing(settings: SmfSettings): number {
   return LINE_SPACING_TWIPS[settings.lineSpacing] ?? LINE_SPACING_TWIPS.double;
 }
 
+/**
+ * Where the story's content warnings are printed.
+ *
+ * The title page is where a slush reader meets them before the story, which is
+ * why it's the default. Some markets want them in the manuscript instead, set
+ * apart before the first line, so a reader who opens to the story still meets
+ * them first. "Both" exists because a market that asks for one rarely forbids
+ * the other. See docs/market-guidelines.md.
+ */
+export type ContentWarningPlacement = "titlePage" | "story" | "both";
+
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
@@ -108,6 +119,7 @@ export interface SmfSettings {
   warnUnclosedQuotes: boolean;
   /** The warnings themselves are per story; only presentation is global. */
   includeContentWarnings: boolean;
+  contentWarningPlacement: ContentWarningPlacement;
   contentWarningLabel: string;
   /**
    * Named override sets, applied at the moment of export and never afterwards.
@@ -144,6 +156,7 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   newStoryFolder: "",
   warnUnclosedQuotes: true,
   includeContentWarnings: true,
+  contentWarningPlacement: "titlePage",
   contentWarningLabel: "Content warnings",
   profiles: [],
 };

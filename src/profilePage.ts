@@ -4,6 +4,7 @@ import type SmfExportPlugin from "./main";
 import { setOverride, type OverridableKey, type SmfProfile } from "./profiles";
 import type {
   BlindMode,
+  ContentWarningPlacement,
   ExportFormat,
   FontPreset,
   LineSpacing,
@@ -206,6 +207,22 @@ export class ProfilePage extends SettingPage {
       );
 
     if (this.valueOf("includeContentWarnings")) {
+      new Setting(containerEl)
+        .setName("Content warning placement")
+        .setDesc("Some markets want them in the manuscript, before the first line.")
+        .addDropdown((dropdown) =>
+          dropdown
+            .addOptions({
+              titlePage: "Title page",
+              story: "With the story",
+              both: "Both",
+            })
+            .setValue(this.valueOf("contentWarningPlacement"))
+            .onChange((value) =>
+              this.save("contentWarningPlacement", value as ContentWarningPlacement)
+            )
+        );
+
       new Setting(containerEl)
         .setName("Content warning label")
         .setDesc("Wording some markets are particular about.")

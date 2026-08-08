@@ -357,6 +357,22 @@ export class SmfSettingTab extends PluginSettingTab {
             control: { type: "toggle", key: "includeContentWarnings" },
           },
           {
+            name: "Content warning placement",
+            desc: "The title page is where a first reader meets them before the story. Some markets want them in the manuscript instead, set apart before the first line.",
+            visible: () =>
+              isGlobal("contentWarningPlacement") &&
+              this.plugin.settings.includeContentWarnings,
+            control: {
+              type: "dropdown",
+              key: "contentWarningPlacement",
+              options: {
+                titlePage: "Title page",
+                story: "With the story",
+                both: "Both",
+              },
+            },
+          },
+          {
             name: "Content warning label",
             desc: "Wording some markets are particular about — 'Content notes' is the other common one.",
             visible: () =>

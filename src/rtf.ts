@@ -17,8 +17,10 @@ import type { Block, ParsedStory, Run } from "./markdown";
 import {
   bylineOf,
   contactLines,
+  contentWarningLine,
   formatWordCount,
   runningHeadPrefix,
+  showsContentWarnings,
 } from "./manuscript";
 import { resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
@@ -151,12 +153,10 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
     align: "center",
   });
 
-  if (settings.includeContentWarnings && story.contentWarnings.length) {
+  if (showsContentWarnings("titlePage", story.contentWarnings, settings)) {
     out += paragraph("", settings, { spacing: resolveLineSpacing(settings) });
     out += paragraph(
-      escapeRtf(
-        `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`
-      ),
+      escapeRtf(contentWarningLine(story.contentWarnings, settings)),
       settings,
       { align: "center" }
     );
@@ -165,9 +165,19 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   return out;
 }
 
-function body(blocks: Block[], settings: SmfSettings): string {
+function body(blocks: Block[], warnings: string[], settings: SmfSettings): string {
   let out = "";
   const spacing = resolveLineSpacing(settings);
+
+  // Before the first line and set apart from it, as on the .docx side.
+  if (showsContentWarnings("story", warnings, settings)) {
+    out += paragraph(escapeRtf(contentWarningLine(warnings, settings)), settings, {
+      align: "center",
+      spacing,
+    });
+    out += paragraph("", settings, { spacing });
+  }
+
   for (const block of blocks) {
     if (block.kind === "sceneBreak") {
       out += paragraph("#", settings, { align: "center", spacing });
@@ -255,7 +265,7 @@ export function buildRtf(story: ParsedStory, settings: SmfSettings): string {
     "\n" +
     runningHeader +
     "\n" +
-    body(story.blocks, settings) +
+    body(story.blocks, story.contentWarnings, settings) +
     "}\n"
   );
 }

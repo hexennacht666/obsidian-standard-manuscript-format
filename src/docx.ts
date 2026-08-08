@@ -22,8 +22,10 @@ import type { Block, ParsedStory, Run } from "./markdown";
 import {
   bylineOf,
   contactLines,
+  contentWarningLine,
   formatWordCount,
   runningHeadPrefix,
+  showsContentWarnings,
 } from "./manuscript";
 import { resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
@@ -164,16 +166,12 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
     line(byline ? `by ${byline}` : "", settings, {
       alignment: AlignmentType.CENTER,
     }),
-    // On the title page, where a slush reader meets them before the story, and
-    // off the manuscript pages themselves.
-    ...(settings.includeContentWarnings && story.contentWarnings.length
+    ...(showsContentWarnings("titlePage", story.contentWarnings, settings)
       ? [
           line("", settings, { spacing: bodySpacing(settings) }),
-          line(
-            `${settings.contentWarningLabel.trim()}: ${story.contentWarnings.join(", ")}`,
-            settings,
-            { alignment: AlignmentType.CENTER }
-          ),
+          line(contentWarningLine(story.contentWarnings, settings), settings, {
+            alignment: AlignmentType.CENTER,
+          }),
         ]
       : []),
     new Paragraph({ children: [new PageBreak()] }),
@@ -182,10 +180,24 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
 
 function bodyParagraphs(
   blocks: Block[],
+  warnings: string[],
   settings: SmfSettings
 ): Paragraph[] {
   const out: Paragraph[] = [];
   const spacing = bodySpacing(settings);
+
+  // Before the first line and set apart from it, so a reader who opens straight
+  // to the story still meets them first.
+  if (showsContentWarnings("story", warnings, settings)) {
+    out.push(
+      line(contentWarningLine(warnings, settings), settings, {
+        alignment: AlignmentType.CENTER,
+        spacing,
+      }),
+      line("", settings, { spacing })
+    );
+  }
+
   for (const block of blocks) {
     if (block.kind === "sceneBreak") {
       out.push(
@@ -280,7 +292,7 @@ export function buildManuscript(
         },
         children: [
           ...titlePage(story, settings),
-          ...bodyParagraphs(story.blocks, settings),
+          ...bodyParagraphs(story.blocks, story.contentWarnings, settings),
         ],
       },
     ],
