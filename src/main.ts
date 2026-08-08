@@ -36,6 +36,18 @@ const CONTENT_WARNINGS_KEY = "Content warnings";
  */
 const TITLE_KEY = "Title";
 
+/**
+ * Left empty, and empty means "derive it". The running head takes two keywords
+ * from the title, which is right often enough to be a default and wrong for a
+ * title whose first words aren't the memorable ones.
+ *
+ * It stays out of the *new story* scaffold — a third field in front of someone
+ * who just wants to write — but it belongs here. This command is where a writer
+ * goes to ask what a manuscript can carry, and Beth went looking for it here
+ * (2026-08-07) before anywhere else.
+ */
+const SHORT_TITLE_KEY = "Short title";
+
 export default class SmfExportPlugin extends Plugin {
   settings: SmfSettings = DEFAULT_SETTINGS;
 
@@ -78,7 +90,7 @@ export default class SmfExportPlugin extends Plugin {
       // The id stays as it was so any hotkey already bound to it survives the
       // rename; it's internal and never shown.
       id: "add-manuscript-properties",
-      name: "Add title and content warnings",
+      name: "Add manuscript properties",
       checkCallback: (checking) => {
         const file = this.app.workspace.getActiveFile();
         if (!file || file.extension !== "md") return false;
@@ -99,7 +111,7 @@ export default class SmfExportPlugin extends Plugin {
         if (!file || file.extension !== "md") return;
         menu.addItem((item) =>
           item
-            .setTitle("Add title and content warnings")
+            .setTitle("Add manuscript properties")
             .setIcon("list-plus")
             .onClick(() => void this.addManuscriptProperties(file))
         );
@@ -151,7 +163,7 @@ export default class SmfExportPlugin extends Plugin {
         }
         menu.addItem((item) =>
           item
-            .setTitle("Add title and content warnings")
+            .setTitle("Add manuscript properties")
             .setIcon("list-plus")
             .onClick(() => void this.addManuscriptProperties(file))
         );
@@ -240,6 +252,10 @@ export default class SmfExportPlugin extends Plugin {
             frontmatter[TITLE_KEY] = "";
             added.push("title");
           }
+          if (!present.has("shorttitle")) {
+            frontmatter[SHORT_TITLE_KEY] = "";
+            added.push("short title");
+          }
           if (!present.has("contentwarnings") && !present.has("cw")) {
             frontmatter[CONTENT_WARNINGS_KEY] = [];
             added.push("content warnings");
@@ -249,10 +265,15 @@ export default class SmfExportPlugin extends Plugin {
 
       // Names only what actually changed — a note that already had one of them
       // shouldn't be told both were added.
+      const list =
+        added.length > 2
+          ? `${added.slice(0, -1).join(", ")} and ${added[added.length - 1]}`
+          : added.join(" and ");
+
       new Notice(
         added.length
-          ? `Added ${added.join(" and ")} to ${file.basename}.`
-          : `${file.basename} already has both.`
+          ? `Added ${list} to ${file.basename}.`
+          : `${file.basename} already has them.`
       );
     } catch (error) {
       console.error("Could not add title and content warnings", error);
