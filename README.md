@@ -22,7 +22,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 **New story** — from the pencil in the left ribbon, the command palette or by right-clicking a folder in the file explorer. It asks nothing: you get a note with its properties ready and the cursor in the body. Name it whenever you like, or never — a story titled `Untitled story` still exports, and if the real title won't fit in a filename, put it in the `title` property.
 
-**Add title, short title and content warnings** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in. Fills in only what's missing. All three can be left empty: the title falls back to the filename, the short title is derived from the title, and no warnings are printed.
+**Add title and content warnings** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in. Fills in only what's missing. All three can be left empty: the title falls back to the filename, the short title is derived from the title, and no warnings are printed.
 
 **Export to standard manuscript format** — from the command palette, or by right-clicking a note. The manuscript is written to the folder set in settings (`Manuscripts` by default), in whichever format you've chosen.
 
