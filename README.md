@@ -4,37 +4,104 @@ An Obsidian plugin that exports a story to [Shunn's Standard Manuscript Format](
 
 Write in markdown. Get back a manuscript that looks like every editor expects one to look.
 
+Free, runs on your phone as well as at your desk, and never connects to the internet at all.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/dark-1-story-note.png">
+  <img alt="A story open in Obsidian with its Title and Content warnings properties, and the exported manuscript sitting beside it in the Manuscripts folder" src="images/light-1-story-note.png">
+</picture>
+
+- **Two formats**, because markets disagree about which they accept.
+- **Shunn modern format**, with a running head on every page but the title page.
+- **Typographic cleanup** — curly quotes, em dashes, ellipses, and wrong-way quotes fixed.
+- **Word count** of the story only, so front matter never inflates it.
+- **Blind submission**, in the two configurations markets require.
+- **Content warnings** from the story's own properties, where the market wants them.
+- **Export profiles**, so a market with unusual requirements is one choice at export time.
+
+## Install
+
+From Obsidian: **Settings → Community plugins → Browse**, search for *Standard Manuscript Format Export*, install, and enable it.
+
+Manually: download `main.js` and `manifest.json` from the [latest release](../../releases/latest) into `<your vault>/.obsidian/plugins/standard-manuscript-format/`, then enable the plugin in **Settings → Community plugins**.
+
+**Requires Obsidian 1.13 or later.** That's where Obsidian's declarative settings API arrives, which is what makes every setting here findable from settings search.
+
+Works on desktop and mobile. It's pure JavaScript with no desktop-only dependencies, so a manuscript can be exported from a phone.
+
+## Quick start
+
+**Set your name.** Open **Settings → Standard Manuscript Format Export → Author identity** and fill in at least your name. The contact block needs it, and export will refuse without it. The row shows the name it will print, so a wrong guess is caught here rather than by an editor.
+
+**Start a story.** Click the pencil icon in the left sidebar, or run **New story** from the command palette, or right-click a folder in the file list. You get a note with its properties ready and the cursor in the body. It asks nothing.
+
+**Write.** Type `***` on its own line wherever you want a scene break.
+
+**Export.** Run **Export to standard manuscript format** from the command palette, or right-click the note. The manuscript is written to your `Manuscripts` folder.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/dark-3-commands.png">
+  <img alt="Obsidian's command palette listing the plugin's four commands: New story, Export with, Add title and content warnings, and Export to standard manuscript format" src="images/light-3-commands.png">
+</picture>
+
+That's the whole loop. A story with no properties at all exports fine, and an old note from years ago needs nothing done to it.
+
+## Your story stays yours
+
+**This plugin never connects to the internet.** It sends nothing and it fetches nothing. Not for updates, not for telemetry, not for anything. There is no `fetch`, no `XMLHttpRequest`, no WebSocket and no analytics anywhere in the shipped bundle.
+
+Everything happens on your own device. No round trip to a server, no account, no subscription, no LLM in the loop. Your manuscripts are written as ordinary files alongside your notes, and your stories stay ordinary markdown. If this plugin disappeared tomorrow, you'd lose a menu command and nothing else.
+
+It also never touches your clipboard, executes no code of its own or yours, and writes nothing outside the output folder you choose.
+
+**It changes your punctuation, never your words.** Quotes get curled, `--` becomes an em dash, `...` becomes an ellipsis. Nothing else in your prose is altered, nothing is rewritten, and anything that looks questionable is mentioned to you rather than corrected.
+
 ## What it does
 
-- **Two formats, because markets disagree.** `.docx` and `.rtf`, the same manuscript either way. Clarkesworld won't take `.doc`; Beneath Ceaseless Skies won't take `.docx`; every market surveyed takes RTF, so it's the safe answer when guidelines are vague or an uploader is fussy. Export one or both.
-- **Shunn modern format.** Title page with your contact block upper-left and the word count upper-right, title and byline centred below. Story starts on page 2.
-- **Running head** on every page but the title page: `Surname / Short title / page`. The surname is yours to state — left blank it's the last word of your name, which is right for most and wrong for every surname of more than one word. The settings page shows what it will print, so a bad guess is caught before an editor sees it a dozen times.
-- **Manuscript layout**: 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centred `#` for scene breaks and a centred END after the last line.
-- **Typographic cleanup.** Straight quotes become curly, `--` becomes an em dash, `...` becomes an ellipsis. Quotes that are *already* curly get re-derived from context, so a wrong-way quote — the usual souvenir of pasting between editors — gets fixed rather than passed through.
-- **Forgiving about unclosed quotes.** Forget a closing quote and the quotes after it don't invert; the mistake stays where you made it. The export still succeeds, and afterwards it mentions any paragraph that opened dialogue and neither closed it nor carried it into the next paragraph. Multi-paragraph speech, which opens every paragraph and closes only the last, is never reported. Nothing is ever silently rewritten, and the whole check can be switched off.
-- **Word count** of the body only — front matter never inflates it — with the traditional round-to-nearest-100 on by default.
-- **Vault syntax never reaches the page.** Wikilinks, markdown links, `%%comments%%`, and highlights are stripped or unwrapped.
-- **No bold by default**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here. Editors do occasionally ask for bold kept, so it's a setting rather than a rule.
-- **Blind submission**, in the two arrangements markets actually ask for. *Anonymous throughout* removes the contact block, the byline and your name from the running head — what Escape Pod and Clarion West want. *Identified cover page* keeps the title page intact and takes your name off every page after it, which is what contests like Writers of the Future require and disqualify entries for missing. Both also neutralise the author name embedded in the `.docx` properties, which survives every precaution taken on the visible page.
-- Pure JavaScript throughout, so it runs on Obsidian mobile as well as desktop.
+**Two formats, because markets disagree.** `.docx` and `.rtf`, the same manuscript either way. Some markets won't take `.doc`; others won't take `.docx`; every market surveyed takes RTF, so it's the safe answer when guidelines are vague or an uploader is fussy. Export one or both.
 
-## Use
+**Shunn modern format.** Title page with your contact block upper-left and the word count upper-right, title and byline centred below. Story starts on page 2.
 
-**New story** — from the pencil in the left ribbon, the command palette or by right-clicking a folder in the file explorer. It asks nothing: you get a note with its properties ready and the cursor in the body. Name it whenever you like, or never — a story titled `Untitled story` still exports, and if the real title won't fit in a filename, put it in the `title` property.
+**Running head** on every page but the title page: `Surname / Short title / page`. Set a surname, or leave it blank if your last name is a single word. Settings shows what will print, so you can check it before an editor sees it a dozen times.
 
-**Add title and content warnings** — from the command palette, the note's ⋯ menu, or right-clicking either the note in the file explorer or the text you're writing in.
+**Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centred `#` for scene breaks and a centred END after the last line.
 
-**Export to standard manuscript format** — from the command palette, or by right-clicking a note. The manuscript is written to the folder set in settings (`Manuscripts` by default), in whichever format you've chosen.
+**Typographic cleanup.** Straight quotes become curly, `--` becomes an em dash, `...` becomes an ellipsis. Quotes that are *already* curly get re-derived from context, so a wrong-way quote — the usual souvenir of pasting between editors — gets fixed rather than passed through.
 
-Exports live in your vault, one file per story — re-exporting replaces it rather than piling up copies. A manuscript is about the size of the note it came from, so a folder of them costs roughly what your stories already cost. Drag them out if you'd rather they lived elsewhere.
+**A missing quote mark won't ruin everything after it.** Forget a closing quotation mark and most editors turn every quote that follows the wrong way round, so one slip can leave a whole story looking broken. Not here: the mistake stays where you made it and the rest of your dialogue is still correct.
 
-Set your name in settings before the first export — the contact block needs it.
+The export works either way. Afterwards it tells you which paragraphs look like they're missing a closing quote, so you can go and check them. Dialogue that runs over several paragraphs, opening each one and closing only the last, is normal and never flagged. Nothing is fixed for you, and you can switch the warning off.
 
-Nothing else is required. A story with no properties at all exports fine: the title falls back to the first heading, then the filename, and a story with no content warnings simply doesn't print that line. An old note from years ago needs nothing done to it. If you do want the fields on an existing story, **Add title and content warnings** puts them there — on that one note, when you ask, without prompting you for values.
+**Word count** of the story only, not your title page or content warnings.
 
-### Per-story frontmatter
+**Obsidian syntax never reaches the page.** Wikilinks, markdown links, `%%comments%%`, and highlights are stripped or unwrapped.
 
-Facts about the story itself, all optional:
+**No bold by default**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here. Editors do occasionally ask for bold kept, so it's a setting rather than a rule.
+
+**Blind submission**, in the two configurations markets require. *Anonymous throughout* removes your name from the contact block, the byline and the running head. *Identified cover page* keeps the title page and removes your name from every page after it. Both also strip the author name that gets embedded invisibly inside a `.docx`, which survives every precaution taken on the visible page.
+
+**Export profiles.** Save a market's or an editor's particular requirements, then pick them at the moment of export. Markets have quirks, you submit to the same ones repeatedly, and this means not adjusting the same six settings every time. **Export with…** always offers your normal settings first and never remembers your last choice, so a profile can't stay switched on by accident. A profile saves only what you actually changed, so a setting you adjust later still reaches a profiled export.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/dark-4-profiles.png">
+  <img alt="The Export with picker, offering Default (your settings) first, then two saved profiles: Anonymous RTF, and Courier single-spaced" src="images/light-4-profiles.png">
+</picture>
+
+## Writing for the exporter
+
+### Scene breaks
+
+Type `***` on a line of its own. It exports as the centred `#` that a manuscript wants.
+
+A bare `#` works too, and is what most writers reach for — but Obsidian reads it as an empty heading, so it renders as a blank H1 and turns up in the Outline pane and in `[[note#` autocomplete. `---` and `___` work as well, though `---` sitting directly under a paragraph turns that paragraph into a heading. `***` is the one with no side effects.
+
+### Title and content warnings
+
+Stories can have two optional properties: a title, and content warnings.
+
+**New story** gives you a note with both already set up. To add them to a story you've already written, run **Add title and content warnings** from the command palette, the note's ⋯ menu, or by right-clicking the note. Either way, nothing is filled in for you.
+
+Obsidian shows them as fields at the top of the note: you type the title into a box, and add each content warning by clicking a plus. Behind those fields it stores this, though you won't normally see it or type it:
 
 ```yaml
 ---
@@ -45,57 +112,71 @@ Content warnings:
 ---
 ```
 
-You won't normally type this by hand — **New story** puts the property there, and Obsidian shows it as a list you add to with a click. Property names are matched loosely, so `Content warnings`, `contentWarnings`, `content_notes` and `cw` are all the same thing.
+The names are matched loosely, so `Content warnings`, `contentWarnings`, `content_notes` and `cw` all work.
 
-**Leave `Title` empty and the filename is the title**, so renaming the note renames the manuscript. Fill it in and it wins. It's there because Obsidian forbids `: / \\ * " < > | ?` in filenames, and plenty of titles need them — *Who Goes There?* can never be a filename, and neither can anything with a subtitle.
+**Leave `Title` empty and the title comes from the note**: the first heading if there is one, otherwise the filename, so renaming the note renames the manuscript. Fill it in and it wins. It's there because Obsidian forbids `: / \ * " < > | ?` in filenames, and plenty of titles need them — *Who Goes There?* can never be a filename, and neither can anything with a subtitle.
 
-It is deliberately not pre-filled with the current filename. A copy of the name would be right exactly once; rename the note afterwards and the stale copy would quietly override the new name, putting the wrong title on a manuscript with nothing to show for it. Empty can't go stale.
+**Content warnings** print on the title page by default, under the byline, where a slush reader meets them before the story — or with the story, set apart before the first line, for the markets that ask for that instead. A comma-separated line or an inline array works just as well as a list. Settings control the label and whether they print at all. You write the warnings on each story.
 
-`Short title` is a third, rarer override. The running head takes two keywords from the title, which is right nearly always — set this when it isn't. Nothing puts the property there for you: type it into the note's properties on the rare story that needs it.
+### If the running head is wrong for one story
 
-Content warnings print on the title page by default, under the byline, where a slush reader meets them before the story — or with the story, set apart before the first line, for the markets that ask for that instead. A comma-separated line or an inline array works just as well as a list. The label, and whether they print at all, are in settings; the warnings themselves belong to the story.
+The running head takes two keywords from the title, in the title's own case, ignoring any subtitle and any leading *the*, *a* or *of*. That's right nearly always.
 
-Without a `Title` property the plugin uses the first heading in the note, then the filename. Without `Short title` it takes two keywords from the title in the title's own case, ignoring any subtitle and any leading *the*, *a* or *of*.
-
-### Scene breaks
-
-Type `***` on a line of its own. It exports as the centred `#` that a manuscript wants.
-
-A bare `#` works too, and is what most writers reach for — but Obsidian reads it as an empty heading, so it renders as a blank H1 and turns up in the Outline pane and in `[[note#` autocomplete. `---` and `___` work as well, though `---` sitting directly under a paragraph turns that paragraph into a heading. `***` is the one with no side effects.
+When it isn't, add a `Short title` property to that story and it wins. Nothing puts this property there for you and nothing mentions it: it's the escape hatch for the rare story that needs it, not a field to fill in.
 
 ## Settings
 
-**Author identity** sits behind one row — legal name, pen name, pronouns, address, email, phone, membership line, with per-export toggles for address, email, and phone, since markets differ on what they want. Blind submission lives here too, next to the settings it overrides; when it's set to anonymous, the include-toggles hide, because nothing they control is printed. It's set once, so it stays out of the way of the options you change per market. The row shows the name it will print — or says the manuscript carries no name — and flags itself if there isn't one yet.
+**Author identity** is one row that opens a page of its own: legal name, pen name, pronouns, address, email, phone, and a membership line. Address, email and phone each have a toggle, because markets differ on which they want. Blind submission is here too, beside the settings it overrides, and switching it to anonymous hides those toggles, since nothing they control gets printed. You set this once and it stays out of the way.
 
-**Manuscript** options cover font (Times, Courier, or a custom face for a market that asks for one), size, emphasis (italics, underline for markets still on the typewriter convention, or literal underscores for one that asks to see them), strip-bold (on, and turned off for the market whose editor wants it kept), word-count rounding, the end marker, the content-warning label, and whether unclosed quotes get mentioned.
+**Manuscript** options cover font (Times, Courier, or a custom face for a market that asks for one), size, line spacing, emphasis (italics, underline for markets still on the typewriter convention, or literal underscores for one that asks to see them), strip-bold, word-count rounding (which prints *about 3,400 words* rather than *3,442 words*), the end marker, the content-warning label, and whether unclosed quotes get mentioned.
 
-**Folders** — where the `.docx` is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
+**Folders** — where the manuscript is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
 
-Settings are declared rather than drawn, so every one of them is findable from Obsidian's settings search.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/dark-2-settings.png">
+  <img alt="The plugin's settings: an Author identity row showing the name it will print, then Manuscript options for format, font, size, line spacing, word-count rounding and end marker, each with a line explaining when to change it" src="images/light-2-settings.png">
+</picture>
 
-Everything the plugin does uses Obsidian's documented API. It makes no network requests, executes no code of its own or yours, never touches the clipboard, and writes nothing outside the output folder.
+Every setting is findable from Obsidian's settings search.
 
-Deliberately absent: any built-in list of markets. Guidelines go stale, and a plugin that quietly formats to an out-of-date one is worse than a plugin that never claimed to know.
+## Troubleshooting
+
+**My RTF has no running head in Pages.** It never will. macOS's RTF reader has no representation for page headers at all, so an RTF looks header-less there even when it's correct. **Check RTF in Word**, which is what the markets requesting RTF will open it in.
+
+**My RTF shows the running head on the title page in Google Docs.** Google's RTF importer flattens headers to the whole document. The same story exported as `.docx` is correct in Google Docs, so this is the importer rather than the manuscript. Again: check RTF in Word.
+
+**My bold went missing.** Deliberate — standard manuscript format has no bold, so the words survive and the emphasis doesn't. If an editor has asked you to keep it, turn off strip-bold in settings.
+
+**The running head shows the wrong part of my name.** Left blank, it takes the last word of your name, which is wrong for any surname of more than one word. Set the surname explicitly in **Author identity**.
+
+**Where did my manuscript go?** The output folder in settings, `Manuscripts` by default. Exports live in your vault, one file per story, and re-exporting replaces the file rather than piling up copies. A compressed manuscript is about the size of the note it came from, so a folder of them costs roughly what your stories already cost. Drag them out if you'd rather they lived elsewhere.
+
+**Export says it needs a name.** The contact block can't be built without one. **Settings → Author identity**.
+
+## What this doesn't do
+
+**Shared editing or comments.** Obsidian is single-user by design, and link-and-drop-in feedback isn't something a plugin can add to it. If you need a co-writer in the document with you, use another tool.
+
+**Multi-note stories.** A story is one note. Assembling a manuscript from a folder of scene notes is a novel-writing shape, and it imposes structure on a short story that didn't ask for it.
+
+**A list of markets.** Deliberately absent. Guidelines go stale, and a plugin that quietly formats to an out-of-date one is worse than a plugin that never claimed to know. Read the guidelines, then set the settings.
+
+If you want any of these, or something else, [open an issue](../../issues). What gets built next is decided by what people ask for.
 
 ## Development
 
 ```bash
 npm install
 npm run dev     # watch build
-npm test        # markdown + typography unit tests
+npm test        # unit tests
 npm run lint    # official Obsidian plugin guidelines
 npm run build   # typecheck and production bundle
 ```
-
-Requires Obsidian 1.13 or later, which is where the declarative settings API arrives.
 
 Render a story without going through Obsidian — the output extension picks the emitter:
 
 ```bash
 npm run sample -- path/to/story.md out.docx
-```
-
-```bash
 npm run sample -- path/to/story.md out.rtf
 ```
 
