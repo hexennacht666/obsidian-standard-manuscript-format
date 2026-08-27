@@ -3,7 +3,7 @@
   "name": "Standard Manuscript Format Export",
   "version": "1.0.0",
   "minAppVersion": "1.13.0",
-  "description": "Export a story to Standard Manuscript Format as a .docx or .rtf, ready to submit.",
+  "description": "Export a story to Shunn's standard manuscript format as a .docx or .rtf, ready to submit.",
   "author": "Beth Dean",
   "isDesktopOnly": false
 }
