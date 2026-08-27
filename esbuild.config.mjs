@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import { stripDeadSchedulers } from "./scripts/strip-dead-schedulers.mjs";
 
 const prod = process.argv[2] === "production";
 
@@ -23,6 +24,7 @@ const context = await esbuild.context({
     "@lezer/lr",
     ...builtins,
   ],
+  plugins: [stripDeadSchedulers],
   format: "cjs",
   target: "es2018",
   logLevel: "info",
