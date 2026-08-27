@@ -7,8 +7,8 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 Free, runs on your phone as well as at your desk, and never connects to the internet at all.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="images/dark-1-story-note.png">
-  <img alt="A story open in Obsidian with its Title and Content warnings properties, and the exported manuscript sitting beside it in the Manuscripts folder" src="images/light-1-story-note.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-1-story-note.png">
+  <img alt="A story open in Obsidian with its Title and Content warnings properties, and the exported manuscript sitting beside it in the Manuscripts folder" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-1-story-note.png">
 </picture>
 
 - **Two formats**, because markets disagree about which they accept.
@@ -40,8 +40,8 @@ Works on desktop and mobile. It's pure JavaScript with no desktop-only dependenc
 **Export.** Run **Export to standard manuscript format** from the command palette, or right-click the note. The manuscript is written to your `Manuscripts` folder.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="images/dark-3-commands.png">
-  <img alt="Obsidian's command palette listing the plugin's four commands: New story, Export with, Add title and content warnings, and Export to standard manuscript format" src="images/light-3-commands.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-3-commands.png">
+  <img alt="Obsidian's command palette listing the plugin's four commands: New story, Export with, Add title and content warnings, and Export to standard manuscript format" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-3-commands.png">
 </picture>
 
 That's the whole loop. A story with no properties at all exports fine, and an old note from years ago needs nothing done to it.
@@ -83,8 +83,8 @@ The export works either way. Afterwards it tells you which paragraphs look like 
 **Export profiles.** Save a market's or an editor's particular requirements, then pick them at the moment of export. Markets have quirks, you submit to the same ones repeatedly, and this means not adjusting the same six settings every time. **Export with…** always offers your normal settings first and never remembers your last choice, so a profile can't stay switched on by accident. A profile saves only what you actually changed, so a setting you adjust later still reaches a profiled export.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="images/dark-4-profiles.png">
-  <img alt="The Export with picker, offering Default (your settings) first, then two saved profiles: Anonymous RTF, and Courier single-spaced" src="images/light-4-profiles.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-4-profiles.png">
+  <img alt="The Export with picker, offering Default (your settings) first, then two saved profiles: Anonymous RTF, and Courier single-spaced" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-4-profiles.png">
 </picture>
 
 ## Writing for the exporter
@@ -133,8 +133,8 @@ When it isn't, add a `Short title` property to that story and it wins. Nothing p
 **Folders** — where the manuscript is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="images/dark-2-settings.png">
-  <img alt="The plugin's settings: an Author identity row showing the name it will print, then Manuscript options for format, font, size, line spacing, word-count rounding and end marker, each with a line explaining when to change it" src="images/light-2-settings.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-2-settings.png">
+  <img alt="The plugin's settings: an Author identity row showing the name it will print, then Manuscript options for format, font, size, line spacing, word-count rounding and end marker, each with a line explaining when to change it" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-2-settings.png">
 </picture>
 
 Every setting is findable from Obsidian's settings search.
