@@ -21,7 +21,7 @@ Free, runs on your phone as well as at your desk, and never connects to the inte
 
 ## Install
 
-From Obsidian: **Settings → Community plugins → Browse**, search for *Standard Manuscript Format Export*, install, and enable it.
+From Obsidian: **Settings → Community plugins → Browse**, search for *Standard Manuscript Format Export*, install, and enable it. Its [directory listing](https://community.obsidian.md/plugins/standard-manuscript-format) is here.
 
 Manually: download `main.js` and `manifest.json` from the [latest release](../../releases/latest) into `<your vault>/.obsidian/plugins/standard-manuscript-format/`, then enable the plugin in **Settings → Community plugins**.
 

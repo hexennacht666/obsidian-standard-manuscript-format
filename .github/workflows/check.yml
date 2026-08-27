@@ -1,0 +1,37 @@
+name: Check
+
+# The release workflow runs these too, but only once a tag exists, which is the
+# wrong time to discover a broken build. The repository is public with issues
+# open, so this also gives a pull request an answer without anyone having to
+# clone it.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+      - name: Refuse a bundle that executes strings
+        run: |
+          for pattern in 'createElement("script")' 'new Function(' 'eval('; do
+            if grep -qF "$pattern" main.js; then
+              echo "main.js contains $pattern — see scripts/strip-dead-schedulers.mjs." >&2
+              exit 1
+            fi
+          done
