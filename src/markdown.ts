@@ -30,6 +30,12 @@ export interface UnclosedQuote {
 export interface ParsedStory {
   title: string | null;
   shortTitle: string | null;
+  /**
+   * The story's opening heading, verbatim, whether or not it was used as the
+   * title. Obsidian's convention is that the first heading and the note's name
+   * are the same thing, so this is what names the exported manuscript.
+   */
+  heading: string | null;
   frontmatter: Record<string, string>;
   blocks: Block[];
   wordCount: number;
@@ -260,6 +266,7 @@ export function parseStory(
   // the writer to fill in later, and an empty title must fall back to the
   // heading or filename rather than producing an untitled manuscript.
   let title: string | null = frontmatter["title"]?.trim() || null;
+  let heading: string | null = null;
   const blocks: Block[] = [];
   let pending: string[] = [];
 
@@ -295,13 +302,18 @@ export function parseStory(
       continue;
     }
 
-    const heading = line.match(/^#{1,6}\s+(.*)$/);
-    if (heading) {
+    const match = line.match(/^#{1,6}\s+(.*)$/);
+    if (match) {
       flush();
       // The first heading is the story's title, not body text; later headings
-      // are almost always part-dividers, so they become scene breaks.
-      if (title === null) title = heading[1].trim();
-      else if (blocks[blocks.length - 1]?.kind !== "sceneBreak") {
+      // are almost always part-dividers, so they become scene breaks. A stated
+      // `Title` overrides what the heading prints as, but the heading is still
+      // the heading — turning it into a scene break would open the manuscript
+      // with one.
+      if (heading === null) {
+        heading = match[1].trim();
+        if (title === null) title = heading;
+      } else if (blocks[blocks.length - 1]?.kind !== "sceneBreak") {
         blocks.push({ kind: "sceneBreak" });
       }
       continue;
@@ -341,6 +353,7 @@ export function parseStory(
     title: resolvedTitle,
     shortTitle:
       frontmatter["shorttitle"]?.trim() || pickShortTitle(resolvedTitle),
+    heading,
     frontmatter,
     blocks,
     wordCount,

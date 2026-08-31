@@ -2,7 +2,7 @@ import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from "obs
 import { buildManuscript, packDocument } from "./docx";
 import { parseStory } from "./markdown";
 import { buildRtf } from "./rtf";
-import { uniquePath } from "./naming";
+import { exportBasename, isPlaceholderName, uniquePath } from "./naming";
 import { ProfilePicker } from "./profilePicker";
 import {
   describeOverrides,
@@ -294,15 +294,26 @@ export default class SmfExportPlugin extends Plugin {
         return;
       }
 
+      // A named note keeps its name. One still called "Untitled story" is named
+      // from the story instead, so a finished submission doesn't reach a market
+      // wearing the scaffold's name.
+      const exportName = exportBasename(file.basename, {
+        heading: story.heading,
+        // The stated values only. The derived short title always has something
+        // in it, which would make "the story has no title" unreachable.
+        shortTitle: story.frontmatter["shorttitle"] ?? null,
+        title: story.frontmatter["title"] ?? null,
+      });
+
       const written: { path: string; replaced: boolean }[] = [];
 
       if (settings.exportFormat !== "rtf") {
         const buffer = await packDocument(buildManuscript(story, settings));
-        written.push(await this.writeExport(file.basename, "docx", buffer));
+        written.push(await this.writeExport(exportName, "docx", buffer));
       }
       if (settings.exportFormat !== "docx") {
         const rtf = buildRtf(story, settings);
-        written.push(await this.writeExport(file.basename, "rtf", rtf));
+        written.push(await this.writeExport(exportName, "rtf", rtf));
       }
 
       // Re-exporting overwrites, deliberately — that's why a story revised
@@ -318,6 +329,15 @@ export default class SmfExportPlugin extends Plugin {
         .join(", ");
 
       const notice = [`${wrote} — ${story.wordCount.toLocaleString()} words`];
+
+      // The story has no title in its frontmatter, its heading or its filename,
+      // so nothing could name the manuscript. Said here because this is the last
+      // moment before the file goes to a market under the scaffold's name.
+      if (isPlaceholderName(exportName)) {
+        notice.push(
+          `Named ${exportName} — set a Title property and the next export takes its name from that.`
+        );
+      }
 
       // Every export says what it applied. The risk in an override isn't the
       // override; it's silent divergence between what the settings screen shows
