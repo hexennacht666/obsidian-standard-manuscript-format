@@ -1,6 +1,6 @@
 {
   "name": "obsidian-smf-export",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Export a story to Standard Manuscript Format as a .docx or .rtf",
   "main": "main.js",
   "scripts": {
