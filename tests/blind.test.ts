@@ -1,7 +1,12 @@
 import { strict as assert } from "assert";
 import { test } from "node:test";
 import { parseStory } from "../src/markdown";
-import { bylineOf, contactLines, runningHeadPrefix } from "../src/manuscript";
+import {
+  bylineOf,
+  contactLines,
+  nameWithPronouns,
+  runningHeadPrefix,
+} from "../src/manuscript";
 import { buildRtf } from "../src/rtf";
 import { DEFAULT_SETTINGS, type SmfSettings } from "../src/settings";
 
@@ -73,4 +78,36 @@ test("the rendered cover-page manuscript keeps the block but not the head", () =
   // the code actually builds — "Le Guin / SALT" would pass without testing
   // anything, since that string is never produced in the first place.
   assert.ok(!out.includes("Guin / SALT"));
+});
+
+const withPronouns: SmfSettings = { ...identified, pronouns: "they/them" };
+
+test("pronouns print in parentheses after the name in the contact block", () => {
+  assert.equal(contactLines(withPronouns)[0], "Ursula Le Guin (they/them)");
+});
+
+test("unset pronouns leave the name exactly as it was", () => {
+  assert.equal(contactLines(identified)[0], "Ursula Le Guin");
+  assert.equal(nameWithPronouns("Ursula Le Guin", "  "), "Ursula Le Guin");
+});
+
+test("pronouns follow the name and go nowhere else", () => {
+  // The byline is a different line with a different job, and the running head
+  // is a surname and a keyword. Neither takes pronouns.
+  const penned: SmfSettings = { ...withPronouns, penName: "U. K. Le Guin" };
+  assert.equal(contactLines(penned)[0], "Ursula Le Guin (they/them)");
+  assert.equal(bylineOf(penned), "U. K. Le Guin");
+  assert.equal(runningHeadPrefix("SALT", penned), "Guin / SALT / ");
+});
+
+test("an anonymous manuscript carries no pronouns either", () => {
+  assert.deepEqual(contactLines({ ...anonymous, pronouns: "they/them" }), []);
+});
+
+test("an identified cover page prints them once, on the cover", () => {
+  assert.equal(
+    contactLines({ ...coverPage, pronouns: "they/them" })[0],
+    "Ursula Le Guin (they/them)"
+  );
+  assert.equal(runningHeadPrefix("SALT", coverPage), "SALT / ");
 });

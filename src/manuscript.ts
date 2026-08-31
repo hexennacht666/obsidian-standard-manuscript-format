@@ -43,6 +43,19 @@ export function formatWordCount(count: number, round: boolean): string {
   return `${prefix}${shown.toLocaleString("en-US")} words`;
 }
 
+/**
+ * The contact-block name, carrying pronouns in parentheses after it.
+ *
+ * The markets that want pronouns (Strange Horizons, Uncanny) want them beside
+ * the name in the contact block and state no form for them. Contact block only:
+ * the byline is a different line with a different job, and the running head is a
+ * surname and a keyword.
+ */
+export function nameWithPronouns(name: string, pronouns: string): string {
+  const stated = pronouns.trim();
+  return stated ? `${name} (${stated})` : name;
+}
+
 /** The contact block, upper left on the title page, in Shunn's order. */
 export function contactLines(settings: SmfSettings): string[] {
   // "Anonymous" means nothing identifying anywhere, and this block is nothing
@@ -51,7 +64,9 @@ export function contactLines(settings: SmfSettings): string[] {
   if (settings.blindSubmission === "anonymous") return [];
 
   const lines: string[] = [];
-  if (settings.legalName) lines.push(settings.legalName);
+  if (settings.legalName) {
+    lines.push(nameWithPronouns(settings.legalName, settings.pronouns));
+  }
   if (settings.includeAddress && settings.address.trim()) {
     lines.push(...settings.address.split(/\r?\n/).filter((l) => l.trim()));
   }
