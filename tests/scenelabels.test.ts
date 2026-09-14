@@ -76,3 +76,33 @@ test("rtf prints a scene label centered, with no first-line indent, and no #", (
   assert.ok(!para.includes("\\fi720"), "no first-line indent");
   assert.ok(!/\\qc\s*#\\/.test(rtf) && !rtf.includes("\\qc #"), "no # for titled breaks");
 });
+
+// A note with no H1 takes its title from the filename (Obsidian's convention),
+// and its scene labels start on line one. None of them is the title.
+test("no H1: the first H2 is a scene label, not the title", () => {
+  const s = parseStory("## Before\n\nOne.\n\n## After\n\nTwo.\n\n## Before\n\nThree.\n", "Perfumed Gloves");
+  assert.equal(s.title, "Perfumed Gloves");
+  assert.equal(s.heading, null);
+  assert.deepEqual(
+    s.blocks.map((b) => (b.kind === "sceneLabel" ? "label:" + b.runs[0].text : b.kind)),
+    ["label:Before", "para", "label:After", "para", "label:Before", "para"]
+  );
+});
+
+test("an H2 that repeats the filename is the title heading, not a label", () => {
+  const s = parseStory("## Perfumed Gloves\n\nOne.\n\n## After\n\nTwo.\n", "Perfumed Gloves");
+  assert.equal(s.heading, "Perfumed Gloves");
+  assert.deepEqual(s.blocks.map((b) => b.kind), ["para", "sceneLabel", "para"]);
+});
+
+test("an H2 that repeats the frontmatter Title is the title heading", () => {
+  const s = parseStory("---\ntitle: Who Goes There?\n---\n## Who goes there?\n\nOne.\n\n## Later\n\nTwo.\n", "fn");
+  assert.equal(s.title, "Who Goes There?");
+  assert.deepEqual(s.blocks.map((b) => b.kind), ["para", "sceneLabel", "para"]);
+});
+
+test("an H1 after labels is still just a label", () => {
+  const s = parseStory("# T\n\nOne.\n\n# Part Two\n\nTwo.\n", "fn");
+  assert.equal(s.heading, "T");
+  assert.deepEqual(s.blocks.map((b) => b.kind), ["para", "sceneLabel", "para"]);
+});

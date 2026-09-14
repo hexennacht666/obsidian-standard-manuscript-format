@@ -256,6 +256,19 @@ function pickShortTitle(title: string): string {
   return pair.length <= MAX_KEYWORD_LENGTH ? pair : first;
 }
 
+/** Loose match between a heading and a title: case, spacing and quote style vary. */
+function sameTitle(heading: string, title: string | null): boolean {
+  if (!title) return false;
+  const norm = (t: string) =>
+    t
+      .toLowerCase()
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201c\u201d]/g, '"')
+      .replace(/\s+/g, " ")
+      .trim();
+  return norm(heading) === norm(title);
+}
+
 export function parseStory(
   source: string,
   fallbackTitle: string,
@@ -304,22 +317,29 @@ export function parseStory(
       continue;
     }
 
-    const match = line.match(/^#{1,6}\s+(.*)$/);
+    const match = line.match(/^(#{1,6})\s+(.*)$/);
     if (match) {
       flush();
-      // The first heading is the story's title, not body text. A stated
-      // `Title` overrides what the heading prints as, but the heading is still
-      // the heading — turning it into a break would open the manuscript with
-      // one. Later headings are scene labels (a dual-timeline story
-      // labeled "1987" / "Now"): the label prints centered where a # would go,
-      // and it is the break, so a marker directly before it is redundant.
-      if (heading === null) {
-        heading = match[1].trim();
+      // The title heading is not body text: the first H1, or the first
+      // heading of any level whose text is the note's own title (a stated
+      // `Title`, or the filename). A note with no H1 takes its title from
+      // the filename, and its first `## 1987` is a scene label, not the title.
+      // Every other heading is a scene label: the label prints centered where
+      // a # would go, and it is the break, so a marker directly before it is
+      // redundant.
+      const text = match[2].trim();
+      const isTitle =
+        heading === null &&
+        (match[1].length === 1 ||
+          sameTitle(text, title) ||
+          sameTitle(text, fallbackTitle));
+      if (isTitle) {
+        heading = text;
         if (title === null) title = heading;
         continue;
       }
       if (blocks[blocks.length - 1]?.kind === "sceneBreak") blocks.pop();
-      const runs = parseInline(typographize(match[1].trim()).text, options);
+      const runs = parseInline(typographize(text).text, options);
       if (runs.length) blocks.push({ kind: "sceneLabel", runs });
       continue;
     }
