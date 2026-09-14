@@ -19,7 +19,9 @@ export interface ParseOptions {
 
 export type Block =
   | { kind: "para"; runs: Run[] }
-  | { kind: "sceneBreak" };
+  | { kind: "sceneBreak" }
+  /** A titled section break: a heading after the title, printed centred. */
+  | { kind: "subhead"; runs: Run[] };
 
 export interface UnclosedQuote {
   /** 1-based position among body paragraphs. */
@@ -305,17 +307,20 @@ export function parseStory(
     const match = line.match(/^#{1,6}\s+(.*)$/);
     if (match) {
       flush();
-      // The first heading is the story's title, not body text; later headings
-      // are almost always part-dividers, so they become scene breaks. A stated
+      // The first heading is the story's title, not body text. A stated
       // `Title` overrides what the heading prints as, but the heading is still
-      // the heading — turning it into a scene break would open the manuscript
-      // with one.
+      // the heading — turning it into a break would open the manuscript with
+      // one. Later headings are titled section breaks (a dual-timeline story
+      // labelled "1987" / "Now"): the label prints centred where a # would go,
+      // and it is the break, so a marker directly before it is redundant.
       if (heading === null) {
         heading = match[1].trim();
         if (title === null) title = heading;
-      } else if (blocks[blocks.length - 1]?.kind !== "sceneBreak") {
-        blocks.push({ kind: "sceneBreak" });
+        continue;
       }
+      if (blocks[blocks.length - 1]?.kind === "sceneBreak") blocks.pop();
+      const runs = parseInline(typographize(match[1].trim()).text, options);
+      if (runs.length) blocks.push({ kind: "subhead", runs });
       continue;
     }
 
@@ -323,13 +328,17 @@ export function parseStory(
   }
   flush();
 
-  // A trailing scene break is an artifact of the source file, never intent.
-  while (blocks.length && blocks[blocks.length - 1].kind === "sceneBreak") {
+  // A trailing break is an artifact of the source file, never intent.
+  while (blocks.length && blocks[blocks.length - 1].kind !== "para") {
     blocks.pop();
   }
 
+  // Subheads count: a word processor counts them, and the "about N words"
+  // line should agree with what the editor's own count says.
   const wordCount = blocks
-    .filter((b): b is { kind: "para"; runs: Run[] } => b.kind === "para")
+    .filter(
+      (b): b is { kind: "para" | "subhead"; runs: Run[] } => b.kind !== "sceneBreak"
+    )
     .map((b) => b.runs.map((r) => r.text).join(""))
     .join(" ")
     .split(/\s+/)

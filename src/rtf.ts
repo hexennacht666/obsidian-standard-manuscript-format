@@ -185,6 +185,13 @@ function body(blocks: Block[], warnings: string[], settings: SmfSettings): strin
       out += paragraph("#", settings, { align: "center", spacing });
       continue;
     }
+    if (block.kind === "subhead") {
+      out += paragraph(runsToRtf(block.runs, settings), settings, {
+        align: "center",
+        spacing,
+      });
+      continue;
+    }
     out += paragraph(runsToRtf(block.runs, settings), settings, {
       spacing,
       firstLineIndent: FIRST_LINE_INDENT,

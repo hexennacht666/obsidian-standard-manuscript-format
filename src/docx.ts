@@ -205,6 +205,16 @@ function bodyParagraphs(
       );
       continue;
     }
+    if (block.kind === "subhead") {
+      out.push(
+        new Paragraph({
+          children: toTextRuns(block.runs, settings),
+          alignment: AlignmentType.CENTER,
+          spacing,
+        })
+      );
+      continue;
+    }
     out.push(
       new Paragraph({
         children: toTextRuns(block.runs, settings),

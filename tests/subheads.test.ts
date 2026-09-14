@@ -1,0 +1,78 @@
+import { strict as assert } from "assert";
+import { test } from "node:test";
+import JSZip from "jszip";
+import { buildManuscript, packDocument } from "../src/docx";
+import { parseStory } from "../src/markdown";
+import { buildRtf } from "../src/rtf";
+import { DEFAULT_SETTINGS, type SmfSettings } from "../src/settings";
+
+// A dual-timeline story labels its sections. The first heading is the title;
+// every later heading is a titled section break, printed centred where a #
+// would go. Shunn has no rule for these ("you could simply label it 'Earlier'
+// or '1987'"); centred plain text is the convention, and it's what Scrivener's
+// manuscript compile prints.
+const STORY = "# The Salt Year\n\nOne.\n\n## 1987\n\nTwo.\n\n***\n\n## Now\n\nThree.\n";
+
+const settings: SmfSettings = {
+  ...DEFAULT_SETTINGS,
+  legalName: "Ursula Le Guin",
+  address: "123 Example Street\nPortland, OR 97201",
+  email: "you@example.com",
+};
+
+test("later headings become titled section breaks with their text kept", () => {
+  const s = parseStory(STORY, "fn");
+  assert.equal(s.title, "The Salt Year");
+  assert.deepEqual(
+    s.blocks.map((b) => (b.kind === "subhead" ? "subhead:" + b.runs[0].text : b.kind)),
+    ["para", "subhead:1987", "para", "subhead:Now", "para"]
+  );
+});
+
+test("a marker directly before a subhead is redundant and dropped", () => {
+  const s = parseStory("# T\n\nOne.\n\n#\n\n## Later\n\nTwo.\n", "fn");
+  assert.deepEqual(s.blocks.map((b) => b.kind), ["para", "subhead", "para"]);
+});
+
+test("a trailing subhead is an artifact, like a trailing scene break", () => {
+  const s = parseStory("# T\n\nOne.\n\n## Later\n\n", "fn");
+  assert.deepEqual(s.blocks.map((b) => b.kind), ["para"]);
+});
+
+test("subhead text is typographized and can carry italics", () => {
+  const s = parseStory("# T\n\nOne.\n\n## The *Marie Celeste* — after\n\nTwo.\n", "fn");
+  const sub = s.blocks[1];
+  assert.equal(sub.kind, "subhead");
+  if (sub.kind !== "subhead") return;
+  assert.deepEqual(sub.runs.map((r) => [r.text, !!r.italic]), [
+    ["The ", false],
+    ["Marie Celeste", true],
+    [" — after", false],
+  ]);
+});
+
+test("subhead words are counted, as a word processor would", () => {
+  assert.equal(parseStory(STORY, "fn").wordCount, 5);
+});
+
+test("docx prints a subhead centred, with no first-line indent, and no #", async () => {
+  const packed = await packDocument(buildManuscript(parseStory(STORY, "fn"), settings));
+  const zip = await JSZip.loadAsync(packed);
+  const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
+  const paras = xml.match(/<w:p\b[\s\S]*?<\/w:p>/g) ?? [];
+  const sub = paras.find((p) => p.includes(">1987<"));
+  assert.ok(sub, "the subhead is a paragraph of its own");
+  assert.ok(sub!.includes('<w:jc w:val="center"/>'), "centred");
+  assert.ok(!sub!.includes("w:firstLine"), "no first-line indent");
+  assert.ok(!paras.some((p) => p.includes(">#<")), "no # for titled breaks");
+});
+
+test("rtf prints a subhead centred, with no first-line indent, and no #", () => {
+  const rtf = buildRtf(parseStory(STORY, "fn"), settings);
+  const idx = rtf.indexOf("1987");
+  assert.ok(idx > 0);
+  const para = rtf.slice(rtf.lastIndexOf("\\pard", idx), idx);
+  assert.ok(para.includes("\\qc"), "centred");
+  assert.ok(!para.includes("\\fi720"), "no first-line indent");
+  assert.ok(!/\\qc\s*#\\/.test(rtf) && !rtf.includes("\\qc #"), "no # for titled breaks");
+});
