@@ -152,7 +152,7 @@ export interface SmfSettings {
   stripBold: boolean;
   roundWordCount: boolean;
   /**
-   * Shunn suggests centring the word END after the last line, because it
+   * Shunn suggests centering the word END after the last line, because it
    * "can prevent ambiguity when your closing words fall near the bottom of the
    * page". The default was `#` — the very symbol a scene break prints — so the
    * last mark in a story was indistinguishable from the mark that means keep
