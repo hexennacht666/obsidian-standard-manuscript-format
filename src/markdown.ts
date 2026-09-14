@@ -20,7 +20,7 @@ export interface ParseOptions {
 export type Block =
   | { kind: "para"; runs: Run[] }
   | { kind: "sceneBreak" }
-  /** A titled section break: a heading after the title, printed centred. */
+  /** A titled section break: a heading after the title, printed centered. */
   | { kind: "subhead"; runs: Run[] };
 
 export interface UnclosedQuote {
@@ -311,7 +311,7 @@ export function parseStory(
       // `Title` overrides what the heading prints as, but the heading is still
       // the heading — turning it into a break would open the manuscript with
       // one. Later headings are titled section breaks (a dual-timeline story
-      // labelled "1987" / "Now"): the label prints centred where a # would go,
+      // labeled "1987" / "Now"): the label prints centered where a # would go,
       // and it is the break, so a marker directly before it is redundant.
       if (heading === null) {
         heading = match[1].trim();

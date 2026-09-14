@@ -60,11 +60,11 @@ It also never touches your clipboard, executes no code of its own or yours, and 
 
 **Two formats, because markets disagree.** `.docx` and `.rtf`, the same manuscript either way. Some markets won't take `.doc`; others won't take `.docx`; every market surveyed takes RTF, so it's the safe answer when guidelines are vague or an uploader is fussy. Export one or both.
 
-**Shunn modern format.** Title page with your contact block upper-left and the word count upper-right, title and byline centred below. Story starts on page 2.
+**Shunn modern format.** Title page with your contact block upper-left and the word count upper-right, title and byline centered below. Story starts on page 2.
 
 **Running head** on every page but the title page: `Surname / Short title / page`. Set a surname, or leave it blank if your last name is a single word. Settings shows what will print, so you can check it before an editor sees it a dozen times.
 
-**Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centred `#` for scene breaks, centred labels for titled sections, and a centred END after the last line.
+**Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centered `#` for scene breaks, centered labels for titled sections, and a centered END after the last line.
 
 **Typographic cleanup.** Straight quotes become curly, `--` becomes an em dash, `...` becomes an ellipsis. Quotes that are *already* curly get re-derived from context, so a wrong-way quote — the usual souvenir of pasting between editors — gets fixed rather than passed through.
 
@@ -91,15 +91,15 @@ The export works either way. Afterwards it tells you which paragraphs look like 
 
 ### Scene breaks
 
-Type `***` on a line of its own. It exports as the centred `#` that a manuscript wants.
+Type `***` on a line of its own. It exports as the centered `#` that a manuscript wants.
 
 A bare `#` works too, and is what most writers reach for — but Obsidian reads it as an empty heading, so it renders as a blank H1 and turns up in the Outline pane and in `[[note#` autocomplete. `---` and `___` work as well, though `---` sitting directly under a paragraph turns that paragraph into a heading. `***` is the one with no side effects.
 
 ### Titled sections
 
-A story told in two timelines, or in named parts, labels its sections. Write each label as an H2 (`## 1987`, `## Now`) and it exports centred on its own line, in the same plain 12-point type, where a `#` would go. The heading is the break, so it needs no `***` before it. The rule underneath: the first heading in the note is the title, and every heading after it is a section label, whatever its level, so an H3 would export the same way.
+A story told in two timelines, or in named parts, labels its sections. Write each label as an H2 (`## 1987`, `## Now`) and it exports centered on its own line, in the same plain 12-point type, where a `#` would go. The heading is the break, so it needs no `***` before it. The rule underneath: the first heading in the note is the title, and every heading after it is a section label, whatever its level, so an H3 would export the same way.
 
-There is no rule for these in standard manuscript format (Shunn: "you could simply label it 'Earlier' or '1987'"); centred plain text is the convention, and it is what other manuscript tools print. A bonus of using real headings: Obsidian's Outline pane becomes a map of the story's sections.
+There is no rule for these in standard manuscript format (Shunn: "you could simply label it 'Earlier' or '1987'"); centered plain text is the convention, and it is what other manuscript tools print. A bonus of using real headings: Obsidian's Outline pane becomes a map of the story's sections.
 
 ### Title and content warnings
 
@@ -188,6 +188,6 @@ npm run sample -- path/to/story.md out.rtf
 
 The core (`src/markdown.ts`, `src/typography.ts`, `src/manuscript.ts`, `src/docx.ts`, `src/rtf.ts`) has no Obsidian imports, so it stays testable in plain Node and reusable by other tools. `manuscript.ts` holds what both emitters agree on — the contact block, the word count, the running head — so the two renderings can't drift apart.
 
-## Licence
+## License
 
 MIT

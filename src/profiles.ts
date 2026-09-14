@@ -208,7 +208,7 @@ function describe(key: OverridableKey, settings: SmfSettings): string {
           ? "warnings on both pages"
           : "warnings on the title page";
     case "contentWarningLabel":
-      return `labelled “${settings.contentWarningLabel.trim()}”`;
+      return `labeled “${settings.contentWarningLabel.trim()}”`;
     case "includeAddress":
       return settings.includeAddress ? "address printed" : "no address";
     case "includeEmail":
