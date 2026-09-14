@@ -64,7 +64,7 @@ It also never touches your clipboard, executes no code of its own or yours, and 
 
 **Running head** on every page but the title page: `Surname / Short title / page`. Set a surname, or leave it blank if your last name is a single word. Settings shows what will print, so you can check it before an editor sees it a dozen times.
 
-**Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centered `#` for scene breaks, centered labels for titled sections, and a centered END after the last line.
+**Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centered `#` for scene breaks, centered scene labels, and a centered END after the last line.
 
 **Typographic cleanup.** Straight quotes become curly, `--` becomes an em dash, `...` becomes an ellipsis. Quotes that are *already* curly get re-derived from context, so a wrong-way quote — the usual souvenir of pasting between editors — gets fixed rather than passed through.
 
@@ -95,11 +95,11 @@ Type `***` on a line of its own. It exports as the centered `#` that a manuscrip
 
 A bare `#` works too, and is what most writers reach for — but Obsidian reads it as an empty heading, so it renders as a blank H1 and turns up in the Outline pane and in `[[note#` autocomplete. `---` and `___` work as well, though `---` sitting directly under a paragraph turns that paragraph into a heading. `***` is the one with no side effects.
 
-### Titled sections
+### Scene labels
 
-A story told in two timelines, or in named parts, labels its sections. Write each label as an H2 (`## 1987`, `## Now`) and it exports centered on its own line, in the same plain 12-point type, where a `#` would go. The heading is the break, so it needs no `***` before it. The rule underneath: the first heading in the note is the title, and every heading after it is a section label, whatever its level, so an H3 would export the same way.
+If your story has multiple timelines, several point-of-view characters, or a prologue and epilogue, you may want to label its scenes. Write each label as an H2 (`## 1987`, `## Now`) and it exports centered on its own line, in the same plain 12-point type. A scene label is its own break, so it needs no `***` before it. The first heading in a note is the title; every heading after it is treated as a scene label.
 
-There is no rule for these in standard manuscript format (Shunn: "you could simply label it 'Earlier' or '1987'"); centered plain text is the convention, and it is what other manuscript tools print. A bonus of using real headings: Obsidian's Outline pane becomes a map of the story's sections.
+Standard manuscript format has no rule for scene labels. Centered plain text is the convention, and it is what other manuscript tools print. A bonus of using real headings: Obsidian's Outline pane becomes a map of your scenes.
 
 ### Title and content warnings
 

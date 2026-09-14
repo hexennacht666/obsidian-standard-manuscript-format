@@ -205,7 +205,7 @@ function bodyParagraphs(
       );
       continue;
     }
-    if (block.kind === "subhead") {
+    if (block.kind === "sceneLabel") {
       out.push(
         new Paragraph({
           children: toTextRuns(block.runs, settings),

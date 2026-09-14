@@ -185,7 +185,7 @@ function body(blocks: Block[], warnings: string[], settings: SmfSettings): strin
       out += paragraph("#", settings, { align: "center", spacing });
       continue;
     }
-    if (block.kind === "subhead") {
+    if (block.kind === "sceneLabel") {
       out += paragraph(runsToRtf(block.runs, settings), settings, {
         align: "center",
         spacing,

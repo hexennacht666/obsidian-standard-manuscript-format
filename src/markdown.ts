@@ -20,8 +20,8 @@ export interface ParseOptions {
 export type Block =
   | { kind: "para"; runs: Run[] }
   | { kind: "sceneBreak" }
-  /** A titled section break: a heading after the title, printed centered. */
-  | { kind: "subhead"; runs: Run[] };
+  /** A scene label: a heading after the title, printed centered; it is its own break. */
+  | { kind: "sceneLabel"; runs: Run[] };
 
 export interface UnclosedQuote {
   /** 1-based position among body paragraphs. */
@@ -310,7 +310,7 @@ export function parseStory(
       // The first heading is the story's title, not body text. A stated
       // `Title` overrides what the heading prints as, but the heading is still
       // the heading — turning it into a break would open the manuscript with
-      // one. Later headings are titled section breaks (a dual-timeline story
+      // one. Later headings are scene labels (a dual-timeline story
       // labeled "1987" / "Now"): the label prints centered where a # would go,
       // and it is the break, so a marker directly before it is redundant.
       if (heading === null) {
@@ -320,7 +320,7 @@ export function parseStory(
       }
       if (blocks[blocks.length - 1]?.kind === "sceneBreak") blocks.pop();
       const runs = parseInline(typographize(match[1].trim()).text, options);
-      if (runs.length) blocks.push({ kind: "subhead", runs });
+      if (runs.length) blocks.push({ kind: "sceneLabel", runs });
       continue;
     }
 
@@ -333,11 +333,11 @@ export function parseStory(
     blocks.pop();
   }
 
-  // Subheads count: a word processor counts them, and the "about N words"
+  // Scene labels count: a word processor counts them, and the "about N words"
   // line should agree with what the editor's own count says.
   const wordCount = blocks
     .filter(
-      (b): b is { kind: "para" | "subhead"; runs: Run[] } => b.kind !== "sceneBreak"
+      (b): b is { kind: "para" | "sceneLabel"; runs: Run[] } => b.kind !== "sceneBreak"
     )
     .map((b) => b.runs.map((r) => r.text).join(""))
     .join(" ")

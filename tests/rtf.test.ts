@@ -156,7 +156,7 @@ test("bold reaches the file only when the setting allows it", () => {
   assert.ok(kept.includes("\\b0 "));
 });
 
-test("a scene break prints centred", () => {
+test("a scene break prints centered", () => {
   const out = render("One.\n\n#\n\nTwo.");
   assert.ok(out.includes("\\qc"));
 });
@@ -183,7 +183,7 @@ test("a curly quote in the title survives into the document", () => {
   assert.ok(out.includes("Don\\u8217?t Look"));
 });
 
-// Shunn marks a scene break with a centred "#" and suggests centring END after
+// Shunn marks a scene break with a centered "#" and suggests centering END after
 // the last line, because it "can prevent ambiguity when your closing words fall
 // near the bottom of the page". Defaulting the end marker to "#" recreated the
 // exact ambiguity it exists to remove.
