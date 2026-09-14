@@ -97,7 +97,7 @@ A bare `#` works too, and is what most writers reach for — but Obsidian reads 
 
 ### Scene labels
 
-If your story has multiple timelines, several point-of-view characters, or a prologue and epilogue, you may want to label its scenes. Write each label as an H2 (`## 1987`, `## Now`) and it exports centered on its own line, in the same plain 12-point type. A scene label is its own break, so it needs no `***` before it. The first heading in a note is the title; every heading after it is treated as a scene label.
+If your story has multiple timelines, several point-of-view characters, or a prologue and epilogue, you may want to label its scenes. Write each label as an H2 (`## 1987`, `## Now`) and it exports centered on its own line, in the same plain 12-point type. A scene label is its own break, so it needs no `***` before it. The title is the note's H1 (or a heading that repeats the note's name); every other heading is treated as a scene label, so a note with no H1 can start with one.
 
 Standard manuscript format has no rule for scene labels. Centered plain text is the convention, and it is what other manuscript tools print. A bonus of using real headings: Obsidian's Outline pane becomes a map of your scenes.
 
