@@ -97,7 +97,7 @@ A bare `#` works too, and is what most writers reach for — but Obsidian reads 
 
 ### Titled sections
 
-A story told in two timelines, or in named parts, labels its sections. Write each label as a heading (`## 1987`, `## Now`) and it exports centred on its own line, in the same plain 12-point type, where a `#` would go. The heading is the break, so it needs no `***` before it. The first heading in the note is the title, not a section; every heading after it is a section label, whatever its level.
+A story told in two timelines, or in named parts, labels its sections. Write each label as an H2 (`## 1987`, `## Now`) and it exports centred on its own line, in the same plain 12-point type, where a `#` would go. The heading is the break, so it needs no `***` before it. The rule underneath: the first heading in the note is the title, and every heading after it is a section label, whatever its level, so an H3 would export the same way.
 
 There is no rule for these in standard manuscript format (Shunn: "you could simply label it 'Earlier' or '1987'"); centred plain text is the convention, and it is what other manuscript tools print. A bonus of using real headings: Obsidian's Outline pane becomes a map of the story's sections.
 
