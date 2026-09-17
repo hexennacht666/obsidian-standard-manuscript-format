@@ -89,7 +89,7 @@ export default class SmfExportPlugin extends Plugin {
       },
     });
 
-    this.addRibbonIcon("pencil", "New story", () =>
+    this.addRibbonIcon("feather", "New story", () =>
       void this.createStory(this.defaultNewStoryFolder())
     );
 
@@ -130,7 +130,7 @@ export default class SmfExportPlugin extends Plugin {
           menu.addItem((item) =>
             item
               .setTitle("New story")
-              .setIcon("pencil")
+              .setIcon("feather")
               .onClick(() => void this.createStory(file.path))
           );
           return;
