@@ -105,26 +105,26 @@ export class ProfilePage extends SettingPage {
       .setName("Format")
       .setDesc("Most markets accept either .docx or .rtf.")
       .addDropdown((dropdown) =>
-      dropdown
-        .addOptions(OPTION_LABELS.exportFormat)
-        .setValue(this.valueOf("exportFormat"))
-        .onChange((value) => this.save("exportFormat", value as ExportFormat))
-    );
+        dropdown
+          .addOptions(OPTION_LABELS.exportFormat)
+          .setValue(this.valueOf("exportFormat"))
+          .onChange((value) => this.save("exportFormat", value as ExportFormat))
+      );
 
     new Setting(containerEl)
       .setName("Font")
       .setDesc("Times is what the modern standard recommends. Courier is the classic look.")
       .addDropdown((dropdown) =>
-      dropdown
-        .addOptions(OPTION_LABELS.fontPreset)
-        .setValue(this.valueOf("fontPreset"))
-        .onChange((value) => {
-          this.save("fontPreset", value as FontPreset);
-          // Redrawing this page is safe — it's the containing tab that must
-          // not be rebuilt while this page is open.
-          this.display();
-        })
-    );
+        dropdown
+          .addOptions(OPTION_LABELS.fontPreset)
+          .setValue(this.valueOf("fontPreset"))
+          .onChange((value) => {
+            this.save("fontPreset", value as FontPreset);
+            // Redrawing this page is safe — it's the containing tab that must
+            // not be rebuilt while this page is open.
+            this.display();
+          })
+      );
 
     if (this.valueOf("fontPreset") === "custom") {
       new Setting(containerEl)
@@ -154,11 +154,11 @@ export class ProfilePage extends SettingPage {
       .setName("Line spacing")
       .setDesc("Double is standard format. Single is for a market that asks for it outright.")
       .addDropdown((dropdown) =>
-      dropdown
-        .addOptions(OPTION_LABELS.lineSpacing)
-        .setValue(this.valueOf("lineSpacing"))
-        .onChange((value) => this.save("lineSpacing", value as LineSpacing))
-    );
+        dropdown
+          .addOptions(OPTION_LABELS.lineSpacing)
+          .setValue(this.valueOf("lineSpacing"))
+          .onChange((value) => this.save("lineSpacing", value as LineSpacing))
+      );
 
     new Setting(containerEl).setName("Content warnings").setHeading();
 
@@ -214,10 +214,10 @@ export class ProfilePage extends SettingPage {
       .setName("Strip bold")
       .setDesc("Standard format has no bold. Off keeps it, for an editor who asks.")
       .addToggle((toggle) =>
-      toggle
-        .setValue(this.valueOf("stripBold"))
-        .onChange((value) => this.save("stripBold", value))
-    );
+        toggle
+          .setValue(this.valueOf("stripBold"))
+          .onChange((value) => this.save("stripBold", value))
+      );
 
     new Setting(containerEl).setName("Author identity").setHeading();
 
@@ -233,16 +233,14 @@ export class ProfilePage extends SettingPage {
           .onChange((value) => this.save("blindSubmission", value as BlindMode))
       );
 
-
-
     new Setting(containerEl)
       .setName("Include address")
       .setDesc("Some markets don't want it.")
       .addToggle((toggle) =>
-      toggle
-        .setValue(this.valueOf("includeAddress"))
-        .onChange((value) => this.save("includeAddress", value))
-    );
+        toggle
+          .setValue(this.valueOf("includeAddress"))
+          .onChange((value) => this.save("includeAddress", value))
+      );
 
     new Setting(containerEl).setName("Include email").addToggle((toggle) =>
       toggle
