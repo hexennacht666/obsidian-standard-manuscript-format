@@ -96,7 +96,6 @@ function line(
   options: {
     alignment?: (typeof AlignmentType)[keyof typeof AlignmentType];
     spacing?: object;
-    indent?: object;
   } = {}
 ): Paragraph {
   return new Paragraph({
@@ -109,7 +108,6 @@ function line(
     ],
     alignment: options.alignment,
     spacing: options.spacing ?? SINGLE,
-    indent: options.indent,
   });
 }
 
