@@ -366,3 +366,18 @@ test("block IDs are stripped", () => {
   assert.equal(firstPara("The tide came in. ^tide-1\n"), "The tide came in.");
   assert.equal(firstPara("The tide came in.\n^tide-1\n"), "The tide came in.");
 });
+
+test("YAML quote escapes are decoded", () => {
+  const single = parseStory("---\nTitle: 'Don''t Look Back'\n---\n\nBody.\n", "fn");
+  assert.equal(single.frontmatter["title"], "Don't Look Back");
+
+  const double = parseStory(
+    '---\nTitle: "The \\"Real\\" Story"\nShort title: "Back\\\\slash"\n---\n\nBody.\n',
+    "fn"
+  );
+  assert.equal(double.frontmatter["title"], 'The "Real" Story');
+  assert.equal(double.frontmatter["shorttitle"], "Back\\slash");
+
+  const list = parseStory("---\nContent warnings:\n  - 'a child''s death'\n---\n\nBody.\n", "fn");
+  assert.deepEqual(list.contentWarnings, ["a child's death"]);
+});

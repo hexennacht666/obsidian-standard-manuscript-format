@@ -78,7 +78,16 @@ function splitFrontmatter(source: string): {
   const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) return { frontmatter, body: source };
 
-  const clean = (s: string) => s.trim().replace(/^["']|["']$/g, "");
+  // A quoted YAML scalar decodes its own escapes: '' inside single quotes,
+  // \" and \\ inside double quotes.
+  const clean = (s: string) => {
+    const value = s.trim();
+    const single = /^'([\s\S]*)'$/.exec(value);
+    if (single) return single[1].replace(/''/g, "'");
+    const double = /^"([\s\S]*)"$/.exec(value);
+    if (double) return double[1].replace(/\\(["\\])/g, "$1");
+    return value.replace(/^["']|["']$/g, "");
+  };
 
   // A key with nothing after the colon opens a block list; its `- item` lines
   // are collected until the next key. Values stay strings, joined with commas,
