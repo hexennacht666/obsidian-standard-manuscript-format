@@ -86,6 +86,11 @@ export function emphasisedText(text: string, settings: SmfSettings): string {
   return core ? `${before}_${core}_${after}` : text;
 }
 
+/** The font size in half-points, which both formats take, rounded the same way. */
+export function halfPoints(settings: SmfSettings): number {
+  return Math.round(settings.fontSize * 2);
+}
+
 export function resolveLineSpacing(settings: SmfSettings): number {
   return LINE_SPACING_TWIPS[settings.lineSpacing] ?? LINE_SPACING_TWIPS.double;
 }

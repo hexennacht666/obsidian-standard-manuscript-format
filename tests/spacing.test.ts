@@ -85,3 +85,17 @@ test("docx body paragraphs carry the chosen spacing", async () => {
   // nothing — what matters is that no double-spaced paragraph survives.
   assert.doesNotMatch(single, /w:line="480"/);
 });
+
+test("a fractional font size rounds to the same half-point in both formats", async () => {
+  const sized: SmfSettings = { ...DEFAULT_SETTINGS, legalName: "Ursula Le Guin", fontSize: 11.3 };
+  const story = parseStory("# The Salt Year\n\nProse.\n", "fn");
+  const zip = await JSZip.loadAsync(await packDocument(buildManuscript(story, sized)));
+  const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
+  const header = Object.keys(zip.files).filter((f) => /word\/header\d*\.xml/.test(f));
+  const headers = await Promise.all(header.map((f) => zip.file(f)!.async("string")));
+  for (const part of [xml, ...headers]) {
+    for (const [, size] of part.matchAll(/<w:sz w:val="([^"]+)"/g)) assert.equal(size, "23");
+  }
+  assert.match(xml, /<w:sz w:val="23"/);
+  assert.match(buildRtf(story, sized), /\\fs23/);
+});

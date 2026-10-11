@@ -27,7 +27,7 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { emphasisedText, resolveFont, resolveLineSpacing } from "./settings";
+import { emphasisedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -67,7 +67,7 @@ function bodySpacing(settings: SmfSettings): {
 
 function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   const font = resolveFont(settings);
-  const size = settings.fontSize * 2;
+  const size = halfPoints(settings);
   return runs.map(
     (r) =>
       new TextRun({
@@ -103,7 +103,7 @@ function line(
       new TextRun({
         text,
         font: resolveFont(settings),
-        size: settings.fontSize * 2,
+        size: halfPoints(settings),
       }),
     ],
     alignment: options.alignment,
@@ -284,7 +284,7 @@ export function buildManuscript(
                   new TextRun({
                     text: runningHead,
                     font: resolveFont(settings),
-                    size: settings.fontSize * 2,
+                    size: halfPoints(settings),
                   }),
                   // The page number has to carry the font too, or it renders
                   // in the reader's default face — visibly heavier and wider
@@ -293,7 +293,7 @@ export function buildManuscript(
                   new TextRun({
                     children: [PageNumber.CURRENT],
                     font: resolveFont(settings),
-                    size: settings.fontSize * 2,
+                    size: halfPoints(settings),
                   }),
                 ],
               }),

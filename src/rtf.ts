@@ -22,7 +22,7 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { emphasisedText, resolveFont, resolveLineSpacing } from "./settings";
+import { emphasisedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const TWIPS_PER_INCH = 1440;
@@ -82,7 +82,7 @@ export function escapeRtf(text: string): string {
 
 /** Font and size, restated on every paragraph for the reason above. */
 function face(settings: SmfSettings): string {
-  return `\\f0\\fs${Math.round(settings.fontSize * 2)}`;
+  return `\\f0\\fs${halfPoints(settings)}`;
 }
 
 interface ParaOptions {
