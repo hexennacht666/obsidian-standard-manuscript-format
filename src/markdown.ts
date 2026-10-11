@@ -113,7 +113,7 @@ function splitFrontmatter(source: string): {
 }
 
 // Already normalized, so every spacing and casing variant of each is covered.
-const CONTENT_WARNING_KEYS = [
+export const CONTENT_WARNING_KEYS = [
   "contentwarnings",
   "contentwarning",
   "contentnotes",
@@ -121,14 +121,25 @@ const CONTENT_WARNING_KEYS = [
   "cw",
 ];
 
-function readContentWarnings(frontmatter: Record<string, string>): string[] {
-  const key = CONTENT_WARNING_KEYS.find((k) => frontmatter[k]);
-  if (!key) return [];
-  return frontmatter[key]
+function splitWarnings(value: string): string[] {
+  return value
     .replace(/^\[|\]$/g, "") // an inline [a, b] array
     .split(",")
     .map((s) => s.trim().replace(/^["']|["']$/g, ""))
     .filter(Boolean);
+}
+
+/**
+ * The first accepted key that lists anything. An empty key is skipped rather
+ * than read as "none": a scaffold's empty `Content warnings: []` can sit beside
+ * the `Content notes` the writer actually filled in.
+ */
+function readContentWarnings(frontmatter: Record<string, string>): string[] {
+  for (const key of CONTENT_WARNING_KEYS) {
+    const warnings = splitWarnings(frontmatter[key] ?? "");
+    if (warnings.length) return warnings;
+  }
+  return [];
 }
 
 /** Strip the Obsidian-isms that should never reach an editor's desk. */

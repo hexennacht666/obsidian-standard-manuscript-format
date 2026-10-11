@@ -1,6 +1,6 @@
 import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from "obsidian";
 import { buildManuscript, packDocument } from "./docx";
-import { parseStory } from "./markdown";
+import { CONTENT_WARNING_KEYS, parseStory } from "./markdown";
 import { buildRtf } from "./rtf";
 import { exportBasename, isPlaceholderName, uniquePath } from "./naming";
 import { ProfilePicker } from "./profilePicker";
@@ -242,7 +242,7 @@ export default class SmfExportPlugin extends Plugin {
             frontmatter[TITLE_KEY] = "";
             added.push("title");
           }
-          if (!present.has("contentwarnings") && !present.has("cw")) {
+          if (!CONTENT_WARNING_KEYS.some((key) => present.has(key))) {
             frontmatter[CONTENT_WARNINGS_KEY] = [];
             added.push("content warnings");
           }

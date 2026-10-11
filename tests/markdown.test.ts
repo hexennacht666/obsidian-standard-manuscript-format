@@ -308,3 +308,13 @@ test("the running head follows the Title property, not the filename", () => {
   assert.equal(s.title, "The Salt Year: A Fragment");
   assert.equal(s.shortTitle, "Salt Year");
 });
+
+test("an empty content-warnings key never hides a filled one beside it", () => {
+  for (const empty of ["Content warnings: []", "Content warnings: [ ]", "Content warnings:", 'cw: ""']) {
+    const s = parseStory(
+      `---\n${empty}\nContent notes:\n  - grief\n  - drowning\n---\n\nBody.\n`,
+      "fn"
+    );
+    assert.deepEqual(s.contentWarnings, ["grief", "drowning"], empty);
+  }
+});
