@@ -22,7 +22,7 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { emphasisedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
+import { emphasizedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const TWIPS_PER_INCH = 1440;
@@ -113,7 +113,7 @@ function runsToRtf(runs: Run[], settings: SmfSettings): string {
       if (italic) out += "\\i ";
       if (underline) out += "\\ul ";
       out += escapeRtf(
-        run.italic ? emphasisedText(run.text, settings) : run.text
+        run.italic ? emphasizedText(run.text, settings) : run.text
       );
       if (underline) out += "\\ulnone ";
       if (italic) out += "\\i0 ";
@@ -142,7 +142,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   }
 
   // Vertical space as empty paragraphs rather than space-before, which readers
-  // honour inconsistently at the top of a page.
+  // honor inconsistently at the top of a page.
   for (let i = 0; i < 8; i++) out += paragraph("", settings);
 
   out += paragraph(escapeRtf(story.title ?? "Untitled"), settings, {
@@ -227,7 +227,7 @@ export function buildRtf(story: ParsedStory, settings: SmfSettings): string {
    * Two sections rather than \titlepg.
    *
    * The obvious way to keep the running head off the title page is
-   * \titlepg with an empty \headerf. Google Docs doesn't honour that pairing —
+   * \titlepg with an empty \headerf. Google Docs doesn't honor that pairing —
    * it falls back to the default header and prints the running head on the
    * title page, which is precisely what the format forbids.
    *

@@ -70,13 +70,13 @@ export const LINE_SPACING_TWIPS: Record<LineSpacing, number> = {
 };
 
 /**
- * An emphasised run as it should read on the page.
+ * An emphasized run as it should read on the page.
  *
  * Only the underscore mode changes the text itself. Surrounding whitespace stays
  * outside the marks — `_ word _` is not what anyone means by emphasis, and a
  * run's edges routinely carry the space between it and the next word.
  */
-export function emphasisedText(text: string, settings: SmfSettings): string {
+export function emphasizedText(text: string, settings: SmfSettings): string {
   if (settings.emphasis !== "underscore") return text;
 
   const match = /^(\s*)([\s\S]*?)(\s*)$/.exec(text);

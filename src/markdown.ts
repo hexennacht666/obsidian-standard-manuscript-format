@@ -305,14 +305,14 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
  * Two keywords, in the order and the case the title uses.
  *
  * Shunn asks for "one or two keywords from the title of your story" and gives
- * no rule about capitals, so both halves of the old behaviour — one word, upper
+ * no rule about capitals, so both halves of the old behavior — one word, upper
  * case — were ours rather than the format's. A manuscript is passed between
  * readers who have to refer to it out loud, and "Perfumed Gloves" is a story
  * where "PERFUMED" is a word.
  *
  * Picked in title order rather than by length: the old rule chose the longest
  * word, which is why "Only Perfumed Gloves Would Do" headed as PERFUMED, and
- * length is not what makes a keyword recognisable.
+ * length is not what makes a keyword recognizable.
  *
  * A story whose derived head is still wrong sets `Short title` in its own
  * frontmatter, as it always could.

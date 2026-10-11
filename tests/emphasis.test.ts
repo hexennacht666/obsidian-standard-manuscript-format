@@ -6,7 +6,7 @@ import { parseStory } from "../src/markdown";
 import { buildRtf } from "../src/rtf";
 import {
   DEFAULT_SETTINGS,
-  emphasisedText,
+  emphasizedText,
   type SmfSettings,
 } from "../src/settings";
 
@@ -67,7 +67,7 @@ test("underscores reach the page as characters, with no formatting at all", asyn
   assert.doesNotMatch(out, /\\ul quite/);
 });
 
-test("only emphasised runs get underscores", () => {
+test("only emphasized runs get underscores", () => {
   const out = rtf({ emphasis: "underscore" });
   assert.match(out, /She was _quite_ certain\./);
 });
@@ -76,15 +76,15 @@ test("only emphasised runs get underscores", () => {
 // "_ word _" is not what anyone means by emphasis.
 test("the marks hug the words, not the whitespace", () => {
   const underscore: SmfSettings = { ...settings, emphasis: "underscore" };
-  assert.equal(emphasisedText(" quite ", underscore), " _quite_ ");
-  assert.equal(emphasisedText("quite", underscore), "_quite_");
-  assert.equal(emphasisedText("   ", underscore), "   ");
-  assert.equal(emphasisedText("", underscore), "");
+  assert.equal(emphasizedText(" quite ", underscore), " _quite_ ");
+  assert.equal(emphasizedText("quite", underscore), "_quite_");
+  assert.equal(emphasizedText("   ", underscore), "   ");
+  assert.equal(emphasizedText("", underscore), "");
 });
 
 test("the other modes never touch the text", () => {
   for (const emphasis of ["italic", "underline"] as const) {
-    assert.equal(emphasisedText(" quite ", { ...settings, emphasis }), " quite ");
+    assert.equal(emphasizedText(" quite ", { ...settings, emphasis }), " quite ");
   }
 });
 

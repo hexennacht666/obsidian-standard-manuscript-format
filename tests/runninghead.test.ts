@@ -55,7 +55,7 @@ test("blind still beats it — a stated surname is not a way back onto the page"
   );
 });
 
-test("surnameOf keeps its old behaviour for callers that want a guess", () => {
+test("surnameOf keeps its old behavior for callers that want a guess", () => {
   assert.equal(surnameOf("Ursula Le Guin"), "Guin");
   assert.equal(surnameOf(""), "AUTHOR");
 });
@@ -71,7 +71,7 @@ test("the head takes two keywords, in the title's own case", () => {
   assert.equal(parseStory("Body.\n", "The Salt Year").shortTitle, "Salt Year");
 });
 
-// Length is not what makes a keyword recognisable — the old rule picked the
+// Length is not what makes a keyword recognizable — the old rule picked the
 // longest word, which is how "Perfumed" beat "Gloves" by two letters.
 test("keywords come in title order, not longest first", () => {
   assert.equal(

@@ -138,20 +138,20 @@ test("body paragraphs are double spaced and first-line indented", () => {
 });
 
 test("italics become underline when the setting asks for it", () => {
-  const emphasised = "*whispered*";
-  assert.ok(render(emphasised).includes("\\i "));
-  assert.ok(!render(emphasised).includes("\\ul "));
+  const emphasized = "*whispered*";
+  assert.ok(render(emphasized).includes("\\i "));
+  assert.ok(!render(emphasized).includes("\\ul "));
 
-  const underlined = render(emphasised, { emphasis: "underline" });
+  const underlined = render(emphasized, { emphasis: "underline" });
   assert.ok(underlined.includes("\\ul "));
   assert.ok(!underlined.includes("\\i "));
 });
 
 test("bold reaches the file only when the setting allows it", () => {
-  const emphasised = "**shouted**";
-  assert.ok(!render(emphasised).includes("\\b "));
+  const emphasized = "**shouted**";
+  assert.ok(!render(emphasized).includes("\\b "));
 
-  const kept = render(emphasised, { stripBold: false });
+  const kept = render(emphasized, { stripBold: false });
   assert.ok(kept.includes("\\b "));
   assert.ok(kept.includes("\\b0 "));
 });

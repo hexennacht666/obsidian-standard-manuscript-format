@@ -94,7 +94,7 @@ test("a placeholder in the frontmatter is not a name either", () => {
   assert.equal(exportedAs("Untitled", "# Untitled story\n\nProse.\n"), "Untitled");
 });
 
-test("Obsidian's placeholders and New story's are both recognised", () => {
+test("Obsidian's placeholders and New story's are both recognized", () => {
   const named = (b: string) =>
     exportBasename(b, { heading: "Salt Year", shortTitle: null, title: null });
   assert.equal(named("Untitled"), "Salt Year");

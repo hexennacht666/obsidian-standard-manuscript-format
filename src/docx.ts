@@ -27,7 +27,7 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { emphasisedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
+import { emphasizedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
 import type { SmfSettings } from "./settings";
 
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -71,7 +71,7 @@ function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
   return runs.map(
     (r) =>
       new TextRun({
-        text: r.italic ? emphasisedText(r.text, settings) : r.text,
+        text: r.italic ? emphasizedText(r.text, settings) : r.text,
         break: r.break ? 1 : undefined,
         // Font AND size on every run. Left to the defaults, Pages renders the
         // manuscript in its own Normal — wrong face, wrong size.
@@ -158,7 +158,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
   return [
     banner,
     // Vertical space as empty paragraphs rather than `spacing before`, which
-    // readers honour inconsistently at the top of a page.
+    // readers honor inconsistently at the top of a page.
     ...Array.from({ length: 8 }, () => line("", settings)),
     line(story.title ?? "Untitled", settings, {
       alignment: AlignmentType.CENTER,
