@@ -7,10 +7,9 @@ export type FontPreset = "courier" | "times" | "custom";
  * Shunn's *modern* format — the one Clarkesworld, Uncanny and khōréō point at —
  * reads "choose something standard and easily readable, like Times New Roman";
  * Courier belongs to his *classic* version and is noted there as his own
- * preference. Corrected 2026-08-07, having defaulted to Courier on the strength
- * of the opposite claim.
+ * preference.
  *
- * No market surveyed requires Courier, and two are actively easier in Times:
+ * No market requires Courier, and two are actively easier in Times:
  * PseudoPod refuses Courier outright, and Beneath Ceaseless Skies asks for a
  * 12pt serif. Courier stays one click away for the classic look.
  *
@@ -33,8 +32,8 @@ export function resolveFont(settings: SmfSettings): string {
 /**
  * Both formats are honest renderings of the same manuscript. RTF exists
  * because the markets disagree with each other, not because it's a fallback:
- * Clarkesworld refuses .doc, Beneath Ceaseless Skies refuses .docx, and RTF is
- * the one format the whole survey accepts. "Both" is for anyone who'd rather
+ * Clarkesworld refuses .doc, Beneath Ceaseless Skies refuses .docx, and both
+ * accept RTF. "Both" is for anyone who'd rather
  * not check the guidelines twice.
  */
 export type ExportFormat = "docx" | "rtf" | "both";
@@ -47,19 +46,16 @@ export type ExportFormat = "docx" | "rtf" | "both";
  * carrying legal name, pen name, address, phone and word count, then no name on
  * any page after it — and disqualifies entries that leave a name in the body.
  * A boolean set for one of those produces a disqualifying manuscript for the
- * other. See docs/market-guidelines.md.
+ * other.
  */
 export type BlindMode = "off" | "anonymous" | "coverPage";
 
 /**
- * Double is Shunn's, and what every market surveyed either states or assumes.
- * Single exists because Lightspeed prefers it *over* Shunn — Arial 14pt,
- * single-spaced — so a plugin that can only double-space cannot produce a
- * manuscript for a market that publishes its preference outright. See
- * docs/market-guidelines.md.
+ * Double is Shunn's, and what markets either state or assume. Single exists
+ * because Lightspeed prefers it *over* Shunn — Arial 14pt, single-spaced.
  *
- * Two values, not a free number: no surveyed market asks for anything between
- * them. One-and-a-half is a line in this table away if one turns up.
+ * Two values, not a free number: no market asks for anything between them.
+ * One-and-a-half is a line in this table away if one does.
  */
 export type LineSpacing = "double" | "single";
 
@@ -102,7 +98,7 @@ export function resolveLineSpacing(settings: SmfSettings): number {
  * why it's the default. Some markets want them in the manuscript instead, set
  * apart before the first line, so a reader who opens to the story still meets
  * them first. "Both" exists because a market that asks for one rarely forbids
- * the other. See docs/market-guidelines.md.
+ * the other.
  */
 export type ContentWarningPlacement = "titlePage" | "story" | "both";
 
@@ -110,11 +106,10 @@ export type ContentWarningPlacement = "titlePage" | "story" | "both";
  * How emphasis reaches the page.
  *
  * `italic` is what almost every market now wants. `underline` is the typewriter
- * convention a few still ask for — it stood alone as a boolean until Escape Pod
- * turned up wanting the third: emphasis written as literal underscores,
- * `_like this_`, in plain type. That one is the only mode that puts characters
- * into the prose rather than formatting on it, which is why it can't be faked
- * with a style. See docs/market-guidelines.md.
+ * convention a few still ask for. `underscore` is for Escape Pod, which wants
+ * emphasis written as literal underscores, `_like this_`, in plain type: the
+ * only mode that puts characters into the prose rather than formatting on it,
+ * which is why it can't be faked with a style.
  */
 export type Emphasis = "italic" | "underline" | "underscore";
 
@@ -159,10 +154,8 @@ export interface SmfSettings {
   /**
    * Shunn suggests centering the word END after the last line, because it
    * "can prevent ambiguity when your closing words fall near the bottom of the
-   * page". The default was `#` — the very symbol a scene break prints — so the
-   * last mark in a story was indistinguishable from the mark that means keep
-   * reading. Corrected 2026-08-07. Blank prints nothing, which is also a
-   * perfectly ordinary manuscript.
+   * page". Not `#`, which is what a scene break prints and means keep reading.
+   * Blank prints nothing, which is also a perfectly ordinary manuscript.
    */
   endMarker: string;
   outputFolder: string;

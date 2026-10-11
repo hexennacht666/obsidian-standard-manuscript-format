@@ -27,9 +27,9 @@ test("thousands are separated for readability", () => {
   assert.equal(formatWordCount(12345, false), "12,345 words");
 });
 
-// The README states that the count covers the story and nothing else. Nothing
-// guarded that until now: the exclusion falls out of counting only "para"
-// blocks, so a change to how blocks are built could break it silently.
+// The README states that the count covers the story and nothing else: not the
+// title, the content warnings or the scene breaks. Scene labels do count, as
+// they would in a word processor.
 test("the count covers the story body and nothing else", () => {
   const story = [
     "---",

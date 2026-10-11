@@ -75,8 +75,8 @@ export default class SmfExportPlugin extends Plugin {
     });
 
     this.addCommand({
-      // The id stays as it was so any hotkey already bound to it survives a
-      // rename; it's internal and never shown. "Title" covers the title fields
+      // The id doesn't match the name: changing it would break any hotkey
+      // already bound to it, and it's internal and never shown. "Title" covers the title fields
       // between them — the name doesn't have to enumerate every property to be
       // findable, and a menu command shouldn't try.
       id: "add-manuscript-properties",

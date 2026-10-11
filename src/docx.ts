@@ -120,10 +120,9 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
   const byline = bylineOf(settings);
 
   // Contact block and word count share one visual band — upper left and upper
-  // right — as Shunn's layout specifies and as Scrivener's manuscripts do. A
-  // borderless single-row table is the only way to hold them level whatever the
-  // contact block's height. Stacking them instead left the word count adrift
-  // below the address.
+  // right — as Shunn's layout specifies. A borderless single-row table is the
+  // only way to hold them level whatever the contact block's height; stacked,
+  // the word count drifts below the address.
   const banner = new Table({
     columnWidths: [HALF_WIDTH, HALF_WIDTH],
     width: { size: CONTENT_WIDTH, type: WidthType.DXA },
@@ -279,18 +278,15 @@ export function buildManuscript(
                 alignment: AlignmentType.RIGHT,
                 spacing: SINGLE,
                 children: [
-                  // The header runs carried no properties at all, so the
-                  // running head arrived in the reader's default sans-serif
-                  // while the manuscript body was monospaced.
+                  // Font and size stated here too, or the running head
+                  // arrives in the reader's default face.
                   new TextRun({
                     text: runningHead,
                     font: resolveFont(settings),
                     size: halfPoints(settings),
                   }),
-                  // The page number has to carry the font too, or it renders
-                  // in the reader's default face — visibly heavier and wider
-                  // than the Courier beside it. SimpleField takes no run
-                  // properties, so the field goes inside a styled run instead.
+                  // The page number needs the font as well. SimpleField takes
+                  // no run properties, so the field goes inside a styled run.
                   new TextRun({
                     children: [PageNumber.CURRENT],
                     font: resolveFont(settings),
@@ -319,10 +315,9 @@ export function buildManuscript(
  * incorrectly with it present, even when the part is completely EMPTY. So it
  * isn't the content of the styles; it's the existence of the part.
  *
- * Scrivener's manuscripts ship no styles part either, which is why they render
- * correctly in Pages and ours did not. Nothing is lost: every run states its
- * own font and size, and every paragraph its own spacing, indent and alignment,
- * so there is nothing left for a style to supply.
+ * Nothing is lost: every run states its own font and size, and every
+ * paragraph its own spacing, indent and alignment, so there is nothing left
+ * for a style to supply.
  */
 async function stripStylesPart(zipped: ArrayBuffer): Promise<ArrayBuffer> {
   const zip = await JSZip.loadAsync(zipped);
@@ -348,10 +343,8 @@ async function stripStylesPart(zipped: ArrayBuffer): Promise<ArrayBuffer> {
     );
   }
 
-  // JSZip stores uncompressed unless told otherwise, and a .docx is a zip by
-  // definition — repacking without this turned every manuscript into three
-  // times the bytes it needed, which is the sort of thing that only shows up
-  // once the files are sitting in someone's synced vault.
+  // JSZip stores uncompressed unless told otherwise, which would make every
+  // manuscript about three times the size it needs to be.
   return zip.generateAsync({
     type: "arraybuffer",
     compression: "DEFLATE",

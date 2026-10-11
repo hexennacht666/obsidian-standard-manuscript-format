@@ -9,8 +9,6 @@
  *
  * No Obsidian imports here on purpose — resolution and the human summaries are
  * the parts worth testing, and they test in plain Node.
- *
- * See docs/design-export-profiles.md for what was deliberately not built.
  */
 import { DEFAULT_SETTINGS, resolveFont, type SmfSettings } from "./settings";
 
@@ -156,7 +154,7 @@ export function resolveProfile(
     const value = profile.overrides[key];
     if (value !== undefined) {
       // Each key's value type is its own; the loop erases that, and the
-      // alternative is thirteen hand-written assignments that drift.
+      // alternative is an assignment for every overridable field, and those drift.
       (merged as Record<string, unknown>)[key] = value;
     }
   }

@@ -15,11 +15,10 @@ import type {
 /**
  * One profile's overrides, rendered imperatively.
  *
- * It was declarative first, and that was wrong for a page whose own title and
- * list row depend on what's being typed into it. Refreshing them means
- * `update()`, which re-reads the definitions the open page was built from and
- * leaves it standing as an empty shell; not refreshing them leaves a page
- * titled with the profile's old name and a row that never catches up. A
+ * Not declarative, because the page's own title and list row depend on what's
+ * being typed into it. Refreshing a declarative page means `update()`, which
+ * re-reads the definitions the open page was built from and leaves it standing
+ * as an empty shell; not refreshing leaves a stale title and row. A
  * `SettingPage` has the lifecycle the declarative form lacks: it is handed to
  * Obsidian by a factory, and `hide()` runs when the writer navigates away — so
  * the list is rebuilt exactly once, when leaving, and nothing is rebuilt
@@ -72,8 +71,8 @@ export class ProfilePage extends SettingPage {
       return;
     }
 
-    // Without this the page reads as thirteen values the profile owns, when
-    // in fact it owns only what gets changed here.
+    // Without this the page reads as every overridable field being owned by
+    // the profile, when in fact it owns only what gets changed here.
     new Setting(containerEl).setDesc(
       "Anything you don't change here follows your settings."
     );
@@ -123,7 +122,7 @@ export class ProfilePage extends SettingPage {
         .setValue(this.valueOf("fontPreset"))
         .onChange((value) => {
           this.save("fontPreset", value as FontPreset);
-          // Redrawing my own page is safe — it's the containing tab that must
+          // Redrawing this page is safe — it's the containing tab that must
           // not be rebuilt while this page is open.
           this.display();
         })

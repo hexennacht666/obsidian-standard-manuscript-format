@@ -79,7 +79,7 @@ export function typographize(input: string): TypographyResult {
   //
   // Resetting per paragraph is what makes the standard convention work, where
   // speech running over several paragraphs re-opens each one and closes only at
-  // the end — smartTypography is called once per paragraph.
+  // the end — typographize is called once per paragraph.
   let inDoubleQuote = false;
 
   for (let i = 0; i < text.length; i++) {

@@ -38,8 +38,7 @@ test("double is the default, and it is Shunn's", () => {
   assert.equal(DEFAULT_SETTINGS.lineSpacing, "double");
 });
 
-// Lightspeed states single-spaced in preference to Shunn, so this is a
-// manuscript the plugin could not produce at all before the setting existed.
+// Lightspeed states single-spaced in preference to Shunn.
 test("single resolves to single, in twips", () => {
   assert.equal(resolveLineSpacing({ ...settings, lineSpacing: "single" }), 240);
 });
@@ -50,8 +49,7 @@ test("RTF body paragraphs carry the chosen spacing", () => {
   assert.doesNotMatch(rtf({ lineSpacing: "single" }), /\\sl480/);
 });
 
-// A scene break is part of the manuscript, so it opens out with everything
-// else rather than staying at whatever the body used to be.
+// A scene break is part of the manuscript, so it takes the body's spacing.
 test("RTF scene breaks and the end marker follow the body", () => {
   const single = rtf({ lineSpacing: "single" });
   assert.equal(single.includes("\\qc\\fi0\\sl240\\slmult1\\f0\\fs24 #\\par"), true);

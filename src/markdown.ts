@@ -301,24 +301,14 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
   return runs;
 }
 
-/**
- * Two keywords, in the order and the case the title uses.
- *
- * Shunn asks for "one or two keywords from the title of your story" and gives
- * no rule about capitals, so both halves of the old behavior — one word, upper
- * case — were ours rather than the format's. A manuscript is passed between
- * readers who have to refer to it out loud, and "Perfumed Gloves" is a story
- * where "PERFUMED" is a word.
- *
- * Picked in title order rather than by length: the old rule chose the longest
- * word, which is why "Only Perfumed Gloves Would Do" headed as PERFUMED, and
- * length is not what makes a keyword recognizable.
- *
- * A story whose derived head is still wrong sets `Short title` in its own
- * frontmatter, as it always could.
- */
 const MAX_KEYWORD_LENGTH = 24;
 
+/**
+ * The running head's keywords: up to two words from the main title, skipping
+ * stopwords, in the order and the case the title uses. Shunn asks for "one or
+ * two keywords from the title of your story" and sets no rule about capitals.
+ * A story whose derived head is wrong sets `Short title` in its frontmatter.
+ */
 function pickShortTitle(title: string): string {
   // A subtitle is the wrong place to look for the running head's keyword —
   // "The Salt Year: A Fragment" should head as Salt Year, not Fragment.

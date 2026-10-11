@@ -1,9 +1,9 @@
 /**
  * Renders a parsed story to Rich Text Format.
  *
- * RTF earns its place by being the one format every market in the survey
- * accepts: Clarkesworld won't take .doc, Beneath Ceaseless Skies won't take
- * .docx, and both take this. It is also the only second format producible
+ * RTF earns its place by being accepted where the other formats are not:
+ * Clarkesworld won't take .doc, Beneath Ceaseless Skies won't take .docx, and
+ * both take this. It is also the only second format producible
  * honestly in pure JavaScript — the legacy .doc is an OLE compound binary, and
  * the usual workaround (HTML wearing a .doc extension) ships a file that isn't
  * the format it claims to be.

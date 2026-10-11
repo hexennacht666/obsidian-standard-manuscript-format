@@ -296,7 +296,6 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Custom font",
             desc: "Exact font name, e.g. Georgia. Word substitutes if the reader doesn't have it.",
-            // Replaces the old rebuild-the-whole-tab call.
             visible: () =>
               isGlobal("customFont") && this.plugin.settings.fontPreset === "custom",
             control: { type: "text", key: "customFont", placeholder: "Georgia" },
@@ -309,8 +308,7 @@ export class SmfSettingTab extends PluginSettingTab {
               type: "number",
               key: "fontSize",
               min: 1,
-              // Said out loud rather than silently ignored, which is what the
-              // old text field did with anything unusable.
+              // Said out loud rather than silently ignored.
               validate: (value) =>
                 Number.isFinite(value) && value > 0
                   ? undefined
@@ -434,8 +432,8 @@ export class SmfSettingTab extends PluginSettingTab {
         onReorder: (from, to) => this.moveProfile(from, to),
         // Kept for the Delete/Backspace shortcut it registers, but it is not
         // the affordance anyone will find: on 1.13.4 a row that opens a page
-        // renders no delete button, on hover or otherwise (Beth, 2026-08-07).
-        // The one that works is inside the profile's own page.
+        // renders no delete button, on hover or otherwise. The one that works
+        // is inside the profile's own page.
         onDelete: (index) => this.deleteProfile(this.plugin.settings.profiles[index]),
         items: this.plugin.settings.profiles.map((profile) =>
           this.profileRow(profile)

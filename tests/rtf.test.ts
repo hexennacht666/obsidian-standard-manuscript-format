@@ -83,8 +83,7 @@ test("the running head carries the page number field", () => {
 });
 
 // Headers are section properties. Without a section to attach to they bind to
-// nothing and the running head silently doesn't appear — which is exactly how
-// this shipped the first time.
+// nothing and the running head silently doesn't appear.
 test("a section is opened before anything that belongs to one", () => {
   const out = render("A paragraph.");
   const sectd = out.indexOf("\\sectd");
@@ -93,10 +92,9 @@ test("a section is opened before anything that belongs to one", () => {
 });
 
 /*
- * The title page must carry no running head. Relying on \titlepg with an empty
- * \headerf was not enough — Google Docs ignored it and printed the running head
- * on the title page. The title page now lives in its own section that declares
- * no header at all, so there is nothing for any reader to fall back to.
+ * The title page must carry no running head. Google Docs ignores \titlepg with
+ * an empty \headerf, so the title page lives in its own section that declares
+ * no header at all, leaving nothing for any reader to fall back to.
  */
 test("the title page's section declares no header", () => {
   const out = render("A paragraph.");

@@ -55,14 +55,13 @@ test("blind still beats it — a stated surname is not a way back onto the page"
   );
 });
 
-test("surnameOf keeps its old behavior for callers that want a guess", () => {
+test("surnameOf guesses the last word for callers that want a guess", () => {
   assert.equal(surnameOf("Ursula Le Guin"), "Guin");
   assert.equal(surnameOf(""), "AUTHOR");
 });
 
 // Shunn asks for "one or two keywords from the title" and says nothing about
-// capitals. One word in capitals was ours, and it read worse: a manuscript is
-// passed between readers who refer to it out loud.
+// capitals, and a manuscript is passed between readers who refer to it out loud.
 test("the head takes two keywords, in the title's own case", () => {
   assert.equal(
     parseStory("Body.\n", "Only Perfumed Gloves Would Do").shortTitle,
@@ -71,8 +70,7 @@ test("the head takes two keywords, in the title's own case", () => {
   assert.equal(parseStory("Body.\n", "The Salt Year").shortTitle, "Salt Year");
 });
 
-// Length is not what makes a keyword recognizable — the old rule picked the
-// longest word, which is how "Perfumed" beat "Gloves" by two letters.
+// Length is not what makes a keyword recognizable.
 test("keywords come in title order, not longest first", () => {
   assert.equal(
     parseStory("Body.\n", "The Cartographer's Wake").shortTitle,
@@ -88,8 +86,8 @@ test("two long keywords fall back to one", () => {
   );
 });
 
-// Beth's worry: a long surname beside a two-word keyword. Even at the extreme
-// the head is about half the width of a 6.5" line at 12pt.
+// A long surname beside a two-word keyword. Even at the extreme the head is
+// about half the width of a 6.5" line at 12pt.
 test("a long surname and two keywords still make a short head", () => {
   const settings: SmfSettings = {
     ...DEFAULT_SETTINGS,

@@ -7,9 +7,9 @@ test("curls double quotes by context", () => {
 });
 
 test("re-derives quotes that were already curly the wrong way", () => {
-  // Straight from a real manuscript that had been pasted between Obsidian and
-  // Scrivener: mixed straight and curly, and the final quote curled the wrong
-  // way. Only the whole paragraph carries enough state to fix it.
+  // Text pasted between editors: mixed straight and curly, and the final quote
+  // curled the wrong way. Only the whole paragraph carries enough state to fix
+  // it.
   assert.equal(
     smartTypography(
       '"Right about now you\'re feeling your heart slow down. ' +
