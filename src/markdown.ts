@@ -330,7 +330,7 @@ export function plainTitle(raw: string): string {
 }
 
 /** Loose match between a heading and a title: case, spacing and quote style vary. */
-function sameTitle(heading: string, title: string | null): boolean {
+export function sameTitle(heading: string, title: string | null): boolean {
   if (!title) return false;
   const norm = (t: string) =>
     t

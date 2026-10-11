@@ -38,13 +38,27 @@ test("the opening heading names it, exactly as written", () => {
   );
 });
 
-test("the heading wins over both properties", () => {
+test("a heading that repeats the stated title wins over both properties", () => {
   assert.equal(
     exportedAs(
       "Untitled 3",
-      "---\ntitle: The Salt Year\nShort title: Gloves\n---\n\n# Only Perfumed Gloves\n\nProse.\n"
+      "---\ntitle: Only Perfumed Gloves\nShort title: Gloves\n---\n\n# Only Perfumed Gloves\n\nProse.\n"
     ),
     "Only Perfumed Gloves"
+  );
+});
+
+test("a stated title wins over a heading that doesn't match it", () => {
+  assert.equal(
+    exportedAs("Untitled story", "---\ntitle: The Salt Year\n---\n\n# Draft notes\n\nProse.\n"),
+    "The Salt Year"
+  );
+  assert.equal(
+    exportedAs(
+      "Untitled 3",
+      "---\ntitle: The Salt Year\nShort title: Salt\n---\n\n# Draft notes\n\nProse.\n"
+    ),
+    "Salt"
   );
 });
 

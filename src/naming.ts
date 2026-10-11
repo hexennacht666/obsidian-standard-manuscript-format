@@ -1,4 +1,4 @@
-import { plainTitle, type ParsedStory } from "./markdown";
+import { plainTitle, sameTitle, type ParsedStory } from "./markdown";
 
 /** Appends a counter until the path is free. */
 export function uniquePath(
@@ -59,13 +59,19 @@ export function storyName(story: ParsedStory): StoryName {
  *
  * A note still carrying a placeholder name has no such name to protect, so it
  * takes one from the story. The heading comes first because in Obsidian the
- * opening heading and the note's name are the same thing, and each candidate is
- * used exactly as written: a title too long to be a filename is what
- * `Short title` is for, and it is asked for first.
+ * opening heading and the note's name are the same thing, unless a stated
+ * `Title` disagrees with it: then the heading is something else, like a working
+ * label, and the title is the story's name. Each candidate is used exactly as
+ * written: a title too long to be a filename is what `Short title` is for, and
+ * it is asked for first.
  */
 export function exportBasename(basename: string, story: StoryName): string {
   if (!isPlaceholderName(basename)) return basename;
-  for (const candidate of [story.heading, story.shortTitle, story.title]) {
+  const heading =
+    story.title && story.heading && !sameTitle(story.heading, story.title)
+      ? null
+      : story.heading;
+  for (const candidate of [heading, story.shortTitle, story.title]) {
     const stated = (candidate ?? "").trim();
     if (stated && !isPlaceholderName(stated)) return stated;
   }
