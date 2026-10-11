@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 import { test } from "node:test";
 import JSZip from "jszip";
 import { buildManuscript, packDocument } from "../src/docx";
+import { offersPlacementChoice } from "../src/manuscript";
 import { parseStory } from "../src/markdown";
 import { buildRtf } from "../src/rtf";
 import { DEFAULT_SETTINGS, type SmfSettings } from "../src/settings";
@@ -140,4 +141,14 @@ test("on a single first page, every placement prints the warnings once", async (
     const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
     assert.equal(xml.split("Content warnings: body horror, drowning").length - 1, 1, placement);
   }
+});
+
+test("the placement choice is offered only where it changes anything", () => {
+  assert.equal(offersPlacementChoice({ ...settings, blindSubmission: "coverPage" }), true);
+  assert.equal(offersPlacementChoice({ ...settings, blindSubmission: "off" }), false);
+  assert.equal(offersPlacementChoice({ ...settings, blindSubmission: "anonymous" }), false);
+  assert.equal(
+    offersPlacementChoice({ ...settings, blindSubmission: "coverPage", includeContentWarnings: false }),
+    false
+  );
 });

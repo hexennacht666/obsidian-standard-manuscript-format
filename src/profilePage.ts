@@ -1,5 +1,6 @@
 import { App, Setting, SettingPage } from "obsidian";
 import { ConfirmModal } from "./confirmModal";
+import { offersPlacementChoice } from "./manuscript";
 import type SmfExportPlugin from "./main";
 import {
   profileTitle,
@@ -174,10 +175,14 @@ export class ProfilePage extends SettingPage {
           })
       );
 
-    if (this.valueOf("includeContentWarnings")) {
+    const placementShown = offersPlacementChoice({
+      includeContentWarnings: this.valueOf("includeContentWarnings"),
+      blindSubmission: this.valueOf("blindSubmission"),
+    });
+    if (placementShown) {
       new Setting(containerEl)
         .setName("Content warning placement")
-        .setDesc("Some markets want them in the manuscript, before the first line.")
+        .setDesc("Where they print when your details are on a cover page of their own.")
         .addDropdown((dropdown) =>
           dropdown
             .addOptions(OPTION_LABELS.contentWarningPlacement)
@@ -186,7 +191,9 @@ export class ProfilePage extends SettingPage {
               this.save("contentWarningPlacement", value as ContentWarningPlacement)
             )
         );
+    }
 
+    if (this.valueOf("includeContentWarnings")) {
       new Setting(containerEl)
         .setName("Content warning label")
         .setDesc("Wording some markets are particular about.")
@@ -230,7 +237,11 @@ export class ProfilePage extends SettingPage {
         dropdown
           .addOptions(OPTION_LABELS.blindSubmission)
           .setValue(this.valueOf("blindSubmission"))
-          .onChange((value) => this.save("blindSubmission", value as BlindMode))
+          .onChange((value) => {
+            this.save("blindSubmission", value as BlindMode);
+            // The content-warning placement row depends on this.
+            this.display();
+          })
       );
 
     new Setting(containerEl)

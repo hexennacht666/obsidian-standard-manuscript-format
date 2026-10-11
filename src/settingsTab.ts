@@ -5,7 +5,7 @@ import {
   type SettingDefinitionPage,
 } from "obsidian";
 import type SmfExportPlugin from "./main";
-import { runningHeadName, surnameOf } from "./manuscript";
+import { offersPlacementChoice, runningHeadName, surnameOf } from "./manuscript";
 import { ProfileNameModal } from "./profileNameModal";
 import { ProfilePage } from "./profilePage";
 import {
@@ -324,8 +324,8 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "Content warning placement",
-            desc: "The title page is where a first reader meets them before the story. Some markets want them in the manuscript instead, set apart before the first line.",
-            visible: () => this.plugin.settings.includeContentWarnings,
+            desc: "Where they print when your details are on a cover page of their own.",
+            visible: () => offersPlacementChoice(this.plugin.settings),
             control: {
               type: "dropdown",
               key: "contentWarningPlacement",

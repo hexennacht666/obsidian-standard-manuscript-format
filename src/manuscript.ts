@@ -140,6 +140,13 @@ export function hasCoverPage(settings: SmfSettings): boolean {
   return settings.blindSubmission === "coverPage";
 }
 
+/** Whether the placement setting can change anything, so is worth showing. */
+export function offersPlacementChoice(
+  settings: Pick<SmfSettings, "includeContentWarnings" | "blindSubmission">
+): boolean {
+  return settings.includeContentWarnings && settings.blindSubmission === "coverPage";
+}
+
 /**
  * Whether warnings are printed in a given place, given the story has any.
  *

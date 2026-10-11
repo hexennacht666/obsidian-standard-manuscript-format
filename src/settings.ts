@@ -92,12 +92,13 @@ export function resolveLineSpacing(settings: SmfSettings): number {
 }
 
 /**
- * Where the story's content warnings are printed.
+ * Where the story's content warnings are printed when the writer's details are
+ * on an identified cover page. Otherwise the story starts under the byline and
+ * they print there, once, whatever this says.
  *
- * The title page is where a slush reader meets them before the story, which is
- * why it's the default. Some markets want them in the manuscript instead, set
- * apart before the first line, so a reader who opens to the story still meets
- * them first. "Both" exists because a market that asks for one rarely forbids
+ * The cover page is the default, where a slush reader meets them before the
+ * story. Some markets want them with the story instead, set apart before the
+ * first line. "Both" exists because a market that asks for one rarely forbids
  * the other.
  */
 export type ContentWarningPlacement = "titlePage" | "story" | "both";
