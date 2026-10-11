@@ -12,7 +12,7 @@ Free, runs on your phone as well as at your desk, and never connects to the inte
 </picture>
 
 - **Two formats**, because markets disagree about which they accept.
-- **Shunn modern format**, with a running head on every page but the title page.
+- **Shunn modern format**, with a running head on every page but the first.
 - **Typographic cleanup** — curly quotes, em dashes, ellipses, and wrong-way quotes fixed.
 - **Word count** of the story only, so front matter never inflates it.
 - **Blind submission**, in the two configurations markets require.
@@ -60,9 +60,9 @@ It also never touches your clipboard, executes no code of its own or yours, and 
 
 **Two formats, because markets disagree.** `.docx` and `.rtf`, the same manuscript either way. Some markets won't take `.doc`; others won't take `.docx`; every market surveyed takes RTF, so it's the safe answer when guidelines are vague or an uploader is fussy. Export one or both.
 
-**Shunn modern format.** Title page with your contact block upper-left and the word count upper-right, title and byline centered below. Story starts on page 2.
+**Shunn modern format.** Your contact block upper-left and the word count upper-right, title and byline centered halfway down the first page. The story begins on the first page, under the byline. *Identified cover page* keeps your details on a separate cover page instead.
 
-**Running head** on every page but the title page: `Surname / Short title / page`. Set a surname, or leave it blank if your last name is a single word. Settings shows what will print, so you can check it before an editor sees it a dozen times.
+**Running head** on every page but the first: `Surname / Short title / page`. Set a surname, or leave it blank if your last name is a single word. Settings shows what will print, so you can check it before an editor sees it a dozen times.
 
 **Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centered `#` for scene breaks, centered scene labels, and a centered END after the last line.
 
@@ -72,13 +72,13 @@ It also never touches your clipboard, executes no code of its own or yours, and 
 
 The export works either way. Afterwards it tells you which paragraphs look like they're missing a closing quote, so you can go and check them. Dialogue that runs over several paragraphs, opening each one and closing only the last, is normal and never flagged. Nothing is fixed for you, and you can switch the warning off.
 
-**Word count** of the story only, not your title page or content warnings.
+**Word count** of the story only, not the title, your contact block or content warnings.
 
 **Obsidian's own syntax is cleaned up.** Wikilinks and markdown links print as their text, embeds and block IDs are dropped, and `%%comments%%`, highlights and strikethrough are stripped or unwrapped.
 
 **No bold by default**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here. Editors do occasionally ask for bold kept, so it's a setting rather than a rule.
 
-**Blind submission**, in the two configurations markets require. *Anonymous throughout* removes your name from the contact block, the byline and the running head. *Identified cover page* keeps the title page and removes your name from every page after it. Both also strip the author name that gets embedded invisibly inside a `.docx`, which survives every precaution taken on the visible page.
+**Blind submission**, in the two configurations markets require. *Anonymous throughout* removes your name from the contact block, the byline and the running head. *Identified cover page* puts your details on a cover page of their own and removes your name from every page after it. Both also strip the author name that gets embedded invisibly inside a `.docx`, which survives every precaution taken on the visible page.
 
 **Export profiles.** Save a market's or an editor's particular requirements, then pick them at the moment of export. Markets have quirks, you submit to the same ones repeatedly, and this means not adjusting the same six settings every time. **Export with…** always offers your normal settings first and never remembers your last choice, so a profile can't stay switched on by accident. A profile saves only what you actually changed, so a setting you adjust later still reaches a profiled export.
 
@@ -126,7 +126,7 @@ The names are matched loosely, so `Content warnings`, `contentWarnings`, `conten
 
 **Leave `Title` empty and the title comes from the note**: the first heading if there is one, otherwise the filename, so renaming the note renames the manuscript. Fill it in and it wins. It's there because Obsidian forbids `: / \ * " < > | ?` in filenames, and plenty of titles need them — *Who Goes There?* can never be a filename, and neither can anything with a subtitle.
 
-**Content warnings** print on the title page by default, under the byline, where a slush reader meets them before the story — or with the story, set apart before the first line, for the markets that ask for that instead. A comma-separated line or an inline array works just as well as a list. Settings control the label and whether they print at all. You write the warnings on each story.
+**Content warnings** print under the byline, set apart before the first line, where a slush reader meets them before the story. With an identified cover page you choose whether they go on the cover, with the story, or both. A comma-separated line or an inline array works just as well as a list. Settings control the label and whether they print at all. You write the warnings on each story.
 
 ### If the running head is wrong for one story
 
@@ -153,7 +153,7 @@ Every setting is findable from Obsidian's settings search.
 
 **My RTF has no running head in Pages.** It never will. macOS's RTF reader has no representation for page headers at all, so an RTF looks header-less there even when it's correct. **Check RTF in Word**, which is what the markets requesting RTF will open it in.
 
-**My RTF shows the running head on the title page in Google Docs.** Google's RTF importer flattens headers to the whole document. The same story exported as `.docx` is correct in Google Docs, so this is the importer rather than the manuscript. Again: check RTF in Word.
+**My RTF shows the running head on the first page in Google Docs.** Google's RTF importer flattens headers to the whole document. The same story exported as `.docx` is correct in Google Docs, so this is the importer rather than the manuscript. Again: check RTF in Word.
 
 **My bold went missing.** Deliberate — standard manuscript format has no bold, so the words survive and the emphasis doesn't. If an editor has asked you to keep it, turn off strip-bold in settings.
 
