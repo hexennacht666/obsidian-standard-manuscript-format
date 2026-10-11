@@ -89,6 +89,10 @@ The export works either way. Afterwards it tells you which paragraphs look like 
 
 ## Writing for the exporter
 
+### Paragraphs
+
+A blank line starts a new paragraph. A single Return is a line break inside it, as Obsidian shows it, so verse keeps its lines.
+
 ### Scene breaks
 
 Type `***` on a line of its own. It exports as the centered `#` that a manuscript wants.

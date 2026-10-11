@@ -99,3 +99,16 @@ test("a fractional font size rounds to the same half-point in both formats", asy
   assert.match(xml, /<w:sz w:val="23"/);
   assert.match(buildRtf(story, sized), /\\fs23/);
 });
+
+test("a line break inside a paragraph keeps the run's font and size", async () => {
+  const story = parseStory("First line,\nsecond line.\n", "fn");
+  const zip = await JSZip.loadAsync(
+    await packDocument(buildManuscript(story, { ...DEFAULT_SETTINGS, legalName: "Ursula Le Guin" }))
+  );
+  const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
+  const run = /<w:r>(?:(?!<\/w:r>)[\s\S])*<w:br\/>(?:(?!<\/w:r>)[\s\S])*<\/w:r>/.exec(xml)?.[0] ?? "";
+  assert.match(run, /second line\./);
+  assert.match(run, /<w:rFonts w:ascii="Times New Roman"/);
+  assert.match(run, /<w:sz w:val="24"/);
+  assert.equal(xml.split("<w:br/>").length - 1, 1);
+});

@@ -108,7 +108,7 @@ function runsToRtf(runs: Run[], settings: SmfSettings): string {
     .map((run) => {
       const underline = run.italic && settings.emphasis === "underline";
       const italic = run.italic && settings.emphasis === "italic";
-      let out = "";
+      let out = run.break ? "\\line " : "";
       if (run.bold) out += "\\b ";
       if (italic) out += "\\i ";
       if (underline) out += "\\ul ";

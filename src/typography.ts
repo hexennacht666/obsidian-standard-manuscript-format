@@ -69,7 +69,7 @@ export function typographize(input: string): TypographyResult {
   text = text.replace(/\.\s\.\s\./g, "…");
   text = text.replace(/\.{3,}/g, "…");
   // So "well..." and "well . . ." land on the same manuscript output.
-  text = text.replace(/(\w)\s+…/g, "$1…");
+  text = text.replace(/(\w)[^\S\n]+…/g, "$1…");
 
   const out: string[] = [];
   // Double quotes alternate open/close across the paragraph rather than being

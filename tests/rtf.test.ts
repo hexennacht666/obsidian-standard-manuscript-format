@@ -202,3 +202,8 @@ test("a blank end marker prints nothing at all", () => {
   const out = render("Just the one scene.\n", { endMarker: "" });
   assert.doesNotMatch(out, /END/);
 });
+
+test("a line break inside a paragraph is a line, not a new paragraph", () => {
+  const out = render("First line,\nsecond line.\n");
+  assert.match(out, /First line,\\line second line\./);
+});

@@ -10,6 +10,11 @@ export interface Run {
   text: string;
   italic?: boolean;
   bold?: boolean;
+  /**
+   * A line break comes before this run. A single Return inside a paragraph is
+   * a break within it, as Obsidian shows it, so verse keeps its lines.
+   */
+  break?: boolean;
 }
 
 export interface ParseOptions {
@@ -173,18 +178,26 @@ function stripVaultSyntax(text: string): string {
     .replace(/~~([^~]+)~~/g, "$1");
 }
 
-function pushRun(runs: Run[], text: string, italic: boolean, bold: boolean) {
-  if (!text) return;
+/** Whether a run was added; empty text adds nothing. */
+function pushRun(
+  runs: Run[],
+  text: string,
+  italic: boolean,
+  bold: boolean,
+  lineBreak: boolean
+): boolean {
+  if (!text) return false;
   const last = runs[runs.length - 1];
-  if (last && !!last.italic === italic && !!last.bold === bold) {
+  if (!lineBreak && last && !!last.italic === italic && !!last.bold === bold) {
     last.text += text;
-    return;
+    return true;
   }
   const run: Run = { text, italic: italic || undefined };
-  // Set only when there's bold to carry, so a run parsed with bold stripped is
-  // exactly the run this produced before the setting existed.
+  // Set only when present, so a plain run carries no extra keys.
   if (bold) run.bold = true;
+  if (lineBreak) run.break = true;
   runs.push(run);
+  return true;
 }
 
 const WORD_CHAR = /[\p{L}\p{N}]/u;
@@ -231,9 +244,22 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
   let buf = "";
   let italic = false;
   let strong = false;
+  // Held until the next run with text, which is the one the break precedes.
+  let lineBreak = false;
+  const flushRun = () => {
+    if (pushRun(runs, buf, italic, strong && !stripBold, lineBreak)) lineBreak = false;
+    buf = "";
+  };
 
   for (let i = 0; i < input.length; ) {
     const c = input[i];
+
+    if (c === "\n") {
+      flushRun();
+      lineBreak = runs.length > 0;
+      i += 1;
+      continue;
+    }
 
     // Only ASCII punctuation can be escaped, as in Markdown, so a path like
     // C:\Users keeps its backslash.
@@ -263,8 +289,7 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
       continue;
     }
 
-    pushRun(runs, buf, italic, strong && !stripBold);
-    buf = "";
+    flushRun();
     // `*` is italic, `**` bold, `***` both. With bold stripped, `**` is
     // swallowed whole and changes nothing, and what survives `***` is italic.
     if (len !== 2) italic = !italic;
@@ -272,7 +297,7 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
     i += len;
   }
 
-  pushRun(runs, buf, italic, strong && !stripBold);
+  flushRun();
   return runs;
 }
 
@@ -360,15 +385,17 @@ export function parseStory(
 
   const paragraphs: { text: string; endsOpen: boolean }[] = [];
 
+  // The paragraph's lines are typographized together, joined by a newline,
+  // so a quote opened on one line closes on a later one.
   const flush = () => {
     if (!pending.length) return;
     const { text, endsOpen } = typographize(
-      pending.join(" ").replace(/\s+/g, " ").trim()
+      pending.map((l) => l.replace(/\s+/g, " ")).join("\n")
     );
     const runs = parseInline(text, options);
     if (runs.length) {
       blocks.push({ kind: "para", runs });
-      paragraphs.push({ text, endsOpen });
+      paragraphs.push({ text: text.replace(/\n/g, " "), endsOpen });
     }
     pending = [];
   };
@@ -434,7 +461,7 @@ export function parseStory(
     .filter(
       (b): b is { kind: "para" | "sceneLabel"; runs: Run[] } => b.kind !== "sceneBreak"
     )
-    .map((b) => b.runs.map((r) => r.text).join(""))
+    .map((b) => b.runs.map((r) => (r.break ? ` ${r.text}` : r.text)).join(""))
     .join(" ")
     .split(/\s+/)
     .filter((w) => WORD_CHAR.test(w)).length;

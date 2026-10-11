@@ -116,9 +116,43 @@ test("vault syntax never reaches the manuscript", () => {
   );
 });
 
-test("soft-wrapped lines join into one paragraph", () => {
-  const s = parseStory("One line\nwrapped here.\n\nSecond.\n", "fn");
+// Each line ends with a single newline, and some with a non-breaking space
+// before it, as Obsidian leaves them.
+const VERSE = [
+  "_“I am the sword of Valdís in the living realm,_",
+  "_guardian of her garden,_\u00a0",
+  "_steward of stray souls._ \u00a0",
+  "_I make humble offering of all who trespass,_\u00a0",
+  "_or else forfeit mine own head,_\u00a0",
+  "_till the end of days.”_\u00a0",
+].join("\n");
+
+test("a single Return is a line break inside the paragraph", () => {
+  const s = parseStory(`${VERSE}\n\nShe lowered the sword.\n`, "fn");
   assert.equal(s.blocks.length, 2);
+  const verse = s.blocks[0];
+  assert.ok(verse.kind === "para");
+  assert.equal(verse.runs.length, 6);
+  assert.ok(verse.runs.every((r) => r.italic));
+  assert.deepEqual(
+    verse.runs.map((r) => !!r.break),
+    [false, true, true, true, true, true]
+  );
+  for (const run of verse.runs) assert.equal(run.text, run.text.trim(), JSON.stringify(run.text));
+  assert.ok(verse.runs[0].text.startsWith("“I am"));
+  assert.ok(verse.runs[5].text.endsWith("days.”"));
+  assert.equal(s.wordCount, 41);
+  assert.deepEqual(s.unclosedQuotes, []);
+});
+
+test("quotes curl across a line break", () => {
+  const s = parseStory('"Not yet,\nshe said," he said.\n', "fn");
+  const block = s.blocks[0];
+  assert.ok(block.kind === "para");
+  assert.deepEqual(
+    block.runs.map((r) => [r.text, !!r.break]),
+    [["“Not yet,", false], ["she said,” he said.", true]]
+  );
 });
 
 test("multi-paragraph speech is never reported as unclosed", () => {

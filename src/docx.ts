@@ -72,6 +72,7 @@ function toTextRuns(runs: Run[], settings: SmfSettings): TextRun[] {
     (r) =>
       new TextRun({
         text: r.italic ? emphasisedText(r.text, settings) : r.text,
+        break: r.break ? 1 : undefined,
         // Font AND size on every run. Left to the defaults, Pages renders the
         // manuscript in its own Normal — wrong face, wrong size.
         font,
