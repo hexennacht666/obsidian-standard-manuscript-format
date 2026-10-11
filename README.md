@@ -74,7 +74,7 @@ The export works either way. Afterwards it tells you which paragraphs look like 
 
 **Word count** of the story only, not your title page or content warnings.
 
-**Obsidian syntax never reaches the page.** Wikilinks, markdown links, `%%comments%%`, and highlights are stripped or unwrapped.
+**Obsidian's own syntax is cleaned up.** Wikilinks and markdown links print as their text, embeds and block IDs are dropped, and `%%comments%%`, highlights and strikethrough are stripped or unwrapped.
 
 **No bold by default**, because the format has none. `**bold**` arrives as plain text — the words survive, the emphasis doesn't — and `***both***` keeps its italics. Emphasis in a manuscript is italic, or underline for the markets still on the typewriter convention, and both are already here. Editors do occasionally ask for bold kept, so it's a setting rather than a rule.
 

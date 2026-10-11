@@ -344,3 +344,25 @@ test("a title is plain text, with markup consumed and quotes curled", () => {
     "Salt"
   );
 });
+
+const firstPara = (source: string) => {
+  const block = parseStory(source, "fn").blocks[0];
+  return block?.kind === "para" ? block.runs.map((r) => r.text).join("") : "";
+};
+
+test("embeds are dropped, not printed as their file names", () => {
+  assert.equal(firstPara("She looked up. ![[moth.png]] Nothing.\n"), "She looked up. Nothing.");
+  assert.equal(firstPara("Before ![a moth](moth.png) after.\n"), "Before after.");
+  assert.equal(firstPara("![[Other story]]\n\nProse.\n"), "Prose.");
+});
+
+test("links to a heading or block print the note's name only", () => {
+  assert.equal(firstPara("See [[Salt Year#The Shore]] again.\n"), "See Salt Year again.");
+  assert.equal(firstPara("See [[Salt Year#^a1b2c3]] again.\n"), "See Salt Year again.");
+  assert.equal(firstPara("See [[Salt Year#The Shore|the shore]] again.\n"), "See the shore again.");
+});
+
+test("block IDs are stripped", () => {
+  assert.equal(firstPara("The tide came in. ^tide-1\n"), "The tide came in.");
+  assert.equal(firstPara("The tide came in.\n^tide-1\n"), "The tide came in.");
+});

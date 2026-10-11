@@ -147,9 +147,17 @@ function stripVaultSyntax(text: string): string {
   return text
     .replace(/%%[\s\S]*?%%/g, "")
     .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/!?\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2")
-    .replace(/!?\[\[([^\]]+)\]\]/g, "$1")
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // An embed is a picture or another note, and a manuscript can hold neither.
+    .replace(/!\[\[[^\]]*\]\]/g, "")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2")
+    // A link into a heading or block prints as the note it points at.
+    .replace(/\[\[([^\]]+)\]\]/g, (_, target: string) =>
+      target.replace(/#.*$/, "") || target.replace(/^#\^?/, "")
+    )
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // Block IDs: ` ^id` at the end of a line, or alone on one.
+    .replace(/(^|[ \t])\^[A-Za-z0-9-]+[ \t]*$/gm, "")
     .replace(/==([^=]+)==/g, "$1")
     .replace(/~~([^~]+)~~/g, "$1");
 }
