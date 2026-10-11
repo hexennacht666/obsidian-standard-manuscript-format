@@ -128,6 +128,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
   const gap = titleGapLines(contact.length, settings.fontSize);
 
   const byline = bylineOf(settings);
+  const spacing = bodySpacing(settings);
 
   // Contact block and word count share one visual band — upper left and upper
   // right — as Shunn's layout specifies. A borderless single-row table is the
@@ -169,19 +170,21 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
     // Vertical space as empty paragraphs rather than `spacing before`, which
     // readers honor inconsistently at the top of a page.
     ...Array.from({ length: gap }, () => line("", settings)),
-    line(story.title, settings, {
-      alignment: AlignmentType.CENTER,
-    }),
-    line("", settings, { spacing: bodySpacing(settings) }),
-    line(byline ? `by ${byline}` : "", settings, {
-      alignment: AlignmentType.CENTER,
-    }),
+    // From the title on, every line takes the manuscript's spacing: the byline
+    // is the next line after the title, then one blank line before what
+    // follows. An anonymous manuscript has no byline line at all.
+    line(story.title, settings, { alignment: AlignmentType.CENTER, spacing }),
+    ...(byline
+      ? [line(`by ${byline}`, settings, { alignment: AlignmentType.CENTER, spacing })]
+      : []),
+    line("", settings, { spacing }),
     ...(showsContentWarnings("titlePage", story.contentWarnings, settings)
       ? [
-          line("", settings, { spacing: bodySpacing(settings) }),
           line(contentWarningLine(story.contentWarnings, settings), settings, {
             alignment: AlignmentType.CENTER,
+            spacing,
           }),
+          line("", settings, { spacing }),
         ]
       : []),
     ...(hasCoverPage(settings) ? [new Paragraph({ children: [new PageBreak()] })] : []),

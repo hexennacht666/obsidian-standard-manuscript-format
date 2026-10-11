@@ -119,3 +119,60 @@ test("the gap above the title is that many empty single-spaced lines in both for
   const lines = out.slice(out.indexOf("you@example.com"), out.indexOf("The Salt Year")).split("\n");
   assert.equal(lines.filter((l) => /\\sl240\\slmult1\\f0\\fs24 \\par$/.test(l)).length, gap);
 });
+
+/** Paragraphs from the title on, as [text, line spacing] pairs. */
+async function docxFromTitle(overrides: Partial<SmfSettings> = {}, source = SOURCE) {
+  const zip = await JSZip.loadAsync(
+    await packDocument(buildManuscript(parseStory(source, "fn"), { ...settings, ...overrides }))
+  );
+  const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
+  const paragraphs = xml.slice(xml.indexOf("</w:tbl>")).match(/<w:p>.*?<\/w:p>/g) ?? [];
+  const rows = paragraphs.map((p) => [
+    (p.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) ?? []).map((t) => t.replace(/<[^>]+>/g, "")).join(""),
+    /w:line="(\d+)"/.exec(p)?.[1] ?? "",
+  ]);
+  return rows.slice(rows.findIndex(([text]) => text === "The Salt Year"));
+}
+
+function rtfFromTitle(overrides: Partial<SmfSettings> = {}, source = SOURCE) {
+  const out = buildRtf(parseStory(source, "fn"), { ...settings, ...overrides });
+  const lines = out.split("\n").filter((l) => l.startsWith("\\pard"));
+  return lines
+    .slice(lines.findIndex((l) => l.endsWith(" The Salt Year\\par")))
+    .map((l) => [l.replace(/^\\pard[^ ]* /, "").replace(/\\par$/, ""), /\\sl(\d+)/.exec(l)?.[1] ?? ""]);
+}
+
+test("the byline is the next double-spaced line, then one blank line, then the story", async () => {
+  const expected = [
+    ["The Salt Year", "480"],
+    ["by Ursula Le Guin", "480"],
+    ["", "480"],
+    ["The first line of the story.", "480"],
+  ];
+  assert.deepEqual((await docxFromTitle()).slice(0, 4), expected);
+  assert.deepEqual(rtfFromTitle().slice(0, 4), expected);
+});
+
+test("title-page warnings sit between the byline and the story, set apart by a blank line", async () => {
+  const source = "---\ncw: drowning\n---\n\n# The Salt Year\n\nThe first line of the story.\n";
+  const expected = [
+    ["The Salt Year", "480"],
+    ["by Ursula Le Guin", "480"],
+    ["", "480"],
+    ["Content warnings: drowning", "480"],
+    ["", "480"],
+    ["The first line of the story.", "480"],
+  ];
+  assert.deepEqual((await docxFromTitle({}, source)).slice(0, 6), expected);
+  assert.deepEqual(rtfFromTitle({}, source).slice(0, 6), expected);
+});
+
+test("an anonymous manuscript has no empty byline line under the title", async () => {
+  const expected = [
+    ["The Salt Year", "480"],
+    ["", "480"],
+    ["The first line of the story.", "480"],
+  ];
+  assert.deepEqual((await docxFromTitle({ blindSubmission: "anonymous" })).slice(0, 3), expected);
+  assert.deepEqual(rtfFromTitle({ blindSubmission: "anonymous" }).slice(0, 3), expected);
+});

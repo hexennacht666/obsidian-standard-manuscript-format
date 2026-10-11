@@ -154,23 +154,25 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   const gap = titleGapLines(Math.max(1, contact.length), settings.fontSize);
   for (let i = 0; i < gap; i++) out += paragraph("", settings);
 
-  out += paragraph(escapeRtf(story.title), settings, {
-    align: "center",
-  });
-  out += paragraph("", settings, { spacing: resolveLineSpacing(settings) });
+  // From the title on, every line takes the manuscript's spacing: the byline
+  // is the next line after the title, then one blank line before what
+  // follows. An anonymous manuscript has no byline line at all.
+  const spacing = resolveLineSpacing(settings);
+  out += paragraph(escapeRtf(story.title), settings, { align: "center", spacing });
 
   const byline = bylineOf(settings);
-  out += paragraph(byline ? `by ${escapeRtf(byline)}` : "", settings, {
-    align: "center",
-  });
+  if (byline) {
+    out += paragraph(`by ${escapeRtf(byline)}`, settings, { align: "center", spacing });
+  }
+  out += paragraph("", settings, { spacing });
 
   if (showsContentWarnings("titlePage", story.contentWarnings, settings)) {
-    out += paragraph("", settings, { spacing: resolveLineSpacing(settings) });
     out += paragraph(
       escapeRtf(contentWarningLine(story.contentWarnings, settings)),
       settings,
-      { align: "center" }
+      { align: "center", spacing }
     );
+    out += paragraph("", settings, { spacing });
   }
 
   return out;
