@@ -35,8 +35,8 @@ export interface UnclosedQuote {
 }
 
 export interface ParsedStory {
-  title: string | null;
-  shortTitle: string | null;
+  title: string;
+  shortTitle: string;
   /**
    * The story's opening heading as plain text, whether or not it was used as
    * the title. Obsidian's convention is that the first heading and the note's

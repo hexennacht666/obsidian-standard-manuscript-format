@@ -86,17 +86,13 @@ export function bylineOf(settings: SmfSettings): string {
 }
 
 /** `Surname / KEYWORD / ` — the page number is appended by each emitter. */
-export function runningHeadPrefix(
-  shortTitle: string | null,
-  settings: SmfSettings
-): string {
-  const title = shortTitle ?? "UNTITLED";
+export function runningHeadPrefix(shortTitle: string, settings: SmfSettings): string {
   // The one place both blind arrangements agree: every page after the first
   // carries the title and a page number and no name at all. It's also the
   // easiest place to leave a name by accident, being set once and never read.
-  if (settings.blindSubmission !== "off") return `${title} / `;
+  if (settings.blindSubmission !== "off") return `${shortTitle} / `;
 
-  return `${runningHeadName(settings)} / ${title} / `;
+  return `${runningHeadName(settings)} / ${shortTitle} / `;
 }
 
 /**

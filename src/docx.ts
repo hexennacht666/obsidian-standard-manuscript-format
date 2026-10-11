@@ -159,7 +159,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
     // Vertical space as empty paragraphs rather than `spacing before`, which
     // readers honor inconsistently at the top of a page.
     ...Array.from({ length: 8 }, () => line("", settings)),
-    line(story.title ?? "Untitled", settings, {
+    line(story.title, settings, {
       alignment: AlignmentType.CENTER,
     }),
     line("", settings, { spacing: bodySpacing(settings) }),
@@ -241,20 +241,18 @@ export function buildManuscript(
   settings: SmfSettings
 ): Document {
   const runningHead = runningHeadPrefix(story.shortTitle, settings);
+  // Word shows these under File > Properties, where a name survives every
+  // precaution taken on the visible page. A named export always has a name,
+  // because the export refuses without one.
+  const creator =
+    settings.blindSubmission === "off"
+      ? settings.penName || settings.legalName
+      : "Anonymous";
 
   return new Document({
-    // Word shows these under File > Properties, where a name survives every
-    // precaution taken on the visible page. Left unset the library writes
-    // "Un-named", which is harmless but reaches an editor looking careless.
-    creator:
-      settings.blindSubmission === "off"
-        ? settings.penName || settings.legalName || "Un-named"
-        : "Anonymous",
-    lastModifiedBy:
-      settings.blindSubmission === "off"
-        ? settings.penName || settings.legalName || "Un-named"
-        : "Anonymous",
-    title: story.title ?? "Untitled",
+    creator,
+    lastModifiedBy: creator,
+    title: story.title,
     sections: [
       {
         properties: {

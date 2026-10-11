@@ -145,7 +145,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   // honor inconsistently at the top of a page.
   for (let i = 0; i < 8; i++) out += paragraph("", settings);
 
-  out += paragraph(escapeRtf(story.title ?? "Untitled"), settings, {
+  out += paragraph(escapeRtf(story.title), settings, {
     align: "center",
   });
   out += paragraph("", settings, { spacing: resolveLineSpacing(settings) });
