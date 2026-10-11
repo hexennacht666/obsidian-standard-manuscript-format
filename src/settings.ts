@@ -207,3 +207,21 @@ export const DEFAULT_SETTINGS: SmfSettings = {
   contentWarningLabel: "Content warnings",
   profiles: [],
 };
+
+/**
+ * Settings as read from data.json. A hand edit or a sync conflict can leave
+ * anything in the file, so a value whose type differs from its default's takes
+ * the default instead of throwing somewhere far from here. Keys this version
+ * doesn't know are kept, so a newer version's settings survive a save from an
+ * older one. Profiles come back empty: `sanitizeProfiles` reads those.
+ */
+export function sanitizeSettings(data: unknown): SmfSettings {
+  const record: Record<string, unknown> =
+    typeof data === "object" && data !== null ? (data as Record<string, unknown>) : {};
+  const settings = { ...DEFAULT_SETTINGS, ...record } as Record<string, unknown>;
+  for (const [key, fallback] of Object.entries(DEFAULT_SETTINGS)) {
+    if (typeof record[key] !== typeof fallback) settings[key] = fallback;
+  }
+  settings.profiles = [];
+  return settings as unknown as SmfSettings;
+}

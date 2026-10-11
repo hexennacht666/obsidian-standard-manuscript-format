@@ -14,7 +14,7 @@ import {
   sanitizeProfiles,
   type SmfProfile,
 } from "../src/profiles";
-import { DEFAULT_SETTINGS, type SmfSettings } from "../src/settings";
+import { DEFAULT_SETTINGS, sanitizeSettings, type SmfSettings } from "../src/settings";
 
 const settings: SmfSettings = {
   ...DEFAULT_SETTINGS,
@@ -191,4 +191,32 @@ test("deleting a profile removes that profile and no other", () => {
 
   removeProfile(list, { ...profile({}, "gone"), id: "profile-9" });
   assert.deepEqual(list.map((p) => p.id), ["profile-1"]);
+});
+
+// A hand edit or a sync conflict can leave anything in data.json.
+test("a wrong-typed setting on disk falls back to its default", () => {
+  const read = sanitizeSettings({
+    outputFolder: null,
+    fontSize: "12",
+    stripBold: "no",
+    legalName: "Ursula Le Guin",
+    profiles: "not a list",
+  });
+  assert.equal(read.outputFolder, DEFAULT_SETTINGS.outputFolder);
+  assert.equal(read.fontSize, DEFAULT_SETTINGS.fontSize);
+  assert.equal(read.stripBold, DEFAULT_SETTINGS.stripBold);
+  assert.equal(read.legalName, "Ursula Le Guin");
+  assert.deepEqual(read.profiles, []);
+  assert.deepEqual(sanitizeSettings(null), { ...DEFAULT_SETTINGS, profiles: [] });
+});
+
+test("a wrong-typed profile override is dropped", () => {
+  const [read] = sanitizeProfiles([
+    {
+      id: "profile-1",
+      name: "Neon Hemlock",
+      overrides: { contentWarningLabel: null, fontSize: "14", stripBold: false },
+    },
+  ]);
+  assert.deepEqual(read.overrides, { stripBold: false });
 });

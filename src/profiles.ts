@@ -12,7 +12,7 @@
  *
  * See docs/design-export-profiles.md for what was deliberately not built.
  */
-import { resolveFont, type SmfSettings } from "./settings";
+import { DEFAULT_SETTINGS, resolveFont, type SmfSettings } from "./settings";
 
 /**
  * Where a setting is allowed to live.
@@ -126,11 +126,12 @@ export function sanitizeProfiles(value: unknown): SmfProfile[] {
         ? (record.overrides as Record<string, unknown>)
         : {};
 
-    // Only keys this version knows about. A key from a later version would
-    // otherwise ride along into an export that can't honour it.
+    // Only keys this version knows about, holding the type their setting
+    // holds. A key from a later version would otherwise ride along into an
+    // export that can't honor it, and a wrong-typed value would throw.
     const overrides: ProfileOverrides = {};
     for (const key of OVERRIDABLE_KEYS) {
-      if (raw[key] !== undefined) {
+      if (typeof raw[key] === typeof DEFAULT_SETTINGS[key]) {
         (overrides as Record<string, unknown>)[key] = raw[key];
       }
     }

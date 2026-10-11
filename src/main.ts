@@ -10,7 +10,7 @@ import {
   sanitizeProfiles,
   type SmfProfile,
 } from "./profiles";
-import { DEFAULT_SETTINGS, FONT_PRESETS, type SmfSettings } from "./settings";
+import { DEFAULT_SETTINGS, FONT_PRESETS, sanitizeSettings, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
 /**
@@ -432,7 +432,7 @@ export default class SmfExportPlugin extends Plugin {
       typeof loaded === "object" && loaded !== null
         ? (loaded as Record<string, unknown>)
         : {};
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, data);
+    this.settings = sanitizeSettings(data);
 
     // Every menu and command asks whether any profile exists, so a data.json
     // that says something other than a list here would break the plugin at
