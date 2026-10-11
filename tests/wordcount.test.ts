@@ -59,3 +59,9 @@ test("a story with no properties counts the same as one carrying them", () => {
   assert.equal(parseStory(bare, "Untitled story").wordCount, 10);
   assert.equal(parseStory(dressed, "Untitled story").wordCount, 10);
 });
+
+test("words in any script are counted", () => {
+  assert.equal(parseStory("Она открыла дверь.\n", "fn").wordCount, 3);
+  assert.equal(parseStory("Η θάλασσα ήταν ήσυχη.\n", "fn").wordCount, 4);
+  assert.equal(parseStory("Ōtautahi — and then nothing.\n", "fn").wordCount, 4);
+});

@@ -412,7 +412,7 @@ export function parseStory(
     .map((b) => b.runs.map((r) => r.text).join(""))
     .join(" ")
     .split(/\s+/)
-    .filter((w) => /[A-Za-z0-9]/.test(w)).length;
+    .filter((w) => WORD_CHAR.test(w)).length;
 
   // A paragraph left mid-quote is only suspect when the next one doesn't pick
   // the speech back up — that continuation is the convention, not an error.
