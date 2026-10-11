@@ -14,6 +14,7 @@ import {
   NO_CHANGES,
   hasDuplicateName,
   newProfile,
+  removeProfile,
   type SmfProfile,
 } from "./profiles";
 import type { SmfSettings } from "./settings";
@@ -62,8 +63,9 @@ export class SmfSettingTab extends PluginSettingTab {
     this.update();
   }
 
-  private deleteProfile(index: number): void {
-    this.plugin.settings.profiles.splice(index, 1);
+  private deleteProfile(profile: SmfProfile | undefined): void {
+    if (!profile) return;
+    removeProfile(this.plugin.settings.profiles, profile);
     void this.plugin.saveSettings();
     this.update();
   }
@@ -94,7 +96,7 @@ export class SmfSettingTab extends PluginSettingTab {
           this.plugin,
           profile,
           () => this.update(),
-          () => this.deleteProfile(this.plugin.settings.profiles.indexOf(profile))
+          () => this.deleteProfile(profile)
         ),
     };
   }
@@ -434,7 +436,7 @@ export class SmfSettingTab extends PluginSettingTab {
         // the affordance anyone will find: on 1.13.4 a row that opens a page
         // renders no delete button, on hover or otherwise (Beth, 2026-08-07).
         // The one that works is inside the profile's own page.
-        onDelete: (index) => this.deleteProfile(index),
+        onDelete: (index) => this.deleteProfile(this.plugin.settings.profiles[index]),
         items: this.plugin.settings.profiles.map((profile) =>
           this.profileRow(profile)
         ),

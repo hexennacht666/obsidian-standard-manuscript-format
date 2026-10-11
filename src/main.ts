@@ -469,6 +469,11 @@ export default class SmfExportPlugin extends Plugin {
     }
   }
 
+  /** Another device, or a sync service, rewrote data.json. */
+  async onExternalSettingsChange() {
+    await this.loadSettings();
+  }
+
   async saveSettings() {
     await this.saveData(this.settings);
   }

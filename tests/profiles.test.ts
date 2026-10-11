@@ -10,6 +10,7 @@ import {
   setOverride,
   uniqueName,
   resolveProfile,
+  removeProfile,
   sanitizeProfiles,
   type SmfProfile,
 } from "../src/profiles";
@@ -176,4 +177,18 @@ test("a profile with no overrides object still loads", () => {
   const [read] = sanitizeProfiles([{ id: "profile-1", name: "Empty" }]);
   assert.deepEqual(read.overrides, {});
   assert.deepEqual(resolveProfile(settings, read), settings);
+});
+
+// The settings can be reloaded from disk while a profile's page is open, so the
+// page may hold a copy rather than the object in the list.
+test("deleting a profile removes that profile and no other", () => {
+  const a = profile({}, "a");
+  const b = { ...profile({}, "b"), id: "profile-2" };
+  const list = [a, b];
+
+  removeProfile(list, { ...b, overrides: {} });
+  assert.deepEqual(list.map((p) => p.id), ["profile-1"]);
+
+  removeProfile(list, { ...profile({}, "gone"), id: "profile-9" });
+  assert.deepEqual(list.map((p) => p.id), ["profile-1"]);
 });

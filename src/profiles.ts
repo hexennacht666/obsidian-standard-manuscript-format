@@ -297,6 +297,16 @@ export function hasDuplicateName(
 }
 
 /**
+ * Removes the profile with this one's id. Matched by id because the settings
+ * can be reloaded from disk while the profile's page is open, leaving the page
+ * holding a copy; a profile that is no longer listed removes nothing.
+ */
+export function removeProfile(profiles: SmfProfile[], profile: SmfProfile): void {
+  const index = profiles.findIndex((p) => p.id === profile.id);
+  if (index !== -1) profiles.splice(index, 1);
+}
+
+/**
  * Setting a profile's field back to what the settings say removes the override
  * rather than storing an equal copy, so the field resumes following the
  * settings. The two are indistinguishable today — `describeOverrides` already
