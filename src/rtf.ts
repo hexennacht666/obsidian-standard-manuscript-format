@@ -22,23 +22,28 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { emphasizedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
+import {
+  emphasizedText,
+  halfPoints,
+  LINE_SPACING_TWIPS,
+  resolveFont,
+  resolveLineSpacing,
+} from "./settings";
 import type { SmfSettings } from "./settings";
 
 const TWIPS_PER_INCH = 1440;
-const INCH = TWIPS_PER_INCH;
 
 /** US Letter, which is what Shunn's format assumes. */
 const PAGE_WIDTH = Math.round(8.5 * TWIPS_PER_INCH);
 const PAGE_HEIGHT = 11 * TWIPS_PER_INCH;
-const MARGIN = INCH;
+const MARGIN = TWIPS_PER_INCH;
 
 /**
  * Single, in twips, as `\sl` expects it. The contact block and the running head
  * are always single; the manuscript itself takes the writer's chosen spacing,
  * which `resolveLineSpacing` returns in the same unit.
  */
-const SINGLE = 240;
+const SINGLE = LINE_SPACING_TWIPS.single;
 
 const FIRST_LINE_INDENT = Math.round(0.5 * TWIPS_PER_INCH);
 

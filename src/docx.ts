@@ -27,7 +27,13 @@ import {
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
-import { emphasizedText, halfPoints, resolveFont, resolveLineSpacing } from "./settings";
+import {
+  emphasizedText,
+  halfPoints,
+  LINE_SPACING_TWIPS,
+  resolveFont,
+  resolveLineSpacing,
+} from "./settings";
 import type { SmfSettings } from "./settings";
 
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
@@ -49,7 +55,12 @@ const HALF_WIDTH = Math.floor(CONTENT_WIDTH / 2);
 // The contact block and the running head are always single — they're address
 // lines, not prose. Everything the reader reads as the manuscript takes the
 // spacing the writer chose.
-const SINGLE = { line: 240, lineRule: LineRuleType.AUTO, before: 0, after: 0 };
+const SINGLE = {
+  line: LINE_SPACING_TWIPS.single,
+  lineRule: LineRuleType.AUTO,
+  before: 0,
+  after: 0,
+};
 
 function bodySpacing(settings: SmfSettings): {
   line: number;
