@@ -64,6 +64,12 @@ test("escaped markers are literal", () => {
   assert.equal(plain("a \\*not italic\\* b"), "a *not italic* b");
 });
 
+test("a backslash before anything but punctuation is kept", () => {
+  assert.equal(plain("saved in C:\\Users\\salt"), "saved in C:\\Users\\salt");
+  assert.equal(plain("a \\\\ b"), "a \\ b");
+  assert.equal(plain("\\_not italic\\_"), "_not italic_");
+});
+
 test("frontmatter supplies title and short title", () => {
   const s = parseStory(
     "---\ntitle: The Salt Year\nshortTitle: SALT\n---\n\nBody text here.\n",

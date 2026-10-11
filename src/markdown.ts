@@ -189,6 +189,8 @@ function pushRun(runs: Run[], text: string, italic: boolean, bold: boolean) {
 
 const WORD_CHAR = /[\p{L}\p{N}]/u;
 
+const ESCAPABLE = /^[!-/:-@[-`{-~]$/;
+
 /**
  * Whether a run of `*` or `_` can open or close emphasis. It opens after a
  * non-word character with text straight after it, and closes the other way
@@ -207,7 +209,7 @@ function flanking(text: string, i: number, len: number): { opens: boolean; close
 /** Whether a run of `marker` that can close emphasis appears from `from` on. */
 function hasCloser(text: string, from: number, marker: string): boolean {
   for (let j = from; j < text.length; ) {
-    if (text[j] === "\\") {
+    if (text[j] === "\\" && ESCAPABLE.test(text[j + 1] ?? "")) {
       j += 2;
       continue;
     }
@@ -233,7 +235,9 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
   for (let i = 0; i < input.length; ) {
     const c = input[i];
 
-    if (c === "\\" && i + 1 < input.length) {
+    // Only ASCII punctuation can be escaped, as in Markdown, so a path like
+    // C:\Users keeps its backslash.
+    if (c === "\\" && ESCAPABLE.test(input[i + 1] ?? "")) {
       buf += input[i + 1];
       i += 2;
       continue;
