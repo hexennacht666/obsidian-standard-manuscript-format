@@ -217,6 +217,8 @@ export function describeOverrides(
   return out;
 }
 
+const UNTITLED_PROFILE = "Untitled profile";
+
 /**
  * A new profile overrides nothing at all.
  *
@@ -229,9 +231,14 @@ export function describeOverrides(
 export function newProfile(name: string, existing: SmfProfile[]): SmfProfile {
   return {
     id: newProfileId(existing),
-    name: uniqueName(name.trim() || "Untitled profile", existing),
+    name: uniqueName(name.trim() || UNTITLED_PROFILE, existing),
     overrides: {},
   };
+}
+
+/** What a profile is called on screen, even with its name left blank. */
+export function profileTitle(profile: SmfProfile): string {
+  return profile.name.trim() || UNTITLED_PROFILE;
 }
 
 /**

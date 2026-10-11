@@ -1,15 +1,21 @@
 import { App, Setting, SettingPage } from "obsidian";
 import { ConfirmModal } from "./confirmModal";
 import type SmfExportPlugin from "./main";
-import { setOverride, type OverridableKey, type SmfProfile } from "./profiles";
-import type {
-  BlindMode,
-  ContentWarningPlacement,
-  Emphasis,
-  ExportFormat,
-  FontPreset,
-  LineSpacing,
-  SmfSettings,
+import {
+  profileTitle,
+  setOverride,
+  type OverridableKey,
+  type SmfProfile,
+} from "./profiles";
+import {
+  OPTION_LABELS,
+  type BlindMode,
+  type ContentWarningPlacement,
+  type Emphasis,
+  type ExportFormat,
+  type FontPreset,
+  type LineSpacing,
+  type SmfSettings,
 } from "./settings";
 
 /**
@@ -41,7 +47,7 @@ export class ProfilePage extends SettingPage {
     private readonly onDelete: () => void
   ) {
     super();
-    this.title = titleOf(profile);
+    this.title = profileTitle(profile);
   }
 
   /** The profile's value for a field, or the setting it falls through to. */
@@ -88,7 +94,7 @@ export class ProfilePage extends SettingPage {
             this.profile.name = value;
             // The titlebar is read from here; the row behind it is rebuilt on
             // the way out rather than on every keystroke.
-            this.title = titleOf(this.profile);
+            this.title = profileTitle(this.profile);
             void this.plugin.saveSettings();
           })
       );
@@ -100,11 +106,7 @@ export class ProfilePage extends SettingPage {
       .setDesc("Most markets accept either .docx or .rtf.")
       .addDropdown((dropdown) =>
       dropdown
-        .addOptions({
-          docx: "Word (.docx)",
-          rtf: "Rich text (.rtf)",
-          both: "Both",
-        })
+        .addOptions(OPTION_LABELS.exportFormat)
         .setValue(this.valueOf("exportFormat"))
         .onChange((value) => this.save("exportFormat", value as ExportFormat))
     );
@@ -114,11 +116,7 @@ export class ProfilePage extends SettingPage {
       .setDesc("Times is what the modern standard recommends. Courier is the classic look.")
       .addDropdown((dropdown) =>
       dropdown
-        .addOptions({
-          courier: "Courier New",
-          times: "Times New Roman",
-          custom: "Custom…",
-        })
+        .addOptions(OPTION_LABELS.fontPreset)
         .setValue(this.valueOf("fontPreset"))
         .onChange((value) => {
           this.save("fontPreset", value as FontPreset);
@@ -157,7 +155,7 @@ export class ProfilePage extends SettingPage {
       .setDesc("Double is standard format. Single is for a market that asks for it outright.")
       .addDropdown((dropdown) =>
       dropdown
-        .addOptions({ double: "Double", single: "Single" })
+        .addOptions(OPTION_LABELS.lineSpacing)
         .setValue(this.valueOf("lineSpacing"))
         .onChange((value) => this.save("lineSpacing", value as LineSpacing))
     );
@@ -182,11 +180,7 @@ export class ProfilePage extends SettingPage {
         .setDesc("Some markets want them in the manuscript, before the first line.")
         .addDropdown((dropdown) =>
           dropdown
-            .addOptions({
-              titlePage: "Title page",
-              story: "With the story",
-              both: "Both",
-            })
+            .addOptions(OPTION_LABELS.contentWarningPlacement)
             .setValue(this.valueOf("contentWarningPlacement"))
             .onChange((value) =>
               this.save("contentWarningPlacement", value as ContentWarningPlacement)
@@ -211,11 +205,7 @@ export class ProfilePage extends SettingPage {
       .setDesc("Underline is the typewriter convention. Underscores put the marks in the text itself.")
       .addDropdown((dropdown) =>
         dropdown
-          .addOptions({
-            italic: "Italics",
-            underline: "Underline",
-            underscore: "Underscores, _like this_",
-          })
+          .addOptions(OPTION_LABELS.emphasis)
           .setValue(this.valueOf("emphasis"))
           .onChange((value) => this.save("emphasis", value as Emphasis))
       );
@@ -238,11 +228,7 @@ export class ProfilePage extends SettingPage {
       )
       .addDropdown((dropdown) =>
         dropdown
-          .addOptions({
-            off: "Off — name on the manuscript",
-            anonymous: "Anonymous throughout",
-            coverPage: "Identified cover page only",
-          })
+          .addOptions(OPTION_LABELS.blindSubmission)
           .setValue(this.valueOf("blindSubmission"))
           .onChange((value) => this.save("blindSubmission", value as BlindMode))
       );
@@ -279,7 +265,7 @@ export class ProfilePage extends SettingPage {
           .setDestructive()
           .onClick(() => {
             new ConfirmModal(this.app, {
-              title: `Delete ${titleOf(this.profile)}?`,
+              title: `Delete ${profileTitle(this.profile)}?`,
               message:
                 "The profile and everything it changes will be removed. Your settings and any other profiles stay as they are.",
               confirmText: "Delete profile",
@@ -300,8 +286,4 @@ export class ProfilePage extends SettingPage {
     // summary on the row are both stale by now, and no page is open to lose.
     this.onLeave();
   }
-}
-
-function titleOf(profile: SmfProfile): string {
-  return profile.name.trim() || "Untitled profile";
 }

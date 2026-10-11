@@ -13,10 +13,11 @@ import {
   NO_CHANGES,
   hasDuplicateName,
   newProfile,
+  profileTitle,
   removeProfile,
   type SmfProfile,
 } from "./profiles";
-import type { SmfSettings } from "./settings";
+import { OPTION_LABELS, type SmfSettings } from "./settings";
 
 type Key = keyof SmfSettings;
 
@@ -80,7 +81,7 @@ export class SmfSettingTab extends PluginSettingTab {
 
     return {
       type: "page",
-      name: profile.name.trim() || "Untitled profile",
+      name: profileTitle(profile),
       desc: duplicate
         ? "Another profile has this name. Both will look the same at export time."
         : undefined,
@@ -217,11 +218,7 @@ export class SmfSettingTab extends PluginSettingTab {
             control: {
               type: "dropdown",
               key: "blindSubmission",
-              options: {
-                off: "Off — name on the manuscript",
-                anonymous: "Anonymous throughout",
-                coverPage: "Identified cover page only",
-              },
+              options: OPTION_LABELS.blindSubmission,
             },
           },
           {
@@ -259,11 +256,7 @@ export class SmfSettingTab extends PluginSettingTab {
             control: {
               type: "dropdown",
               key: "exportFormat",
-              options: {
-                docx: "Word (.docx)",
-                rtf: "Rich text (.rtf)",
-                both: "Both",
-              },
+              options: OPTION_LABELS.exportFormat,
             },
           },
           {
@@ -272,11 +265,7 @@ export class SmfSettingTab extends PluginSettingTab {
             control: {
               type: "dropdown",
               key: "fontPreset",
-              options: {
-                courier: "Courier New",
-                times: "Times New Roman",
-                custom: "Custom…",
-              },
+              options: OPTION_LABELS.fontPreset,
             },
           },
           {
@@ -305,10 +294,7 @@ export class SmfSettingTab extends PluginSettingTab {
             control: {
               type: "dropdown",
               key: "lineSpacing",
-              options: {
-                double: "Double",
-                single: "Single",
-              },
+              options: OPTION_LABELS.lineSpacing,
             },
           },
           {
@@ -343,11 +329,7 @@ export class SmfSettingTab extends PluginSettingTab {
             control: {
               type: "dropdown",
               key: "contentWarningPlacement",
-              options: {
-                titlePage: "Title page",
-                story: "With the story",
-                both: "Both",
-              },
+              options: OPTION_LABELS.contentWarningPlacement,
             },
           },
           {
@@ -375,11 +357,7 @@ export class SmfSettingTab extends PluginSettingTab {
             control: {
               type: "dropdown",
               key: "emphasis",
-              options: {
-                italic: "Italics",
-                underline: "Underline",
-                underscore: "Underscores, _like this_",
-              },
+              options: OPTION_LABELS.emphasis,
             },
           },
           {

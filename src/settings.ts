@@ -113,6 +113,39 @@ export type ContentWarningPlacement = "titlePage" | "story" | "both";
  */
 export type Emphasis = "italic" | "underline" | "underscore";
 
+/** Dropdown labels, shared by the settings screen and each profile's page. */
+export const OPTION_LABELS = {
+  exportFormat: {
+    docx: "Word (.docx)",
+    rtf: "Rich text (.rtf)",
+    both: "Both",
+  } satisfies Record<ExportFormat, string>,
+  fontPreset: {
+    courier: "Courier New",
+    times: "Times New Roman",
+    custom: "Custom…",
+  } satisfies Record<FontPreset, string>,
+  lineSpacing: {
+    double: "Double",
+    single: "Single",
+  } satisfies Record<LineSpacing, string>,
+  contentWarningPlacement: {
+    titlePage: "Title page",
+    story: "With the story",
+    both: "Both",
+  } satisfies Record<ContentWarningPlacement, string>,
+  emphasis: {
+    italic: "Italics",
+    underline: "Underline",
+    underscore: "Underscores, _like this_",
+  } satisfies Record<Emphasis, string>,
+  blindSubmission: {
+    off: "Off — name on the manuscript",
+    anonymous: "Anonymous throughout",
+    coverPage: "Identified cover page only",
+  } satisfies Record<BlindMode, string>,
+};
+
 export interface SmfSettings {
   /** Shunn puts the legal name in the contact block and allows a pen name on the byline. */
   legalName: string;
