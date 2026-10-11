@@ -167,7 +167,7 @@ export class ProfilePage extends SettingPage {
 
     new Setting(containerEl)
       .setName("Include content warnings")
-      .setDesc("Printed on the title page when the story's frontmatter has them.")
+      .setDesc("Printed when the story's frontmatter has them.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.valueOf("includeContentWarnings"))

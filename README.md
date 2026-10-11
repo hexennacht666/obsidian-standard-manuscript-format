@@ -33,7 +33,7 @@ Works on desktop and mobile. It's pure JavaScript with no desktop-only dependenc
 
 **Set your name.** Open **Settings → Standard Manuscript Format Export → Author identity** and fill in at least your name. The contact block needs it, and export will refuse without it. The row shows the name it will print, so a wrong guess is caught here rather than by an editor.
 
-**Start a story.** Click the pencil icon in the left sidebar, or run **New story** from the command palette, or right-click a folder in the file list. You get a note with its properties ready and the cursor in the body. It asks nothing.
+**Start a story.** Click the feather icon in the left sidebar, or run **New story** from the command palette, or right-click a folder in the file list. You get a note with its properties ready and the cursor in the body. It asks nothing.
 
 **Write.** Type `***` on its own line wherever you want a scene break.
 

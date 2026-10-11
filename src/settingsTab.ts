@@ -176,7 +176,7 @@ export class SmfSettingTab extends PluginSettingTab {
           },
           {
             name: "Pronouns",
-            desc: "Optional. Used by cover letters.",
+            desc: "Optional. Printed after your name in the contact block.",
             control: { type: "text", key: "pronouns", placeholder: "she/her" },
           },
           {
@@ -448,7 +448,7 @@ export class SmfSettingTab extends PluginSettingTab {
         items: [
           {
             name: "Output folder",
-            desc: "Vault folder the .docx is written to. Created if missing.",
+            desc: "Vault folder manuscripts are written to. Created if missing.",
             control: {
               type: "folder",
               key: "outputFolder",
