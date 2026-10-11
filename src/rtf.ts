@@ -20,6 +20,7 @@ import {
   contentWarningLine,
   formatWordCount,
   hasCoverPage,
+  titleGapLines,
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
@@ -148,8 +149,10 @@ function titlePage(story: ParsedStory, settings: SmfSettings): string {
   }
 
   // Vertical space as empty paragraphs rather than space-before, which readers
-  // honor inconsistently at the top of a page.
-  for (let i = 0; i < 8; i++) out += paragraph("", settings);
+  // honor inconsistently at the top of a page. The word count shares the first
+  // contact line, so the contact block sets the band's height.
+  const gap = titleGapLines(Math.max(1, contact.length), settings.fontSize);
+  for (let i = 0; i < gap; i++) out += paragraph("", settings);
 
   out += paragraph(escapeRtf(story.title), settings, {
     align: "center",

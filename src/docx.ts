@@ -25,6 +25,7 @@ import {
   contentWarningLine,
   formatWordCount,
   hasCoverPage,
+  titleGapLines,
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
@@ -110,14 +111,11 @@ function line(
     spacing?: object;
   } = {}
 ): Paragraph {
+  const face = { font: resolveFont(settings), size: halfPoints(settings) };
   return new Paragraph({
-    children: [
-      new TextRun({
-        text,
-        font: resolveFont(settings),
-        size: halfPoints(settings),
-      }),
-    ],
+    children: [new TextRun({ text, ...face })],
+    // The paragraph mark too: an empty line takes its height from the mark.
+    run: face,
     alignment: options.alignment,
     spacing: options.spacing ?? SINGLE,
   });
@@ -126,6 +124,8 @@ function line(
 function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Table)[] {
   const contact = contactLines(settings).map((text) => line(text, settings));
   if (!contact.length) contact.push(line("", settings));
+  // The word count is one line, so the contact block sets the band's height.
+  const gap = titleGapLines(contact.length, settings.fontSize);
 
   const byline = bylineOf(settings);
 
@@ -168,7 +168,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
     banner,
     // Vertical space as empty paragraphs rather than `spacing before`, which
     // readers honor inconsistently at the top of a page.
-    ...Array.from({ length: 8 }, () => line("", settings)),
+    ...Array.from({ length: gap }, () => line("", settings)),
     line(story.title, settings, {
       alignment: AlignmentType.CENTER,
     }),

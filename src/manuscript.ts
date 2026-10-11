@@ -77,6 +77,31 @@ export function contactLines(settings: SmfSettings): string[] {
 }
 
 /**
+ * Word's single line spacing for a font size, in points. The true figure comes
+ * from each font's own metrics; 1.15 times the size is Times New Roman's, and
+ * near enough for the other faces a manuscript uses that the title still lands
+ * within a line of where it should.
+ */
+export function singleLinePoints(fontSize: number): number {
+  return fontSize * 1.15;
+}
+
+/** Shunn's title line starts four inches below the top margin: the page's middle. */
+const TITLE_DROP_POINTS = 288;
+
+/** So a very tall contact block still leaves the title some air. */
+const MIN_TITLE_GAP_LINES = 2;
+
+/**
+ * How many empty single-spaced lines go between the contact band and the
+ * title, given how many lines the band takes up.
+ */
+export function titleGapLines(bandLines: number, fontSize: number): number {
+  const total = Math.round(TITLE_DROP_POINTS / singleLinePoints(fontSize));
+  return Math.max(MIN_TITLE_GAP_LINES, total - bandLines);
+}
+
+/**
  * The byline, or nothing when the manuscript must not carry a name. Shared so
  * the two emitters can't answer the question differently.
  */

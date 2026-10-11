@@ -2,6 +2,7 @@ import { strict as assert } from "assert";
 import { test } from "node:test";
 import JSZip from "jszip";
 import { buildManuscript, packDocument } from "../src/docx";
+import { contactLines, singleLinePoints, titleGapLines } from "../src/manuscript";
 import { parseStory } from "../src/markdown";
 import { buildRtf } from "../src/rtf";
 import { DEFAULT_SETTINGS, type BlindMode, type SmfSettings } from "../src/settings";
@@ -86,4 +87,35 @@ test("an identified cover page is still a page of its own (.rtf)", () => {
   assert.ok(!out.includes("\\titlepg"), "\\titlepg here would take page 2's running head");
   assert.ok(out.indexOf("{\\header") > sect, "running head declared on the cover page");
   assert.ok(sect < out.indexOf("The first line of the story"));
+});
+
+test("the title line starts four inches below the top margin, whatever the contact block", () => {
+  const line = singleLinePoints(12);
+  for (const band of [1, 2, 4, 7]) {
+    const start = (band + titleGapLines(band, 12)) * line;
+    assert.ok(Math.abs(start - 288) <= line, `${band} lines: title at ${start}pt`);
+  }
+  assert.notEqual(titleGapLines(2, 12), titleGapLines(7, 12));
+  assert.ok(titleGapLines(2, 14) < titleGapLines(2, 12), "larger type takes fewer lines");
+});
+
+test("a very tall contact block still leaves a gap above the title", () => {
+  assert.equal(titleGapLines(40, 12), 2);
+});
+
+test("the gap above the title is that many empty single-spaced lines in both formats", async () => {
+  const band = contactLines(settings).length;
+  const gap = titleGapLines(band, settings.fontSize);
+
+  const { document } = await docxParts("off");
+  const afterBanner = document.slice(document.indexOf("</w:tbl>"), document.indexOf("The Salt Year"));
+  const empty = afterBanner.match(/<w:p>(?:(?!<\/w:p>).)*?<w:t xml:space="preserve"><\/w:t>/g) ?? [];
+  assert.equal(empty.length, gap);
+  // An empty line's height comes from its paragraph mark, so the mark states
+  // the size too.
+  assert.match(afterBanner, /<w:pPr>(?:(?!<\/w:pPr>).)*<w:rPr>(?:(?!<\/w:rPr>).)*<w:sz w:val="24"\/>/);
+
+  const out = buildRtf(story(), settings);
+  const lines = out.slice(out.indexOf("you@example.com"), out.indexOf("The Salt Year")).split("\n");
+  assert.equal(lines.filter((l) => /\\sl240\\slmult1\\f0\\fs24 \\par$/.test(l)).length, gap);
 });
