@@ -75,7 +75,9 @@ function splitFrontmatter(source: string): {
   body: string;
 } {
   const frontmatter: Record<string, string> = {};
-  const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  // An empty block (`---` straight after `---`) and a leading byte-order mark
+  // are both still frontmatter.
+  const match = source.match(/^\uFEFF?---\r?\n(?:([\s\S]*?)\r?\n)?---[ \t]*(?:\r?\n|$)/);
   if (!match) return { frontmatter, body: source };
 
   // A quoted YAML scalar decodes its own escapes: '' inside single quotes,
@@ -94,7 +96,7 @@ function splitFrontmatter(source: string): {
   // so a list and a comma-separated line are interchangeable to callers.
   let listKey: string | null = null;
 
-  for (const line of match[1].split(/\r?\n/)) {
+  for (const line of (match[1] ?? "").split(/\r?\n/)) {
     const item = line.match(/^\s*-\s+(.*)$/);
     if (item && listKey) {
       const value = clean(item[1]);
@@ -415,7 +417,9 @@ export function parseStory(
   }
   flush();
 
-  // A trailing break is an artifact of the source file, never intent.
+  // A break before the first paragraph or after the last is an artifact of
+  // the source file, never intent.
+  while (blocks.length && blocks[0].kind === "sceneBreak") blocks.shift();
   while (blocks.length && blocks[blocks.length - 1].kind !== "para") {
     blocks.pop();
   }

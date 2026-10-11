@@ -381,3 +381,17 @@ test("YAML quote escapes are decoded", () => {
   const list = parseStory("---\nContent warnings:\n  - 'a child''s death'\n---\n\nBody.\n", "fn");
   assert.deepEqual(list.contentWarnings, ["a child's death"]);
 });
+
+test("the manuscript never opens with a scene break", () => {
+  const kinds = (source: string) => parseStory(source, "fn").blocks.map((b) => b.kind);
+  assert.deepEqual(kinds("# The Salt Year\n\n***\n\nProse.\n"), ["para"]);
+  assert.deepEqual(kinds("---\n---\n\nProse.\n"), ["para"]);
+  assert.deepEqual(kinds("﻿---\ntitle: The Salt Year\n---\n\nProse.\n"), ["para"]);
+});
+
+test("empty frontmatter and a byte-order mark still read as frontmatter", () => {
+  const bom = parseStory("﻿---\ntitle: The Salt Year\n---\n\nProse.\n", "fn");
+  assert.equal(bom.title, "The Salt Year");
+  assert.equal(bom.wordCount, 1);
+  assert.equal(parseStory("---\n---\nProse.\n", "fn").wordCount, 1);
+});
