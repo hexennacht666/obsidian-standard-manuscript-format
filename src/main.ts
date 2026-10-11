@@ -10,7 +10,7 @@ import {
   sanitizeProfiles,
   type SmfProfile,
 } from "./profiles";
-import { DEFAULT_SETTINGS, FONT_PRESETS, sanitizeSettings, type SmfSettings } from "./settings";
+import { DEFAULT_SETTINGS, sanitizeSettings, type SmfSettings } from "./settings";
 import { SmfSettingTab } from "./settingsTab";
 
 /**
@@ -438,35 +438,6 @@ export default class SmfExportPlugin extends Plugin {
     // that says something other than a list here would break the plugin at
     // load rather than at export.
     this.settings.profiles = sanitizeProfiles(data.profiles);
-
-    // The font used to be one free-text field. Carry an existing value over to
-    // the preset it matches, or to Custom, so nobody's setting silently resets.
-    const legacy = data.font;
-    if (typeof legacy === "string" && data.fontPreset === undefined) {
-      const name = legacy.trim();
-      const preset = (
-        Object.keys(FONT_PRESETS) as (keyof typeof FONT_PRESETS)[]
-      ).find((k) => FONT_PRESETS[k].toLowerCase() === name.toLowerCase());
-
-      if (preset) {
-        this.settings.fontPreset = preset;
-      } else if (name) {
-        this.settings.fontPreset = "custom";
-        this.settings.customFont = name;
-      }
-      delete (this.settings as unknown as Record<string, unknown>).font;
-      await this.saveSettings();
-    }
-
-    // Emphasis used to be a boolean — underline instead of italics — until a
-    // market asked for literal underscores and a third mode couldn't be a
-    // toggle. Carry the old answer over so nobody's setting silently resets.
-    const legacyUnderline = data.italicsAsUnderline;
-    if (typeof legacyUnderline === "boolean" && data.emphasis === undefined) {
-      this.settings.emphasis = legacyUnderline ? "underline" : "italic";
-      delete (this.settings as unknown as Record<string, unknown>).italicsAsUnderline;
-      await this.saveSettings();
-    }
   }
 
   /** Another device, or a sync service, rewrote data.json. */
