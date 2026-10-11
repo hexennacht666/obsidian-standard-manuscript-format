@@ -87,3 +87,14 @@ test("the other modes never touch the text", () => {
     assert.equal(emphasisedText(" quite ", { ...settings, emphasis }), " quite ");
   }
 });
+
+test("the title page and the document's Title property carry the title as plain text", async () => {
+  const story = parseStory('# *Salt* "Year"\n\nProse.\n', "fn");
+  const zip = await JSZip.loadAsync(await packDocument(buildManuscript(story, settings)));
+  const core = (await zip.file("docProps/core.xml")?.async("string")) ?? "";
+  const body = (await zip.file("word/document.xml")?.async("string")) ?? "";
+  assert.match(core, /<dc:title>Salt “Year”<\/dc:title>/);
+  assert.match(body, />Salt “Year”</);
+  assert.doesNotMatch(body, /\*Salt\*/);
+  assert.doesNotMatch(buildRtf(story, settings), /\*Salt\*/);
+});

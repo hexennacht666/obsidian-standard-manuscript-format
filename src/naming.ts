@@ -1,3 +1,5 @@
+import { plainTitle, type ParsedStory } from "./markdown";
+
 /** Appends a counter until the path is free. */
 export function uniquePath(
   folder: string,
@@ -26,12 +28,25 @@ export function isPlaceholderName(name: string): boolean {
 
 /** What a placeholder-named note can be named from, in the order they win. */
 export interface StoryName {
-  /** The opening heading, verbatim. */
+  /** The opening heading, as plain text. */
   heading: string | null;
   /** `Short title` as the frontmatter states it — never the derived one. */
   shortTitle: string | null;
   /** `Title` as the frontmatter states it. */
   title: string | null;
+}
+
+/** The names a story states for itself, as plain text. */
+export function storyName(story: ParsedStory): StoryName {
+  const stated = (key: string) => {
+    const value = story.frontmatter[key]?.trim();
+    return value ? plainTitle(value) : null;
+  };
+  return {
+    heading: story.heading,
+    shortTitle: stated("shorttitle"),
+    title: stated("title"),
+  };
 }
 
 /**

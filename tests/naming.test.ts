@@ -1,7 +1,7 @@
 import { strict as assert } from "assert";
 import { test } from "node:test";
 import { parseStory } from "../src/markdown";
-import { exportBasename, uniquePath } from "../src/naming";
+import { exportBasename, storyName, uniquePath } from "../src/naming";
 
 test("unique paths step around what already exists", () => {
   const taken = new Set(["Stories/The Salt Year.md", "Stories/The Salt Year 2.md"]);
@@ -17,12 +17,7 @@ test("an empty folder means the vault root", () => {
 
 /** The filename the manuscript would be written under, end to end. */
 function exportedAs(basename: string, source: string): string {
-  const story = parseStory(source, basename);
-  return exportBasename(basename, {
-    heading: story.heading,
-    shortTitle: story.frontmatter["shorttitle"] ?? null,
-    title: story.frontmatter["title"] ?? null,
-  });
+  return exportBasename(basename, storyName(parseStory(source, basename)));
 }
 
 test("a note the writer named keeps its name", () => {
@@ -103,4 +98,12 @@ test("a stated title does not turn the opening heading into a scene break", () =
   assert.equal(story.blocks[0]?.kind, "para");
   assert.equal(story.heading, "The Salt Year");
   assert.equal(story.title, "The Salt Year");
+});
+
+test("markup in the heading stays out of the file name", () => {
+  assert.equal(exportedAs("Untitled story", "# *Salt Year*\n\nProse.\n"), "Salt Year");
+  assert.equal(
+    exportedAs("Untitled story", "---\ntitle: The **Salt** Year\n---\n\nProse.\n"),
+    "The Salt Year"
+  );
 });

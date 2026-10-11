@@ -33,9 +33,9 @@ export interface ParsedStory {
   title: string | null;
   shortTitle: string | null;
   /**
-   * The story's opening heading, verbatim, whether or not it was used as the
-   * title. Obsidian's convention is that the first heading and the note's name
-   * are the same thing, so this is what names the exported manuscript.
+   * The story's opening heading as plain text, whether or not it was used as
+   * the title. Obsidian's convention is that the first heading and the note's
+   * name are the same thing, so this is what names the exported manuscript.
    */
   heading: string | null;
   frontmatter: Record<string, string>;
@@ -294,6 +294,18 @@ function pickShortTitle(title: string): string {
   return pair.length <= MAX_KEYWORD_LENGTH ? pair : first;
 }
 
+/**
+ * A title as it should print: quotes and dashes made typographic, emphasis
+ * markers consumed. A title page, a document property and a file name have no
+ * way to show italics, so the words are all that survive.
+ */
+export function plainTitle(raw: string): string {
+  return parseInline(typographize(raw).text)
+    .map((r) => r.text)
+    .join("")
+    .trim();
+}
+
 /** Loose match between a heading and a title: case, spacing and quote style vary. */
 function sameTitle(heading: string, title: string | null): boolean {
   if (!title) return false;
@@ -372,8 +384,8 @@ export function parseStory(
           sameTitle(text, title) ||
           sameTitle(text, fallbackTitle));
       if (isTitle) {
-        heading = text;
-        if (title === null) title = heading;
+        heading = plainTitle(text);
+        if (title === null) title = text;
         continue;
       }
       if (blocks[blocks.length - 1]?.kind === "sceneBreak") blocks.pop();
@@ -414,12 +426,14 @@ export function parseStory(
     });
   });
 
-  const resolvedTitle = title ?? fallbackTitle;
+  const resolvedTitle = title === null ? fallbackTitle : plainTitle(title);
+  const statedShortTitle = frontmatter["shorttitle"]?.trim();
 
   return {
     title: resolvedTitle,
-    shortTitle:
-      frontmatter["shorttitle"]?.trim() || pickShortTitle(resolvedTitle),
+    shortTitle: statedShortTitle
+      ? plainTitle(statedShortTitle)
+      : pickShortTitle(resolvedTitle),
     heading,
     frontmatter,
     blocks,

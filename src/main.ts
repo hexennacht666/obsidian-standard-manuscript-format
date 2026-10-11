@@ -2,7 +2,7 @@ import { MarkdownView, Notice, Plugin, TFile, TFolder, normalizePath } from "obs
 import { buildManuscript, packDocument } from "./docx";
 import { CONTENT_WARNING_KEYS, parseStory } from "./markdown";
 import { buildRtf } from "./rtf";
-import { exportBasename, isPlaceholderName, uniquePath } from "./naming";
+import { exportBasename, isPlaceholderName, storyName, uniquePath } from "./naming";
 import { ProfilePicker } from "./profilePicker";
 import {
   describeOverrides,
@@ -297,13 +297,9 @@ export default class SmfExportPlugin extends Plugin {
       // A named note keeps its name. One still called "Untitled story" is named
       // from the story instead, so a finished submission doesn't reach a market
       // wearing the scaffold's name.
-      const exportName = exportBasename(file.basename, {
-        heading: story.heading,
-        // The stated values only. The derived short title always has something
-        // in it, which would make "the story has no title" unreachable.
-        shortTitle: story.frontmatter["shorttitle"] ?? null,
-        title: story.frontmatter["title"] ?? null,
-      });
+      // The stated values only. The derived short title always has something
+      // in it, which would make "the story has no title" unreachable.
+      const exportName = exportBasename(file.basename, storyName(story));
 
       const written: { path: string; replaced: boolean }[] = [];
 

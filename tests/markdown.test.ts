@@ -332,3 +332,15 @@ test("a lone asterisk leaves real emphasis after it intact", () => {
     { text: " it", italic: undefined },
   ]);
 });
+
+test("a title is plain text, with markup consumed and quotes curled", () => {
+  assert.equal(parseStory('# *Salt* "Year"\n\nBody.\n', "fn").title, "Salt “Year”");
+  assert.equal(
+    parseStory("---\ntitle: The *Salt* Year\n---\n\nBody.\n", "fn").title,
+    "The Salt Year"
+  );
+  assert.equal(
+    parseStory("---\nShort title: '*Salt*'\n---\n\nBody.\n", "fn").shortTitle,
+    "Salt"
+  );
+});
