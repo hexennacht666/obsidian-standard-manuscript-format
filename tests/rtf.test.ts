@@ -91,13 +91,12 @@ test("a section is opened before anything that belongs to one", () => {
   assert.ok(sectd < out.indexOf("{\\header"), "header precedes its section");
 });
 
-/*
- * The title page must carry no running head. Google Docs ignores \titlepg with
- * an empty \headerf, so the title page lives in its own section that declares
- * no header at all, leaving nothing for any reader to fall back to.
- */
-test("the title page's section declares no header", () => {
-  const out = render("A paragraph.");
+// An identified cover page must carry no running head, so it lives in its own
+// section that declares no header at all.
+const COVER = { blindSubmission: "coverPage" } as const;
+
+test("the cover page's section declares no header", () => {
+  const out = render("A paragraph.", COVER);
   const secondSection = out.indexOf("\\sect\n");
   const header = out.indexOf("{\\header");
 
@@ -105,17 +104,17 @@ test("the title page's section declares no header", () => {
   assert.ok(header > secondSection, "header is declared in the title page's section");
 });
 
-test("the story begins in a second section, on a new page", () => {
-  const out = render("A paragraph.");
+test("after a cover page the story begins in a second section, on a new page", () => {
+  const out = render("A paragraph.", COVER);
   assert.ok(out.includes("\\sect\n"), "no section break");
   assert.ok(out.includes("\\sbkpage"), "the break doesn't start a new page");
   assert.ok(out.includes("\\pgncont"), "numbering restarts instead of continuing");
 });
 
 // Belt and braces: a stray \page alongside the section break would leave a
-// blank page between the title page and the story.
+// blank page between the cover page and the story.
 test("the section break is the only page break", () => {
-  const out = render("A paragraph.");
+  const out = render("A paragraph.", COVER);
   assert.ok(!/\\page[^a-z]/.test(out.replace(/\\pagebb/g, "")), "stray \\page");
 });
 
@@ -123,8 +122,8 @@ test("the running head sits above the text block, not inside it", () => {
   assert.ok(render("A paragraph.").includes("\\headery720"));
 });
 
-test("the title page is separated from the story by a section break", () => {
-  const out = render("A paragraph.");
+test("the cover page is separated from the story by a section break", () => {
+  const out = render("A paragraph.", COVER);
   assert.ok(out.includes("\\sect\n"));
   assert.ok(out.includes("\\sbkpage"));
 });

@@ -24,6 +24,7 @@ import {
   contactLines,
   contentWarningLine,
   formatWordCount,
+  hasCoverPage,
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
@@ -183,7 +184,7 @@ function titlePage(story: ParsedStory, settings: SmfSettings): (Paragraph | Tabl
           }),
         ]
       : []),
-    new Paragraph({ children: [new PageBreak()] }),
+    ...(hasCoverPage(settings) ? [new Paragraph({ children: [new PageBreak()] })] : []),
   ];
 }
 
@@ -265,8 +266,8 @@ export function buildManuscript(
     sections: [
       {
         properties: {
-          // The title page carries no running head; numbering still counts it,
-          // so the story's first page is 2 — which is what Shunn specifies.
+          // The first page carries no running head; numbering still counts
+          // it, so the head starts at 2, which is what Shunn specifies.
           titlePage: true,
           page: {
             margin: {

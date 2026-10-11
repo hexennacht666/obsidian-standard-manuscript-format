@@ -106,13 +106,29 @@ export function contentWarningLine(
   return `${settings.contentWarningLabel.trim()}: ${warnings.join(", ")}`;
 }
 
-/** Whether warnings are printed in a given place, given the story has any. */
+/**
+ * Whether the title page is a page of its own. Shunn's modern format starts the
+ * story on page 1 under the byline; only an identified cover page keeps the
+ * writer's details on a separate page, because that is what it is for.
+ */
+export function hasCoverPage(settings: SmfSettings): boolean {
+  return settings.blindSubmission === "coverPage";
+}
+
+/**
+ * Whether warnings are printed in a given place, given the story has any.
+ *
+ * When the story starts under the byline, the title page and the story's
+ * opening are the same spot, so every placement prints them once, under the
+ * byline.
+ */
 export function showsContentWarnings(
   where: "titlePage" | "story",
   warnings: string[],
   settings: SmfSettings
 ): boolean {
   if (!settings.includeContentWarnings || !warnings.length) return false;
+  if (!hasCoverPage(settings)) return where === "titlePage";
   return (
     settings.contentWarningPlacement === "both" ||
     settings.contentWarningPlacement === where

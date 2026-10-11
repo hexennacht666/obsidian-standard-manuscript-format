@@ -33,12 +33,16 @@ function rtf(overrides: Partial<SmfSettings> = {}): string {
   return buildRtf(story(), { ...settings, ...overrides });
 }
 
+// Title page and story are told apart only where they are separate pages,
+// which is an identified cover page.
+const COVER = { blindSubmission: "coverPage" } as const;
+
 /** The document split at the page break, so "where" is answerable. */
 async function docxHalves(
   overrides: Partial<SmfSettings> = {}
 ): Promise<{ titlePage: string; body: string }> {
   const packed = await packDocument(
-    buildManuscript(story(), { ...settings, ...overrides })
+    buildManuscript(story(), { ...settings, ...COVER, ...overrides })
   );
   const zip = await JSZip.loadAsync(packed);
   const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
@@ -51,7 +55,7 @@ function rtfHalves(overrides: Partial<SmfSettings> = {}): {
   body: string;
 } {
   // \sect ends the title page's section; the story is everything after it.
-  const [titlePage, body] = rtf(overrides).split("\\sect\n");
+  const [titlePage, body] = rtf({ ...COVER, ...overrides }).split("\\sect\n");
   return { titlePage, body: body ?? "" };
 }
 
@@ -119,4 +123,21 @@ test("the label is the writer's, in both places", async () => {
   });
   assert.match(titlePage, /Content notes/);
   assert.match(body, /Content notes/);
+});
+
+// With the story under the byline, the title page and the story's opening are
+// the same spot, so every placement prints the warnings once, before the story.
+test("on a single first page, every placement prints the warnings once", async () => {
+  for (const placement of ["titlePage", "story", "both"] as const) {
+    const out = rtf({ contentWarningPlacement: placement });
+    assert.equal(out.split("Content warnings: body horror, drowning").length - 1, 1, placement);
+    assert.ok(out.indexOf("by Ursula Le Guin") < out.indexOf("Content warnings"));
+    assert.ok(out.indexOf("Content warnings") < out.indexOf("The first line of the story"));
+
+    const zip = await JSZip.loadAsync(
+      await packDocument(buildManuscript(story(), { ...settings, contentWarningPlacement: placement }))
+    );
+    const xml = (await zip.file("word/document.xml")?.async("string")) ?? "";
+    assert.equal(xml.split("Content warnings: body horror, drowning").length - 1, 1, placement);
+  }
 });

@@ -19,6 +19,7 @@ import {
   contactLines,
   contentWarningLine,
   formatWordCount,
+  hasCoverPage,
   runningHeadPrefix,
   showsContentWarnings,
 } from "./manuscript";
@@ -229,20 +230,22 @@ export function buildRtf(story: ParsedStory, settings: SmfSettings): string {
   const headerY = `\\headery${Math.round(0.5 * TWIPS_PER_INCH)}`;
 
   /*
-   * Two sections rather than \titlepg.
+   * Keeping the running head off page 1. Word is the reader that matters here:
+   * the markets that refuse .docx open the .rtf in Word. Pages never shows an
+   * RTF header at all, and Google Docs prints it on page 1 whatever this does.
    *
-   * The obvious way to keep the running head off the title page is
-   * \titlepg with an empty \headerf. Google Docs doesn't honor that pairing —
-   * it falls back to the default header and prints the running head on the
-   * title page, which is precisely what the format forbids.
+   * When the story starts under the byline, page 1 and page 2 are one section,
+   * so the first page is told apart with \titlepg and an empty \headerf.
    *
-   * So the title page gets its own section with NO header destination at all.
-   * A header that was never declared cannot be rendered by anyone, whatever
-   * their support for different-first-page. \pgncont keeps the numbering
-   * running across the break, so the story still opens on page 2.
+   * An identified cover page is a section of its own that declares no header,
+   * and the story's section, which carries the running head, starts on a new
+   * page with numbering continued so the head opens at 2. \titlepg must not be
+   * added to that arrangement: it makes the story's section treat its own first
+   * page as special, and page 2 loses its running head.
    */
-  const titleSection = `\\sectd${headerY}\\sbknone`;
+  const coverSection = `\\sectd${headerY}\\sbknone`;
   const bodySection = `\\sectd${headerY}\\sbkpage\\pgncont`;
+  const singleSection = `\\sectd${headerY}\\titlepg`;
 
   // The page number as a proper field rather than the older \chpgn control
   // word. Both mean "current page", but the field form is what modern Word
@@ -255,6 +258,28 @@ export function buildRtf(story: ParsedStory, settings: SmfSettings): string {
   const runningHeader =
     `{\\header\\pard\\plain\\qr\\fi0\\sl${SINGLE}\\slmult1${face(settings)} ` +
     `${escapeRtf(head)}${pageNumber}\\par}`;
+
+  const firstPageHeader = `{\\headerf\\pard\\plain\\qr\\fi0\\sl${SINGLE}\\slmult1${face(settings)} \\par}`;
+
+  const pages = hasCoverPage(settings)
+    ? // The cover page, carrying no header of any kind, then the story.
+      coverSection +
+      "\n" +
+      titlePage(story, settings) +
+      "\\sect\n" +
+      bodySection +
+      "\n" +
+      runningHeader +
+      "\n" +
+      body(story.blocks, story.contentWarnings, settings)
+    : singleSection +
+      "\n" +
+      firstPageHeader +
+      "\n" +
+      runningHeader +
+      "\n" +
+      titlePage(story, settings) +
+      body(story.blocks, story.contentWarnings, settings);
 
   // No \stylesheet is emitted on purpose. Nothing here depends on one, and a
   // reader that finds no styles cannot apply the wrong ones.
@@ -269,17 +294,7 @@ export function buildRtf(story: ParsedStory, settings: SmfSettings): string {
     `\\viewkind4\n` +
     documentProps +
     "\n" +
-    // Section one: the title page, carrying no header of any kind.
-    titleSection +
-    "\n" +
-    titlePage(story, settings) +
-    // Section two: the story, where the running head lives.
-    "\\sect\n" +
-    bodySection +
-    "\n" +
-    runningHeader +
-    "\n" +
-    body(story.blocks, story.contentWarnings, settings) +
+    pages +
     "}\n"
   );
 }
