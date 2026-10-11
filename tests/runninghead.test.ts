@@ -106,3 +106,8 @@ test("a story can still overrule the derivation from its own frontmatter", () =>
   );
   assert.equal(s.shortTitle, "Gloves");
 });
+
+test("a title in any script gives the running head real keywords", () => {
+  assert.equal(parseStory("Body.\n", "Соляной год").shortTitle, "Соляной год");
+  assert.equal(parseStory("Body.\n", "塩の 年").shortTitle, "塩の 年");
+});

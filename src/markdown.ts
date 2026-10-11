@@ -315,7 +315,7 @@ function pickShortTitle(title: string): string {
   const main = title.split(/\s*[:—–]\s*/)[0].trim() || title;
 
   const words = main
-    .replace(/[^A-Za-z0-9\s'’-]/g, " ")
+    .replace(/[^\p{L}\p{N}\s'’-]/gu, " ")
     .split(/\s+/)
     .filter(Boolean);
   const candidates = words.filter(
