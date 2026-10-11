@@ -10,7 +10,6 @@ import { ProfileNameModal } from "./profileNameModal";
 import { ProfilePage } from "./profilePage";
 import {
   describeOverrides,
-  isGlobal,
   NO_CHANGES,
   hasDuplicateName,
   newProfile,
@@ -215,10 +214,6 @@ export class SmfSettingTab extends PluginSettingTab {
                 "Neither can rename the file, so keep your name out of the note's title."
               );
             }),
-            // Deliberately not gated on isGlobal: a profile may override this,
-            // but it can never be the only place to reach it. Most writers keep
-            // no profiles, and blind submission has to work without setting one
-            // up first.
             control: {
               type: "dropdown",
               key: "blindSubmission",
@@ -234,26 +229,19 @@ export class SmfSettingTab extends PluginSettingTab {
             heading: "Include per export",
             // Nothing from this block is printed on an anonymous manuscript, so
             // it would be three controls sitting there doing nothing.
-            visible: () =>
-              this.plugin.settings.blindSubmission !== "anonymous" &&
-              (isGlobal("includeAddress") ||
-                isGlobal("includeEmail") ||
-                isGlobal("includePhone")),
+            visible: () => this.plugin.settings.blindSubmission !== "anonymous",
             items: [
               {
                 name: "Include address",
                 desc: "Some markets don't want it.",
-                visible: () => isGlobal("includeAddress"),
                 control: { type: "toggle", key: "includeAddress" },
               },
               {
                 name: "Include email",
-                visible: () => isGlobal("includeEmail"),
                 control: { type: "toggle", key: "includeEmail" },
               },
               {
                 name: "Include phone",
-                visible: () => isGlobal("includePhone"),
                 control: { type: "toggle", key: "includePhone" },
               },
             ],
@@ -268,7 +256,6 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Format",
             desc: "Most markets accept either .docx or .rtf. Check the guidelines if they ask for one.",
-            visible: () => isGlobal("exportFormat"),
             control: {
               type: "dropdown",
               key: "exportFormat",
@@ -282,7 +269,6 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Font",
             desc: "Times is what the modern standard recommends. Courier is the classic look, still preferred by some editors. Use custom when a market asks for something else.",
-            visible: () => isGlobal("fontPreset"),
             control: {
               type: "dropdown",
               key: "fontPreset",
@@ -296,14 +282,12 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Custom font",
             desc: "Exact font name, e.g. Georgia. Word substitutes if the reader doesn't have it.",
-            visible: () =>
-              isGlobal("customFont") && this.plugin.settings.fontPreset === "custom",
+            visible: () => this.plugin.settings.fontPreset === "custom",
             control: { type: "text", key: "customFont", placeholder: "Georgia" },
           },
           {
             name: "Font size",
             desc: "Points.",
-            visible: () => isGlobal("fontSize"),
             control: {
               type: "number",
               key: "fontSize",
@@ -318,7 +302,6 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Line spacing",
             desc: "Double is standard format and the safe answer. Single is for the occasional market that asks for it outright, in preference to the standard.",
-            visible: () => isGlobal("lineSpacing"),
             control: {
               type: "dropdown",
               key: "lineSpacing",
@@ -351,15 +334,12 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Include content warnings",
             desc: "Print them when the story's frontmatter has them. The warnings themselves are set per story, not here.",
-            visible: () => isGlobal("includeContentWarnings"),
             control: { type: "toggle", key: "includeContentWarnings" },
           },
           {
             name: "Content warning placement",
             desc: "The title page is where a first reader meets them before the story. Some markets want them in the manuscript instead, set apart before the first line.",
-            visible: () =>
-              isGlobal("contentWarningPlacement") &&
-              this.plugin.settings.includeContentWarnings,
+            visible: () => this.plugin.settings.includeContentWarnings,
             control: {
               type: "dropdown",
               key: "contentWarningPlacement",
@@ -373,9 +353,7 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Content warning label",
             desc: "Wording some markets are particular about — 'Content notes' is the other common one.",
-            visible: () =>
-              isGlobal("contentWarningLabel") &&
-              this.plugin.settings.includeContentWarnings,
+            visible: () => this.plugin.settings.includeContentWarnings,
             control: {
               type: "text",
               key: "contentWarningLabel",
@@ -394,7 +372,6 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Emphasis",
             desc: "Italics are what almost every market now wants. Underline is the typewriter convention a few still ask for. Underscores put the marks in the text itself, for a market that asks to see them.",
-            visible: () => isGlobal("emphasis"),
             control: {
               type: "dropdown",
               key: "emphasis",
@@ -408,7 +385,6 @@ export class SmfSettingTab extends PluginSettingTab {
           {
             name: "Strip bold",
             desc: "Shunn's format has no bold, so on means the words survive and the emphasis doesn't. Turn off for a market whose editor asks for bold kept.",
-            visible: () => isGlobal("stripBold"),
             control: { type: "toggle", key: "stripBold" },
           },
           {

@@ -12,27 +12,6 @@
  */
 import { DEFAULT_SETTINGS, resolveFont, type SmfSettings } from "./settings";
 
-/**
- * Where a setting is allowed to live.
- *
- * `global` — on the Manuscript screen, and overridable by a profile.
- * `profileOnly` — reachable only inside a profile.
- *
- * This is a per-field decision, not a policy, which is why it sits beside the
- * field rather than in the code that reads it. The one field that must stay
- * `global` on principle is blind submission: most writers will never keep a
- * per-market profile, and a blind submission is decided by a single call from
- * a market, so putting it behind profile setup is friction on the majority to
- * tidy the screen for the minority. Everything else is a judgment about
- * crowding and can be changed here alone.
- */
-export type Placement = "global" | "profileOnly";
-
-export interface ProfileField {
-  key: OverridableKey;
-  placement: Placement;
-}
-
 export type OverridableKey =
   | "exportFormat"
   | "fontPreset"
@@ -49,33 +28,23 @@ export type OverridableKey =
   | "includeEmail"
   | "includePhone";
 
-export const PROFILE_FIELDS: ProfileField[] = [
-  { key: "exportFormat", placement: "global" },
-  { key: "fontPreset", placement: "global" },
-  { key: "customFont", placement: "global" },
-  { key: "fontSize", placement: "global" },
-  { key: "lineSpacing", placement: "global" },
-  { key: "emphasis", placement: "global" },
-  { key: "stripBold", placement: "global" },
-  { key: "blindSubmission", placement: "global" },
-  { key: "includeContentWarnings", placement: "global" },
-  { key: "contentWarningPlacement", placement: "global" },
-  { key: "contentWarningLabel", placement: "global" },
-  { key: "includeAddress", placement: "global" },
-  { key: "includeEmail", placement: "global" },
-  { key: "includePhone", placement: "global" },
+/** The settings a profile can change. Identity and folders stay global. */
+export const OVERRIDABLE_KEYS: OverridableKey[] = [
+  "exportFormat",
+  "fontPreset",
+  "customFont",
+  "fontSize",
+  "lineSpacing",
+  "emphasis",
+  "stripBold",
+  "blindSubmission",
+  "includeContentWarnings",
+  "contentWarningPlacement",
+  "contentWarningLabel",
+  "includeAddress",
+  "includeEmail",
+  "includePhone",
 ];
-
-export const OVERRIDABLE_KEYS: OverridableKey[] = PROFILE_FIELDS.map((f) => f.key);
-
-export function placementOf(key: OverridableKey): Placement {
-  return PROFILE_FIELDS.find((f) => f.key === key)?.placement ?? "global";
-}
-
-/** Whether the Manuscript screen shows this field at all. */
-export function isGlobal(key: OverridableKey): boolean {
-  return placementOf(key) === "global";
-}
 
 /**
  * Shown wherever a profile's summary would otherwise be empty — which is every

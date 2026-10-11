@@ -2,7 +2,6 @@ import { strict as assert } from "assert";
 import { test } from "node:test";
 import {
   describeOverrides,
-  isGlobal,
   newProfileId,
   OVERRIDABLE_KEYS,
   hasDuplicateName,
@@ -47,12 +46,6 @@ test("identity is never overridable", () => {
       `${key} must not be a profile field`
     );
   }
-});
-
-// Beth's rule, and the reason it's narrow: a writer who keeps no profiles must
-// still be able to submit blind without setting one up first.
-test("blind submission stays reachable globally", () => {
-  assert.equal(isGlobal("blindSubmission"), true);
 });
 
 test("a profile says what it changes, phrased as an outcome", () => {
