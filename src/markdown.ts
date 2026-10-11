@@ -168,16 +168,40 @@ function pushRun(runs: Run[], text: string, italic: boolean, bold: boolean) {
   runs.push(run);
 }
 
+const WORD_CHAR = /[\p{L}\p{N}]/u;
+
 /**
- * `_` only opens on a word boundary, so snake_case survives intact — which
- * matters because invented names in speculative fiction are full of them.
+ * Whether a run of `*` or `_` can open or close emphasis. It opens after a
+ * non-word character with text straight after it, and closes the other way
+ * round, so snake_case, f*ck and 5 * 3 all print as written. Invented names in
+ * speculative fiction are full of underscores.
  */
-function underscoreDelimits(text: string, i: number, len: number): boolean {
+function flanking(text: string, i: number, len: number): { opens: boolean; closes: boolean } {
   const before = i > 0 ? text[i - 1] : " ";
   const after = i + len < text.length ? text[i + len] : " ";
-  const opensHere = /[^A-Za-z0-9]/.test(before) && !/\s/.test(after || " ");
-  const closesHere = !/\s/.test(before) && /[^A-Za-z0-9]/.test(after);
-  return opensHere || closesHere;
+  return {
+    opens: !WORD_CHAR.test(before) && !/\s/.test(after),
+    closes: !/\s/.test(before) && !WORD_CHAR.test(after),
+  };
+}
+
+/** Whether a run of `marker` that can close emphasis appears from `from` on. */
+function hasCloser(text: string, from: number, marker: string): boolean {
+  for (let j = from; j < text.length; ) {
+    if (text[j] === "\\") {
+      j += 2;
+      continue;
+    }
+    if (text[j] !== marker) {
+      j += 1;
+      continue;
+    }
+    let len = 1;
+    while (text[j + len] === marker) len++;
+    if (flanking(text, j, len).closes) return true;
+    j += len;
+  }
+  return false;
 }
 
 export function parseInline(input: string, options: ParseOptions = {}): Run[] {
@@ -185,7 +209,7 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
   const runs: Run[] = [];
   let buf = "";
   let italic = false;
-  let bold = false;
+  let strong = false;
 
   for (let i = 0; i < input.length; ) {
     const c = input[i];
@@ -196,33 +220,36 @@ export function parseInline(input: string, options: ParseOptions = {}): Run[] {
       continue;
     }
 
-    const isStar = c === "*";
-    const isUnderscore = c === "_";
-    if (!isStar && !isUnderscore) {
+    if (c !== "*" && c !== "_") {
       buf += c;
       i += 1;
       continue;
     }
 
-    const marker = input.slice(i).match(isStar ? /^\*{1,3}/ : /^_{1,3}/);
+    const marker = input.slice(i).match(c === "*" ? /^\*{1,3}/ : /^_{1,3}/);
     const len = marker ? marker[0].length : 1;
 
-    if (isUnderscore && !underscoreDelimits(input, i, len)) {
-      buf += c;
-      i += 1;
+    // An opener with no closer later in the paragraph is printed as written,
+    // rather than emphasizing everything after it.
+    const { opens, closes } = flanking(input, i, len);
+    const closing = len === 2 ? strong : italic;
+    const delimits = closing ? closes : opens && hasCloser(input, i + len, c);
+    if (!delimits) {
+      buf += input.slice(i, i + len);
+      i += len;
       continue;
     }
 
-    pushRun(runs, buf, italic, bold);
+    pushRun(runs, buf, italic, strong && !stripBold);
     buf = "";
     // `*` is italic, `**` bold, `***` both. With bold stripped, `**` is
     // swallowed whole and changes nothing, and what survives `***` is italic.
     if (len !== 2) italic = !italic;
-    if (len !== 1 && !stripBold) bold = !bold;
+    if (len !== 1) strong = !strong;
     i += len;
   }
 
-  pushRun(runs, buf, italic, bold);
+  pushRun(runs, buf, italic, strong && !stripBold);
   return runs;
 }
 

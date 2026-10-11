@@ -318,3 +318,17 @@ test("an empty content-warnings key never hides a filled one beside it", () => {
     assert.deepEqual(s.contentWarnings, ["grief", "drowning"], empty);
   }
 });
+
+test("a lone asterisk is printed, not read as emphasis", () => {
+  for (const text of ["What the f*ck.", "Five * three = 15, she said.", "A *dangling opener and nothing else."]) {
+    assert.deepEqual(parseInline(text), [{ text, italic: undefined }], text);
+  }
+});
+
+test("a lone asterisk leaves real emphasis after it intact", () => {
+  assert.deepEqual(parseInline("f*ck, she *meant* it"), [
+    { text: "f*ck, she ", italic: undefined },
+    { text: "meant", italic: true },
+    { text: " it", italic: undefined },
+  ]);
+});
