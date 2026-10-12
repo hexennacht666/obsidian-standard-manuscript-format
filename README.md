@@ -6,10 +6,7 @@ Write in markdown. Get back a manuscript that looks like every editor expects on
 
 Free, runs on your phone as well as at your desk, and never connects to the internet at all.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-1-story-note.png">
-  <img alt="A story open in Obsidian with its Title and Content warnings properties, and the exported manuscript sitting beside it in the Manuscripts folder" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-1-story-note.png">
-</picture>
+<img alt="The first two pages of The Fall of the House of Usher as a manuscript: Poe's contact block and a rounded word count, the title and byline halfway down with the story beginning under them, and page 2 behind it with its running head" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/hero.png">
 
 - **Two formats**, because markets disagree about which they accept.
 - **Shunn modern format**, with a running head on every page but the first.
@@ -40,8 +37,8 @@ Works on desktop and mobile. It's pure JavaScript with no desktop-only dependenc
 **Export.** Run **Export to standard manuscript format** from the command palette, or right-click the note. The manuscript is written to your `Manuscripts` folder.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-3-commands.png">
-  <img alt="Obsidian's command palette listing the plugin's four commands: New story, Export with, Add title and content warnings, and Export to standard manuscript format" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-3-commands.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/commands-dark.png">
+  <img alt="Obsidian's command palette listing the plugin's four commands: New story, Export with, Add title and content warnings, and Export to standard manuscript format" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/commands-light.png">
 </picture>
 
 That's the whole loop. A story with no properties at all exports fine, and an old note from years ago needs nothing done to it.
@@ -62,11 +59,15 @@ It also never touches your clipboard, executes no code of its own or yours, and 
 
 **Shunn modern format.** Your contact block upper-left and the word count upper-right, title and byline centered halfway down the first page. The story begins on the first page, under the byline. *Identified cover page* keeps your details on a separate cover page instead.
 
+<img alt="The top of a first page, labeled: Poe's name, pronouns and email; the word count, to the nearest hundred; and the title and byline, halfway down" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/title-page.png">
+
 **Running head** on every page but the first: `Surname / Short title / page`. Set a surname, or leave it blank if your last name is a single word. Settings shows what will print, so you can check it before an editor sees it a dozen times.
 
 **Manuscript layout.** 12pt Times New Roman, 1" margins, double-spaced, 0.5" first-line indent, centered `#` for scene breaks, centered scene labels, and a centered END after the last line.
 
 **Typographic cleanup.** Straight quotes become curly, `--` becomes an em dash, `...` becomes an ellipsis. Quotes that are *already* curly get re-derived from context, so a wrong-way quote — the usual souvenir of pasting between editors — gets fixed rather than passed through.
+
+<img alt="Page 2 of a manuscript, labeled: the running head, Poe / Cask Amontillado / 2; a centered # scene break; and dialogue with curly quotes and em dashes" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/story-page.png">
 
 **A missing quote mark won't ruin everything after it.** Forget a closing quotation mark and most editors turn every quote that follows the wrong way round, so one slip can leave a whole story looking broken. Not here: the mistake stays where you made it and the rest of your dialogue is still correct.
 
@@ -82,10 +83,7 @@ The export works either way. Afterwards it tells you which paragraphs look like 
 
 **Export profiles.** Save a market's or an editor's particular requirements, then pick them at the moment of export. Markets have quirks, you submit to the same ones repeatedly, and this means not adjusting the same six settings every time. **Export with…** always offers your normal settings first and never remembers your last choice, so a profile can't stay switched on by accident. A profile saves only what you actually changed, so a setting you adjust later still reaches a profiled export.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-4-profiles.png">
-  <img alt="The Export with picker, offering Default (your settings) first, then two saved profiles: Anonymous RTF, and Courier single-spaced" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-4-profiles.png">
-</picture>
+<img alt="The same first page exported three ways: Default; Anonymous, with no name anywhere; and Courier single-spaced" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/profiles.png">
 
 ## Writing for the exporter
 
@@ -143,8 +141,8 @@ When it isn't, add a `Short title` property to that story and it wins. Nothing p
 **Folders** — where the manuscript is written, and where new stories go. Both pick from the folders in your vault rather than asking you to type a path, so a misspelling can't quietly create a second folder.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/dark-2-settings.png">
-  <img alt="The plugin's settings: an Author identity row showing the name it will print, then Manuscript options for format, font, size, line spacing, word-count rounding and end marker, each with a line explaining when to change it" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/light-2-settings.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/settings-dark.png">
+  <img alt="The plugin's settings: an Author identity row showing the name it will print, then Manuscript options for format, font, font size, line spacing and word-count rounding, each with a line explaining when to change it" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/settings-light.png">
 </picture>
 
 Every setting is findable from Obsidian's settings search.
