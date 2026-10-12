@@ -26,6 +26,11 @@ Manually: download `main.js` and `manifest.json` from the [latest release](../..
 
 Works on desktop and mobile. It's pure JavaScript with no desktop-only dependencies, so a manuscript can be exported from a phone.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/mobile-dark.png">
+  <img alt="A phone showing The Cask of Amontillado in Obsidian with its Title and Content warnings properties, the note menu open on the plugin's three export items, and the exported first page beside it" src="https://raw.githubusercontent.com/hexennacht666/obsidian-standard-manuscript-format/HEAD/images/mobile-light.png">
+</picture>
+
 ## Quick start
 
 **Set your name.** Open **Settings → Standard Manuscript Format Export → Author identity** and fill in at least your name. The contact block needs it, and export will refuse without it. The row shows the name it will print, so a wrong guess is caught here rather than by an editor.
