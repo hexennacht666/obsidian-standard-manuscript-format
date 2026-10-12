@@ -176,3 +176,9 @@ test("an anonymous manuscript has no empty byline line under the title", async (
   assert.deepEqual((await docxFromTitle({ blindSubmission: "anonymous" })).slice(0, 3), expected);
   assert.deepEqual(rtfFromTitle({ blindSubmission: "anonymous" }).slice(0, 3), expected);
 });
+
+test("both formats print on US Letter, not the library's A4 default", async () => {
+  const { document } = await docxParts("off");
+  assert.match(document, /<w:pgSz w:w="12240" w:h="15840"/);
+  assert.match(buildRtf(story(), settings), /\\paperw12240\\paperh15840/);
+});

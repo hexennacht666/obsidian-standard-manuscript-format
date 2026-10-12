@@ -273,6 +273,11 @@ export function buildManuscript(
           // it, so the head starts at 2, which is what Shunn specifies.
           titlePage: true,
           page: {
+            // US Letter, which Shunn's format assumes; the library defaults to A4.
+            size: {
+              width: convertInchesToTwip(8.5),
+              height: convertInchesToTwip(11),
+            },
             margin: {
               top: convertInchesToTwip(1),
               right: convertInchesToTwip(1),
